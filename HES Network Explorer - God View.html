@@ -1,0 +1,1698 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>HES — Network Explorer · God View</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=DM+Mono:wght@400;500&family=Geologica:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --vellum-1:#EBEEF2;
+  --vellum-2:#E3DED8;
+  --carbon:#18160F;
+  --dust:#7B7869;
+  --core:#3C91D6;       --core-dark:#1D3D82;
+  --derived:#2EA397;    --derived-dark:#2A6348;
+  --quantum:#CC5023;    --quantum-dark:#B84020;
+  --emotional:#9A49B8;  --emotional-dark:#5E3080;
+  --hairline: rgba(24,22,15,0.14);
+  --hairline-strong: rgba(24,22,15,0.22);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grotesk',sans-serif;color:var(--carbon)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* ── shell ─────────────────────────────────────────────────────── */
+#app{
+  position:relative;width:100vw;height:100vh;overflow:hidden;
+  background:linear-gradient(160deg,var(--vellum-1) 0%,var(--vellum-2) 100%);
+}
+#app::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(60% 50% at 18% 22%, rgba(255,255,255,0.55), transparent 70%),
+    radial-gradient(50% 40% at 82% 86%, rgba(150,135,110,0.10), transparent 75%);
+  z-index:0;
+}
+
+/* ── top bar ───────────────────────────────────────────────────── */
+#topbar{
+  position:absolute;top:0;left:0;right:0;height:64px;z-index:30;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;
+}
+#topbar::after{
+  content:"";position:absolute;left:32px;right:32px;bottom:0;height:1px;
+  background:rgba(24,22,15,0.95);
+}
+.lockup{display:flex;align-items:center;gap:14px}
+.lockup .mark{width:22px;height:22px;border-radius:50%;background:var(--carbon);position:relative}
+.lockup .mark::after{
+  content:"";position:absolute;inset:5px;border-radius:50%;
+  background:linear-gradient(135deg,var(--vellum-1),var(--vellum-2));
+}
+.lockup .wm{font-family:'DM Mono',monospace;font-weight:500;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:var(--carbon)}
+.lockup .wm .sep{color:var(--dust);margin:0 8px}
+.lockup .wm .lab{color:var(--dust)}
+.lockup .wm .mode{margin-left:14px;padding:3px 8px;border:0.5px solid var(--hairline-strong);color:var(--carbon);letter-spacing:0.16em;font-size:10px}
+
+.controls{display:flex;align-items:center;gap:14px}
+.viewswitch{
+  display:inline-flex;border:0.5px solid var(--hairline-strong);border-radius:2px;overflow:hidden;
+  font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+}
+.viewswitch button{
+  background:transparent;border:none;color:var(--dust);padding:7px 14px;cursor:pointer;
+  letter-spacing:inherit;text-transform:inherit;font:inherit;
+  border-right:0.5px solid var(--hairline-strong);
+  transition:background 0.15s,color 0.15s;
+}
+.viewswitch button:last-child{border-right:none}
+.viewswitch button:hover{color:var(--carbon)}
+.viewswitch button[aria-pressed="true"]{background:var(--carbon);color:var(--vellum-1)}
+
+.searchwrap{position:relative;display:flex;align-items:center}
+.searchwrap svg{position:absolute;left:10px;color:var(--dust);pointer-events:none}
+#search{
+  background:rgba(24,22,15,0.04);border:0.5px solid var(--hairline-strong);border-radius:2px;
+  font-family:'Space Mono',monospace;font-size:12px;color:var(--carbon);
+  padding:8px 12px 8px 32px;width:260px;outline:none;
+  transition:border-color 0.15s,background 0.15s;
+}
+#search::placeholder{color:var(--dust)}
+#search:focus{border-color:var(--carbon);background:rgba(255,255,255,0.4)}
+#search-dd{
+  position:absolute;top:calc(100% + 6px);right:0;width:340px;max-height:340px;overflow-y:auto;
+  background:rgba(246,244,238,0.98);backdrop-filter:blur(10px);
+  border:0.5px solid var(--hairline-strong);
+  box-shadow:0 24px 56px -22px rgba(24,22,15,0.28),0 2px 6px rgba(24,22,15,0.06);
+  border-radius:2px;display:none;z-index:50;
+}
+#search-dd.on{display:block}
+.dd-row{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:0.5px solid var(--hairline);transition:background 0.12s}
+.dd-row:last-child{border-bottom:none}
+.dd-row:hover,.dd-row.cur{background:rgba(24,22,15,0.06)}
+.dd-row .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dd-row .code{font-family:'Space Mono',monospace;font-size:11px;color:var(--carbon);min-width:42px}
+.dd-row .name{font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--carbon);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dd-row .meta{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--dust)}
+.dd-empty{padding:14px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--dust);text-align:center}
+.dd-section{padding:6px 14px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.20em;text-transform:uppercase;color:var(--dust);background:rgba(24,22,15,0.025);border-bottom:0.5px solid var(--hairline)}
+
+#mml-filter{
+  background:rgba(24,22,15,0.04);border:0.5px solid var(--hairline-strong);border-radius:2px;
+  font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--carbon);padding:8px 10px;outline:none;cursor:pointer;
+}
+#mml-filter:focus{border-color:var(--carbon)}
+
+/* ── sub-bar / breadcrumb ──────────────────────────────────────── */
+#subbar{
+  position:absolute;top:64px;left:0;right:0;height:54px;z-index:25;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;pointer-events:none;
+}
+#subbar > *{pointer-events:auto}
+.bc{
+  display:flex;align-items:center;gap:10px;
+  font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+}
+.bc .crumb{color:var(--dust);background:none;border:none;font:inherit;letter-spacing:inherit;text-transform:inherit;padding:0;transition:color 0.18s;cursor:pointer}
+.bc .crumb:hover{color:var(--carbon)}
+.bc .crumb.current{color:var(--carbon)}
+.bc .sep{color:var(--dust);opacity:0.45}
+.statusline{
+  font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.10em;text-transform:uppercase;
+  color:var(--dust);display:flex;gap:18px;align-items:center;
+}
+.statusline em{font-style:normal;color:var(--carbon)}
+.statusline .zoom{display:inline-flex;align-items:center;gap:6px;color:var(--carbon)}
+.statusline .zoom .pulse{width:5px;height:5px;border-radius:50%;background:var(--carbon)}
+
+/* ── canvas ────────────────────────────────────────────────────── */
+#canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none;z-index:1}
+#canvas.drag{cursor:grabbing}
+#canvas.over-node{cursor:pointer}
+
+/* ── legend ────────────────────────────────────────────────────── */
+#legend{
+  position:absolute;left:32px;bottom:28px;z-index:10;pointer-events:none;
+  display:flex;flex-direction:column;gap:10px;
+  background:rgba(246,244,238,0.6);backdrop-filter:blur(6px);
+  border:0.5px solid var(--hairline);
+  padding:14px 16px;border-radius:2px;
+  min-width:200px;
+}
+#legend .lg-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--dust);display:flex;justify-content:space-between;align-items:center}
+#legend .lg-row{display:flex;align-items:center;gap:10px;font-family:'Space Mono',monospace;font-size:10px;color:var(--carbon);letter-spacing:0.04em}
+#legend .lg-dot{width:9px;height:9px;border-radius:50%;background:var(--carbon)}
+#legend .lg-label{flex:1;color:var(--dust)}
+#legend .lg-meta{color:var(--carbon);font-size:9px;letter-spacing:0.10em;text-transform:uppercase}
+
+/* ── zoom controls ─────────────────────────────────────────────── */
+#zoom-controls{
+  position:absolute;right:32px;bottom:200px;z-index:10;
+  display:flex;flex-direction:column;
+  background:rgba(246,244,238,0.85);backdrop-filter:blur(6px);
+  border:0.5px solid var(--hairline-strong);border-radius:2px;
+  font-family:'DM Mono',monospace;
+}
+#zoom-controls button{
+  background:transparent;border:none;color:var(--carbon);
+  width:36px;height:36px;font-size:16px;line-height:1;
+  cursor:pointer;border-bottom:0.5px solid var(--hairline);
+  transition:background 0.15s;
+}
+#zoom-controls button:last-child{border-bottom:none}
+#zoom-controls button:hover{background:rgba(24,22,15,0.06)}
+#zoom-controls .zlbl{
+  height:24px;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--dust);display:flex;align-items:center;justify-content:center;
+  border-bottom:0.5px solid var(--hairline);
+}
+
+/* ── minimap ───────────────────────────────────────────────────── */
+#minimap{
+  position:absolute;right:32px;bottom:28px;z-index:10;
+  width:200px;height:148px;
+  background:rgba(246,244,238,0.70);backdrop-filter:blur(8px);
+  border:0.5px solid var(--hairline-strong);border-radius:2px;
+  overflow:hidden;
+}
+#minimap canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:pointer}
+#minimap .mm-tag{
+  position:absolute;top:6px;left:8px;
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--dust);pointer-events:none;
+}
+
+/* ── tooltip ───────────────────────────────────────────────────── */
+#tip{
+  position:absolute;pointer-events:none;z-index:40;display:none;
+  background:var(--carbon);color:var(--vellum-1);
+  font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.04em;
+  padding:6px 10px;border-radius:2px;white-space:nowrap;
+  box-shadow:0 8px 24px rgba(24,22,15,0.18);
+}
+#tip .tc{color:rgba(235,238,242,0.55);margin-right:8px}
+#tip .tm{color:rgba(235,238,242,0.45);margin-left:8px;font-size:9.5px;letter-spacing:0.10em;text-transform:uppercase}
+
+/* ── passport panel ───────────────────────────────────────────── */
+#panel{
+  position:absolute;top:0;right:0;bottom:0;width:520px;max-width:46vw;
+  background:linear-gradient(180deg,var(--vellum-1) 0%,var(--vellum-2) 100%);
+  border-left:0.5px solid var(--hairline-strong);
+  box-shadow:-40px 0 60px -24px rgba(24,22,15,0.10);
+  transform:translateX(102%);transition:transform 0.55s cubic-bezier(0.22,1,0.36,1);
+  z-index:35;overflow-y:auto;
+}
+#panel.open{transform:translateX(0)}
+#panel .stripe{display:flex;height:36px;width:100%}
+#panel .stripe span{flex:1;height:100%}
+#panel .close{
+  position:absolute;top:16px;right:18px;z-index:2;
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(255,255,255,0.45);border:0.5px solid var(--hairline);
+  color:var(--carbon);font-size:16px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background 0.15s,border-color 0.15s;
+}
+#panel .close:hover{background:rgba(255,255,255,0.8);border-color:var(--carbon)}
+#panel .pad{padding:40px 44px 56px}
+.pp-eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--dust);margin-bottom:18px;display:flex;gap:12px;align-items:center}
+.pp-eyebrow .pp-dot{width:5px;height:5px;border-radius:50%;background:var(--dust)}
+.pp-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:42px;line-height:1.04;letter-spacing:0.005em;color:var(--carbon);margin-bottom:22px;text-wrap:balance}
+.pp-badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:28px}
+.pp-badge{font-family:'Geologica','DM Sans',sans-serif;font-weight:500;font-size:11px;letter-spacing:0.04em;padding:5px 12px;border-radius:100px}
+.pp-rule{height:1px;background:var(--hairline);margin:24px 0;border:none}
+.pp-lbl{font-family:'DM Mono',monospace;font-weight:500;font-size:10px;letter-spacing:0.20em;text-transform:uppercase;color:var(--dust);margin-bottom:8px;display:flex;justify-content:space-between;align-items:baseline}
+.pp-lbl .pp-lbl-meta{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:none;color:var(--dust);opacity:0.75}
+.pp-body{font-family:'Space Grotesk',sans-serif;font-weight:300;font-size:17px;line-height:1.55;letter-spacing:-0.003em;color:#3c3a30;margin-bottom:24px;text-wrap:pretty}
+.pp-poles{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:6px}
+.pp-pole{padding:14px 14px 12px;background:rgba(255,255,255,0.32);border:0.5px solid var(--hairline);border-radius:2px}
+.pp-pole .pl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.20em;text-transform:uppercase;color:var(--dust);margin-bottom:6px}
+.pp-pole .pv{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:400;line-height:1.5;color:var(--carbon)}
+.pp-2col{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
+.pp-2col .pv-mono{font-family:'Space Mono',monospace;font-size:12px;color:var(--carbon);letter-spacing:0.02em}
+.pp-nbrs{display:flex;flex-wrap:wrap;gap:6px}
+.pp-nbr{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.06em;padding:5px 10px;border-radius:2px;border:0.5px solid var(--hairline-strong);background:rgba(255,255,255,0.4);color:var(--carbon);cursor:pointer;transition:all 0.15s}
+.pp-nbr .nb-name{color:var(--dust);margin-left:6px}
+.pp-nbr:hover{border-color:var(--carbon);background:var(--carbon);color:var(--vellum-1)}
+.pp-nbr:hover .nb-name{color:rgba(235,238,242,0.7)}
+.pp-meta{display:flex;justify-content:space-between;margin-top:32px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--dust)}
+
+/* ── tweaks panel ─────────────────────────────────────────────── */
+#tweaks-panel{
+  position:fixed;right:20px;bottom:20px;width:320px;z-index:60;
+  background:rgba(246,244,238,0.96);backdrop-filter:blur(10px);
+  border:0.5px solid var(--hairline-strong);border-radius:4px;
+  box-shadow:0 20px 60px -16px rgba(24,22,15,0.22),0 2px 6px rgba(24,22,15,0.06);
+  display:none;flex-direction:column;
+  font-family:'Space Grotesk',sans-serif;color:var(--carbon);
+}
+#tweaks-panel.on{display:flex;animation:tp-in 0.28s cubic-bezier(0.22,1,0.36,1)}
+@keyframes tp-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.tp-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:0.5px solid var(--hairline)}
+.tp-title{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.20em;text-transform:uppercase;color:var(--carbon)}
+.tp-close{background:transparent;border:none;color:var(--dust);font-size:14px;cursor:pointer;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background 0.15s,color 0.15s}
+.tp-close:hover{background:rgba(24,22,15,0.06);color:var(--carbon)}
+.tp-body{display:flex;flex-direction:column;gap:14px;padding:14px 16px 18px;max-height:75vh;overflow-y:auto}
+.tp-sec{display:flex;flex-direction:column;gap:8px}
+.tp-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--dust)}
+.tp-row{display:flex;justify-content:space-between;align-items:baseline}
+.tp-val{font-family:'Space Mono',monospace;font-size:11px;color:var(--carbon)}
+.tp-slider{-webkit-appearance:none;appearance:none;width:100%;height:2px;background:var(--hairline-strong);border-radius:1px;outline:none}
+.tp-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--carbon);cursor:pointer;border:2px solid var(--vellum-1);box-shadow:0 0 0 1px var(--hairline-strong)}
+.tp-slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--carbon);cursor:pointer;border:2px solid var(--vellum-1);box-shadow:0 0 0 1px var(--hairline-strong)}
+.tp-seg{display:inline-flex;border:0.5px solid var(--hairline-strong);border-radius:2px;overflow:hidden;align-self:flex-start}
+.tp-seg button{background:transparent;border:none;font:inherit;color:var(--dust);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;padding:6px 12px;cursor:pointer;border-right:0.5px solid var(--hairline-strong);transition:background 0.15s,color 0.15s}
+.tp-seg button:last-child{border-right:none}
+.tp-seg button:hover{color:var(--carbon)}
+.tp-seg button.on{background:var(--carbon);color:var(--vellum-1)}
+.tp-swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tp-pal{background:transparent;border:0.5px solid var(--hairline-strong);border-radius:3px;padding:0;cursor:pointer;height:34px;overflow:hidden;display:flex;transition:border-color 0.15s,box-shadow 0.15s}
+.tp-pal span{flex:1;height:100%}
+.tp-pal:hover{border-color:var(--carbon)}
+.tp-pal.on{border-color:var(--carbon);box-shadow:inset 0 0 0 1px var(--carbon)}
+.tp-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--carbon);padding:4px 0}
+.tp-toggle input{position:absolute;opacity:0;pointer-events:none}
+.tp-sw{position:relative;width:32px;height:18px;background:rgba(24,22,15,0.18);border-radius:100px;transition:background 0.2s}
+.tp-sw::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;background:var(--vellum-1);border-radius:50%;transition:transform 0.2s,background 0.2s;box-shadow:0 1px 2px rgba(24,22,15,0.2)}
+.tp-toggle input:checked + .tp-sw{background:var(--carbon)}
+.tp-toggle input:checked + .tp-sw::after{transform:translateX(14px)}
+</style>
+</head>
+<body>
+
+<template id="__bundler_thumbnail" data-bg-color="#E7E6E0">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="vellum" x1="0" x2="1" y1="0" y2="1">
+        <stop offset="0%" stop-color="#EBEEF2"/>
+        <stop offset="100%" stop-color="#E3DED8"/>
+      </linearGradient>
+      <radialGradient id="h1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#3C91D6" stop-opacity="0.3"/><stop offset="100%" stop-color="#3C91D6" stop-opacity="0"/></radialGradient>
+      <radialGradient id="h2" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#2EA397" stop-opacity="0.3"/><stop offset="100%" stop-color="#2EA397" stop-opacity="0"/></radialGradient>
+      <radialGradient id="h3" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#CC5023" stop-opacity="0.3"/><stop offset="100%" stop-color="#CC5023" stop-opacity="0"/></radialGradient>
+      <radialGradient id="h4" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#9A49B8" stop-opacity="0.3"/><stop offset="100%" stop-color="#9A49B8" stop-opacity="0"/></radialGradient>
+    </defs>
+    <rect width="1200" height="800" fill="url(#vellum)"/>
+    <circle cx="380" cy="320" r="180" fill="url(#h1)"/>
+    <circle cx="820" cy="320" r="200" fill="url(#h2)"/>
+    <circle cx="380" cy="560" r="140" fill="url(#h3)"/>
+    <circle cx="820" cy="560" r="140" fill="url(#h4)"/>
+    <g fill="#3C91D6"><circle cx="320" cy="280" r="6"/><circle cx="350" cy="320" r="6"/><circle cx="400" cy="300" r="6"/><circle cx="380" cy="360" r="6"/><circle cx="440" cy="340" r="6"/></g>
+    <g fill="#2EA397"><circle cx="800" cy="280" r="6"/><circle cx="840" cy="320" r="6"/><circle cx="780" cy="360" r="6"/><circle cx="880" cy="300" r="6"/><circle cx="850" cy="380" r="6"/></g>
+    <g fill="#CC5023"><circle cx="360" cy="540" r="6"/><circle cx="400" cy="570" r="6"/><circle cx="380" cy="600" r="6"/></g>
+    <g fill="#9A49B8"><circle cx="800" cy="540" r="6"/><circle cx="840" cy="580" r="6"/><circle cx="820" cy="610" r="6"/></g>
+    <text x="600" y="180" text-anchor="middle" font-family="DM Mono, monospace" font-size="22" letter-spacing="6" fill="#18160F">HES / NETWORK EXPLORER · GOD VIEW</text>
+  </svg>
+</template>
+
+<h2 class="sr-only">HES Network Explorer — God View. A continuous zoomable canvas presenting all 343 elements of the Human Elements System at once, with progressive disclosure of layers, blocks, and elements as you zoom.</h2>
+
+<div id="app">
+  <header id="topbar">
+    <div class="lockup">
+      <div class="mark" aria-hidden="true"></div>
+      <div class="wm">
+        HES<span class="sep">/</span><span class="lab">Network Explorer</span>
+        <span class="mode">God View</span>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="viewswitch" role="tablist" aria-label="View mode">
+        <button aria-pressed="true">Graph</button>
+        <button aria-pressed="false">Grid</button>
+        <button aria-pressed="false">Tree</button>
+      </div>
+      <div class="searchwrap">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" aria-hidden="true">
+          <circle cx="7" cy="7" r="5"></circle><path d="m11 11 4 4"></path>
+        </svg>
+        <input id="search" type="text" placeholder="search elements, codes, blocks…" autocomplete="off"/>
+        <div id="search-dd" role="listbox" aria-label="Search results"></div>
+      </div>
+      <select id="mml-filter" aria-label="MML filter">
+        <option value="">All MML</option>
+        <option value="1">MML-1 · Established</option>
+        <option value="2">MML-2 · Validated</option>
+        <option value="3">MML-3 · Emerging</option>
+        <option value="4">MML-4 · Theoretical</option>
+        <option value="5">MML-5 · Speculative</option>
+      </select>
+    </div>
+  </header>
+
+  <div id="subbar">
+    <nav class="bc" id="bc" aria-label="Breadcrumb"><button class="crumb current">All layers</button></nav>
+    <div class="statusline" id="status">
+      <span><em>343</em> PASSPORTS · <em>4</em> LAYERS · <em>46</em> BLOCKS</span>
+      <span class="zoom" id="zoom-display"><span class="pulse"></span>ZOOM <em id="zk">1.00×</em></span>
+    </div>
+  </div>
+
+  <canvas id="canvas"></canvas>
+
+  <div id="legend" aria-hidden="true">
+    <div class="lg-title"><span>Layers</span><span>elements</span></div>
+    <div class="lg-row" id="lg-core"><div class="lg-dot" style="background:#3C91D6"></div><div class="lg-label">Core</div><div class="lg-meta">106</div></div>
+    <div class="lg-row" id="lg-derived"><div class="lg-dot" style="background:#2EA397"></div><div class="lg-label">Derived</div><div class="lg-meta">154</div></div>
+    <div class="lg-row" id="lg-quantum"><div class="lg-dot" style="background:#CC5023"></div><div class="lg-label">Quantum</div><div class="lg-meta">40</div></div>
+    <div class="lg-row" id="lg-emotional"><div class="lg-dot" style="background:#9A49B8"></div><div class="lg-label">Emotional</div><div class="lg-meta">43</div></div>
+  </div>
+
+  <div id="zoom-controls" aria-label="Zoom controls">
+    <button id="z-in" title="Zoom in" aria-label="Zoom in">+</button>
+    <div class="zlbl" id="zk2">1.0×</div>
+    <button id="z-out" title="Zoom out" aria-label="Zoom out">−</button>
+    <button id="z-reset" title="Reset view" aria-label="Reset view" style="font-size:12px">⤢</button>
+  </div>
+
+  <div id="minimap">
+    <div class="mm-tag">All 343 · drag or click to navigate</div>
+    <canvas id="mm-canvas"></canvas>
+  </div>
+
+  <div id="tip"></div>
+
+  <aside id="panel" aria-hidden="true">
+    <div class="stripe" id="pp-stripe"></div>
+    <button class="close" id="pp-close" aria-label="Close passport">✕</button>
+    <div class="pad" id="pp-content"></div>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   HES NETWORK EXPLORER — GOD VIEW (Concept B)
+   Canvas 2D + d3-force physics + d3.zoom transform.
+   Progressive disclosure by zoom level. ~343 nodes visible at all times.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── DATA MODEL (carried from v4) ──────────────────────────────────── */
+const LY=[
+  {id:'core',     label:'Core',     tag:'foundational, stable', count:106, stroke:'#3C91D6', dark:'#1D3D82',
+   desc:'The foundational layer. Stable, well-evidenced capacities that underlie all higher cognition — attention, memory, executive control, sensory and motor systems. These elements change slowly and are measurable across the lifespan.'},
+  {id:'derived',  label:'Derived',  tag:'grown from core',      count:154, stroke:'#2EA397', dark:'#2A6348',
+   desc:'Capacities that grow out of the core layer through experience and culture — cognitive styles, communication, decision-making, identity, belief. They are plastic, shaped by environment, and form the bulk of individual character.'},
+  {id:'quantum',  label:'Quantum',  tag:'volatile, rupture',    count:40,  stroke:'#CC5023', dark:'#B84020',
+   desc:'Discontinuous states that interrupt ordinary function: freeze, collapse, overwhelm, dissociation, panic, shame loops. They are rupture rather than gradient — short-lived but consequential, and often misread as the layers beneath them.'},
+  {id:'emotional',label:'Emotional',tag:'rare, shifting',       count:43,  stroke:'#9A49B8', dark:'#5E3080',
+   desc:'The capacity to hold and manipulate emotional information across time — the workbench of conscious affect. Underpins reasoning about meaning, comprehension of others, and learning from felt experience.'},
+];
+const BL={
+  core:[{id:'B01',name:'Attention & Processing',count:8},{id:'B02',name:'Memory Systems',count:7},{id:'B03',name:'Executive Function',count:9},{id:'B04',name:'Sensory Processing',count:6},{id:'B05',name:'Emotional Core',count:8},{id:'B06',name:'Social Cognition',count:7},{id:'B07',name:'Motor & Coordination',count:5},{id:'B08',name:'Interoception',count:6},{id:'B09',name:'Temporal Processing',count:5},{id:'B10',name:'Reward & Motivation',count:7},{id:'B11',name:'Language Foundation',count:6},{id:'B12',name:'Pattern Recognition',count:8},{id:'B13',name:'Arousal & Energy',count:7},{id:'B14',name:'Biological Rhythms',count:7}],
+  derived:[{id:'BD01',name:'Cognitive Styles',count:12},{id:'BD02',name:'Learning & Adaptation',count:11},{id:'BD03',name:'Emotional Regulation',count:10},{id:'BD04',name:'Social Dynamics',count:13},{id:'BD05',name:'Communication',count:11},{id:'BD06',name:'Creativity & Imagination',count:9},{id:'BD07',name:'Decision Making',count:12},{id:'BD08',name:'Identity & Self',count:10},{id:'BD09',name:'Values & Meaning',count:11},{id:'BD10',name:'Resilience & Coping',count:10},{id:'BD11',name:'Motivation Styles',count:9},{id:'BD12',name:'Metacognition',count:11},{id:'BD13',name:'Interpersonal Patterns',count:12},{id:'BD14',name:'Belief Systems',count:13}],
+  quantum:[{id:'QB01',name:'Freeze States',count:5},{id:'QB02',name:'Collapse Modes',count:4},{id:'QB03',name:'Overwhelm Patterns',count:5},{id:'QB04',name:'Dissociation Types',count:4},{id:'QB05',name:'Rage & Dysregulation',count:4},{id:'QB06',name:'Shutdown States',count:4},{id:'QB07',name:'Spiral Patterns',count:4},{id:'QB08',name:'Panic Architecture',count:4},{id:'QB09',name:'Shame Loops',count:3},{id:'QB10',name:'Trauma Responses',count:3}],
+  emotional:[{id:'EB01',name:'Positive Affect',count:6},{id:'EB02',name:'Negative Affect',count:6},{id:'EB03',name:'Ambivalent States',count:5},{id:'EB04',name:'Social Emotions',count:6},{id:'EB05',name:'Self-Conscious Emotions',count:5},{id:'EB06',name:'Existential Affect',count:5},{id:'EB07',name:'Aesthetic Emotions',count:5},{id:'EB08',name:'Background Emotions',count:5}],
+};
+const DEFS=[
+  'The capacity to hold and manipulate information in mind over short periods — the workbench of conscious thought. Underpins reasoning, comprehension, and learning.',
+  'Latency between stimulus and motor response — the most consistently measurable elementary cognitive capacity across the lifespan.',
+  'Filtering of task-relevant input from competing distractors during goal-directed activity. Modulated by arousal and motivation.',
+  'Capacity to suppress prepotent responses when they conflict with current goals. A cornerstone of executive function.',
+  'The baseline rate at which well-learned mental operations are carried out under controlled conditions.',
+  'Sensitivity to physiological signals arising from the body interior; the somatic substrate of emotional experience.',
+  'The ability to shift attentional focus between different tasks, rules, or mental sets without performance decrement.',
+  'The capacity to maintain focused engagement on a single stimulus stream over extended duration despite fatigue.',
+];
+const POLES_LO=[
+  'Difficulty maintaining engagement under normal conditions; attention drifts within minutes.',
+  'High distractibility, frequent rule-switching errors, weak inhibition of irrelevant input.',
+  'Slow consolidation; retrieval requires repeated cues even for recent material.',
+];
+const POLES_HI=[
+  'Exceptional performance even under high cognitive load or competing stimuli.',
+  'Sustained vigilance through extended duty cycles; resistant to fatigue effects.',
+  'Strong manipulation of held information; flexible recombination under demand.',
+];
+const AUTHORS=['Baddeley','Posner','Diamond','Deisseroth','Davidson','Damasio','Tulving','Anderson','Treisman','Kahneman'];
+const MML_D=[1,1,1,2,2,2,2,3,3,3,4,4,4,5];
+const MML_LABEL=['','Established','Validated','Emerging','Theoretical','Speculative'];
+const NAME_VOCAB=['Stability','Switching','Capacity','Filtering','Control','Speed','Awareness','Flexibility','Threshold','Resonance','Coherence','Drift','Aperture','Latency'];
+
+const ELS=[];
+Object.entries(BL).forEach(([lid,blocks])=>{
+  const px=lid==='core'?'C':lid==='derived'?'D':lid==='quantum'?'Q':'E';
+  let counter=0;
+  blocks.forEach(bl=>{
+    for(let i=0;i<bl.count;i++){
+      counter++;
+      const n=String(counter).padStart(3,'0');
+      const base=bl.name.split(/\s|&/)[0];
+      const suffix=NAME_VOCAB[(i+bl.id.charCodeAt(1))%NAME_VOCAB.length];
+      ELS.push({
+        id:`${px}${n}_${bl.id}`,
+        code:`${px}${n}`,
+        name:`${base} ${suffix}`,
+        layer:lid, block:bl.id, blockName:bl.name,
+        mml:MML_D[(i+counter)%MML_D.length],
+        definition:DEFS[(i+counter)%DEFS.length],
+        poleLow:POLES_LO[(i+counter)%POLES_LO.length],
+        poleHigh:POLES_HI[(i+counter)%POLES_HI.length],
+        trainability:['High','Mid','Low'][(i+counter)%3],
+        modifiability:['High','Mid','High','Low'][(i+counter)%4],
+        author:AUTHORS[(i+counter)%AUTHORS.length],
+        neighbors:[],
+      });
+    }
+  });
+});
+ELS.forEach((el,i)=>{
+  const same=ELS.filter(e=>e.block===el.block&&e.id!==el.id);
+  const diff=ELS.filter(e=>e.layer===el.layer&&e.block!==el.block);
+  const cross=ELS.filter(e=>e.layer!==el.layer);
+  const p=[];
+  if(same.length)p.push(same[Math.abs(i*3)%same.length]);
+  if(same.length>1)p.push(same[Math.abs(i*7+2)%same.length]);
+  if(diff.length)p.push(diff[Math.abs(i*11)%diff.length]);
+  if(i%4===0&&cross.length)p.push(cross[Math.abs(i*13)%cross.length]);
+  el.neighbors=[...new Set(p.filter(x=>x&&x.id!==el.id))].slice(0,4).map(x=>x.code);
+});
+const ELS_BY_CODE = Object.fromEntries(ELS.map(e=>[e.code,e]));
+const LY_BY_ID = Object.fromEntries(LY.map(l=>[l.id,l]));
+const BL_BY_ID = {}; Object.values(BL).flat().forEach(b=>BL_BY_ID[b.id]=b);
+
+/* ── WORLD LAYOUT — fixed anchors for layers & blocks ──────────────── */
+/* World coords are independent of viewport. Origin at center. */
+const WORLD = { minX:-1200, maxX:1200, minY:-820, maxY:820 };
+
+/* Layer anchors: arranged in a 2x2 grid, offset by relative size. */
+const LAYER_ANCHORS = {
+  core:      {x:-560, y:-380},
+  derived:   {x: 600, y:-360},
+  quantum:   {x:-560, y: 420},
+  emotional: {x: 600, y: 440},
+};
+/* Per-layer cluster radius (where blocks sit around the layer center). */
+const LAYER_RADIUS = {
+  core:     310,
+  derived:  370,
+  quantum:  230,
+  emotional:240,
+};
+
+/* Block anchors: positioned radially around their layer center.
+   The order of blocks is preserved from BL[]; angle is evenly distributed. */
+const BLOCK_ANCHORS = {};
+Object.entries(BL).forEach(([lid, blocks])=>{
+  const lc = LAYER_ANCHORS[lid];
+  const R  = LAYER_RADIUS[lid];
+  const N  = blocks.length;
+  /* Offset starting angle so each layer's blocks "open" toward the canvas
+     center — gives a more balanced look than a uniform circle. */
+  const lookAt = Math.atan2(0 - lc.y, 0 - lc.x);
+  blocks.forEach((b, i)=>{
+    const t = N === 1 ? 0 : i / N;
+    const angle = lookAt + (t - 0.5) * Math.PI * 2 * 0.92;
+    /* Pull derived/core (large layers) further out for room. */
+    const radJitter = 0.85 + 0.30 * (((i*13)%7)/7);
+    BLOCK_ANCHORS[b.id] = {
+      x: lc.x + Math.cos(angle) * R * radJitter,
+      y: lc.y + Math.sin(angle) * R * radJitter,
+      layer: lid,
+      angle, R
+    };
+  });
+});
+
+/* Element node radius (world units). Scales subtly with MML for visual variety. */
+function elementRadius(e){
+  /* MML-1 (established) is largest; MML-5 smallest. Range ~5..8 world units. */
+  return 5.5 + (5 - e.mml) * 0.4;
+}
+
+/* ── BUILD SIMULATION NODES ────────────────────────────────────────── */
+const NODES = ELS.map(e=>{
+  const ba = BLOCK_ANCHORS[e.block];
+  /* Initial position: scattered around block anchor with a small radius. */
+  const a = Math.random() * Math.PI * 2;
+  const r = 18 + Math.random() * 26;
+  return {
+    ...e,
+    r: elementRadius(e),
+    x: ba.x + Math.cos(a) * r,
+    y: ba.y + Math.sin(a) * r,
+    vx: 0, vy: 0,
+    anchorX: ba.x, anchorY: ba.y, /* cached for quick force lookup */
+  };
+});
+const NODES_BY_CODE = Object.fromEntries(NODES.map(n=>[n.code,n]));
+
+/* Build tether edges from neighbor lists.
+   Three categories:
+     intra-block — both endpoints in same block (densest, drawn earliest)
+     cross-block — different block, same layer
+     cross-layer — different layer
+   We dedupe so each edge appears once.
+*/
+const EDGES_INTRA = [];
+const EDGES_XBLOCK = [];
+const EDGES_XLAYER = [];
+const seenEdge = new Set();
+NODES.forEach(n=>{
+  (n.neighbors||[]).forEach(nc=>{
+    const t = NODES_BY_CODE[nc];
+    if(!t) return;
+    const key = n.code < t.code ? n.code+'|'+t.code : t.code+'|'+n.code;
+    if(seenEdge.has(key)) return;
+    seenEdge.add(key);
+    const e = { source:n, target:t };
+    if(n.block === t.block) EDGES_INTRA.push(e);
+    else if(n.layer === t.layer) EDGES_XBLOCK.push(e);
+    else EDGES_XLAYER.push(e);
+  });
+});
+
+/* ── TWEAKS / DEFAULTS ─────────────────────────────────────────────── */
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "palette": [
+    "#3C91D6",
+    "#2EA397",
+    "#CC5023",
+    "#9A49B8"
+  ],
+  "clusterStrength": 0.10,
+  "repelStrength": 22,
+  "labelDensity": 1.0,
+  "edgeDensity": 1.0,
+  "haloIntensity": 0.55,
+  "mmlFade": 0.34,
+  "tetherStyle": "solid",
+  "showCrossLayer": true,
+  "showCrossBlock": true,
+  "showLegend": true,
+  "showMinimap": true
+}/*EDITMODE-END*/;
+let TW = {...TWEAK_DEFAULTS};
+
+/* ── COLOR HELPERS ─────────────────────────────────────────────────── */
+function ha(hex,a){
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+function layerColor(lid){ return LY_BY_ID[lid].stroke; }
+function mmlVis(m){ const floor = TW.mmlFade; const t=(5-m)/4; return 1 - t*(1-floor); }
+
+/* ── CANVAS SETUP ──────────────────────────────────────────────────── */
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d', { alpha: true });
+const mmCanvas = document.getElementById('mm-canvas');
+const mmCtx = mmCanvas.getContext('2d', { alpha: true });
+
+let W=0, H=0, DPR=1;
+function resize(){
+  W = window.innerWidth; H = window.innerHeight;
+  DPR = window.devicePixelRatio || 1;
+  canvas.width = W * DPR; canvas.height = H * DPR;
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  /* minimap fixed at CSS 200x148. */
+  const mmW = 200, mmH = 148;
+  mmCanvas.width = mmW * DPR; mmCanvas.height = mmH * DPR;
+  mmCtx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener('resize', ()=>{ resize(); fitToWorld(false); });
+
+/* ── ZOOM / TRANSFORM ──────────────────────────────────────────────── */
+let transform = d3.zoomIdentity;
+let hoveredNode = null;
+let selectedNode = null;
+let mouseX = -999, mouseY = -999;
+
+const zoom = d3.zoom()
+  .scaleExtent([0.4, 9])
+  .filter(ev => {
+    /* allow wheel + drag on canvas, but not on overlay chrome */
+    if(ev.type === 'mousedown' || ev.type === 'touchstart'){
+      const tgt = ev.target;
+      return tgt === canvas;
+    }
+    return !ev.button;
+  })
+  .on('start', () => { canvas.classList.add('drag'); })
+  .on('zoom',  (ev) => { transform = ev.transform; updateZoomUI(); })
+  .on('end',   () => { canvas.classList.remove('drag'); });
+
+d3.select(canvas).call(zoom).on('dblclick.zoom', null);
+
+/* fit the world bounds into the viewport. */
+function fitToWorld(animate=true){
+  const ww = WORLD.maxX - WORLD.minX, wh = WORLD.maxY - WORLD.minY;
+  const pad = 60;
+  const sx = (W - pad*2) / ww, sy = (H - 200) / wh;
+  const k = Math.min(sx, sy) * 0.92;
+  const cx = (WORLD.minX + WORLD.maxX)/2, cy = (WORLD.minY + WORLD.maxY)/2;
+  const t = d3.zoomIdentity.translate(W/2 - cx*k, (H+60)/2 - cy*k).scale(k);
+  const sel = d3.select(canvas);
+  if(animate) sel.transition().duration(700).ease(d3.easeCubicInOut).call(zoom.transform, t);
+  else sel.call(zoom.transform, t);
+}
+
+/* world ↔ screen helpers */
+function worldToScreen(x,y){ return [transform.applyX(x), transform.applyY(y)]; }
+function screenToWorld(x,y){ return transform.invert([x,y]); }
+
+/* ── FORCE SIMULATION ──────────────────────────────────────────────── */
+let sim = null;
+function buildSim(){
+  if(sim) sim.stop();
+  sim = d3.forceSimulation(NODES)
+    .alpha(0.6)
+    .alphaDecay(0.012)
+    .velocityDecay(0.32)
+    .force('x', d3.forceX(d => d.anchorX).strength(TW.clusterStrength))
+    .force('y', d3.forceY(d => d.anchorY).strength(TW.clusterStrength))
+    .force('charge', d3.forceManyBody().strength(-TW.repelStrength).distanceMax(120))
+    .force('collide', d3.forceCollide().radius(d => d.r + 1.5).iterations(2))
+    .on('tick', ()=>{});
+}
+buildSim();
+
+/* keep updating anchors when palette/density tweaks change strength */
+function refreshForces(){
+  if(!sim) return;
+  sim.force('x').strength(TW.clusterStrength);
+  sim.force('y').strength(TW.clusterStrength);
+  sim.force('charge').strength(-TW.repelStrength);
+  sim.alpha(0.4).restart();
+}
+
+/* ── ZOOM TIER LOGIC ───────────────────────────────────────────────── */
+/* Four tiers of progressive disclosure (k = transform.k):
+     T0  god view:        k < 0.95  — color dots, no labels, no tethers
+     T1  layer labels:    0.95–1.6  — layer names large, faint tethers
+     T2  block labels:    1.6–3.0   — block names appear, intra tethers fade in
+     T3  element labels:  3.0–9.0   — element codes/names + all tethers     */
+function tier(k){
+  if(k < 0.95) return 0;
+  if(k < 1.6)  return 1;
+  if(k < 3.0)  return 2;
+  return 3;
+}
+/* smooth, monotonic ease across a [a,b] interval -> [0,1] */
+function ramp(k, a, b){ if(k<=a) return 0; if(k>=b) return 1; const t=(k-a)/(b-a); return t*t*(3-2*t); }
+
+/* ── RENDER LOOP ───────────────────────────────────────────────────── */
+let lastFrame = performance.now();
+let fps = 60, fpsAcc = 0, fpsCount = 0;
+
+function render(now){
+  const dt = now - lastFrame; lastFrame = now;
+  if(dt > 0){ fpsAcc += 1000/dt; fpsCount++; if(fpsCount>=30){ fps = fpsAcc/fpsCount; fpsAcc=0; fpsCount=0; } }
+
+  const k = transform.k;
+  const t = tier(k);
+
+  ctx.clearRect(0,0,W,H);
+
+  /* save & apply world transform for everything except labels */
+  ctx.save();
+  ctx.translate(transform.x, transform.y);
+  ctx.scale(k, k);
+
+  /* viewport in world coords (for culling) */
+  const tl = transform.invert([0,0]);
+  const br = transform.invert([W,H]);
+  const view = { minX:tl[0]-20, minY:tl[1]-20, maxX:br[0]+20, maxY:br[1]+20 };
+
+  drawHalos(t, k, view);
+  drawEdges(t, k, view);
+  drawNodes(t, k, view);
+
+  ctx.restore();
+
+  /* labels & UI overlays in screen space (constant size) */
+  drawLabels(t, k);
+  drawSelectionRing(k);
+
+  /* minimap */
+  if(TW.showMinimap) drawMinimap();
+
+  requestAnimationFrame(render);
+}
+requestAnimationFrame(render);
+
+/* ── HALOS (god view) ──────────────────────────────────────────────── */
+function drawHalos(t, k, view){
+  /* big radial halos behind each layer cluster — strongest at god view,
+     fading out as you move closer. */
+  const haloAlpha = TW.haloIntensity * (1 - ramp(k, 1.6, 3.0)*0.85);
+  if(haloAlpha < 0.02) return;
+  LY.forEach(l=>{
+    const lc = LAYER_ANCHORS[l.id];
+    const R  = LAYER_RADIUS[l.id] * 1.6;
+    const grad = ctx.createRadialGradient(lc.x, lc.y, 0, lc.x, lc.y, R);
+    grad.addColorStop(0, ha(l.stroke, haloAlpha * 0.55));
+    grad.addColorStop(0.5, ha(l.stroke, haloAlpha * 0.18));
+    grad.addColorStop(1, ha(l.stroke, 0));
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(lc.x, lc.y, R, 0, Math.PI*2);
+    ctx.fill();
+  });
+}
+
+/* ── EDGES ─────────────────────────────────────────────────────────── */
+function drawEdges(t, k, view){
+  if(t === 0) return; /* no edges at god view */
+
+  const dens = TW.edgeDensity;
+  const sel = selectedNode;
+  const hov = hoveredNode;
+
+  /* intra-block: fade in from k=1.2..2.2 */
+  const aIntra = ramp(k, 1.2, 2.2) * 0.65 * dens;
+  if(aIntra > 0.02){
+    ctx.lineWidth = 1 / k;
+    drawEdgeList(EDGES_INTRA, view, (e)=>{
+      const l = layerColor(e.source.layer);
+      return ha(l, aIntra);
+    }, TW.tetherStyle === 'dashed' ? [3/k, 4/k] : null);
+  }
+
+  /* cross-block (same layer): fade in k=2.0..3.4 */
+  if(TW.showCrossBlock){
+    const aXB = ramp(k, 2.0, 3.4) * 0.5 * dens;
+    if(aXB > 0.02){
+      ctx.lineWidth = 0.9 / k;
+      drawEdgeList(EDGES_XBLOCK, view, (e)=>{
+        const l = layerColor(e.source.layer);
+        return ha(l, aXB);
+      }, [2/k, 5/k]);
+    }
+  }
+
+  /* cross-layer: very faint, fades in k=2.5..4.5 */
+  if(TW.showCrossLayer){
+    const aXL = ramp(k, 2.5, 4.5) * 0.45 * dens;
+    if(aXL > 0.02){
+      ctx.lineWidth = 0.8 / k;
+      drawEdgeList(EDGES_XLAYER, view, ()=>`rgba(123,120,105,${aXL})`, [1/k, 5/k]);
+    }
+  }
+
+  /* highlighted node's edges drawn brighter on top */
+  const focus = sel || hov;
+  if(focus && t >= 2){
+    ctx.lineWidth = 1.4 / k;
+    const lcol = layerColor(focus.layer);
+    EDGES_INTRA.concat(EDGES_XBLOCK, EDGES_XLAYER).forEach(e=>{
+      if(e.source === focus || e.target === focus){
+        const other = e.source === focus ? e.target : e.source;
+        ctx.strokeStyle = ha(lcol, 0.85);
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(focus.x, focus.y); ctx.lineTo(other.x, other.y);
+        ctx.stroke();
+      }
+    });
+  }
+}
+
+function drawEdgeList(list, view, colorFn, dash){
+  if(dash) ctx.setLineDash(dash); else ctx.setLineDash([]);
+  for(let i=0; i<list.length; i++){
+    const e = list[i];
+    const s = e.source, t = e.target;
+    if((s.x < view.minX && t.x < view.minX) || (s.x > view.maxX && t.x > view.maxX) ||
+       (s.y < view.minY && t.y < view.minY) || (s.y > view.maxY && t.y > view.maxY)) continue;
+    ctx.strokeStyle = colorFn(e);
+    ctx.beginPath();
+    ctx.moveTo(s.x, s.y); ctx.lineTo(t.x, t.y);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+}
+
+/* ── NODES ─────────────────────────────────────────────────────────── */
+function drawNodes(t, k, view){
+  const mfilt = mmlFilter;
+  const sterm = searchTerm;
+
+  /* Node sizes: in god view we draw slightly larger so dots are visible.
+     We use world-space radius (already in node.r). For godview boost,
+     scale up via a constant world boost that fades out as we zoom in. */
+  const godBoost = 1 + ramp(0.9, 0.4, 0.9) * 0; /* placeholder; we use k below */
+  const sizeBoost = k < 0.95 ? 1.45 : (k < 1.6 ? 1.2 : 1.0);
+
+  for(let i=0; i<NODES.length; i++){
+    const n = NODES[i];
+    if(n.x < view.minX || n.x > view.maxX || n.y < view.minY || n.y > view.maxY) continue;
+
+    /* filtering */
+    const matchMML = !mfilt || String(n.mml) === mfilt;
+    const matchSrch = !sterm || matchesNode(n, sterm);
+    const dim = (!matchMML || !matchSrch);
+
+    const l = LY_BY_ID[n.layer];
+    const lcol = l.stroke;
+    const m = mmlVis(n.mml);
+    const baseR = n.r * sizeBoost;
+
+    const baseAlpha = dim ? 0.15 : (0.45 + m*0.55);
+    /* faint outer halo per-node at high zoom only */
+    if(t >= 2 && !dim){
+      const haloR = baseR * (1.7 + 0.6*TW.haloIntensity);
+      const g = ctx.createRadialGradient(n.x, n.y, baseR*0.4, n.x, n.y, haloR);
+      g.addColorStop(0, ha(lcol, 0.25 * TW.haloIntensity));
+      g.addColorStop(1, ha(lcol, 0));
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(n.x, n.y, haloR, 0, Math.PI*2); ctx.fill();
+    }
+
+    /* body fill */
+    ctx.fillStyle = ha(lcol, dim ? 0.10 : 0.22 + m*0.18);
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, baseR, 0, Math.PI*2);
+    ctx.fill();
+
+    /* outline */
+    ctx.strokeStyle = ha(lcol, baseAlpha);
+    ctx.lineWidth = (k < 1.6 ? 1.1 : 1.25) / k;
+    ctx.stroke();
+  }
+
+  /* selected / hovered emphasis ring drawn last so it stays on top */
+  [hoveredNode, selectedNode].forEach(n=>{
+    if(!n) return;
+    if(n.x < view.minX || n.x > view.maxX || n.y < view.minY || n.y > view.maxY) return;
+    const l = LY_BY_ID[n.layer];
+    ctx.strokeStyle = ha(l.stroke, n === selectedNode ? 1 : 0.85);
+    ctx.lineWidth = (n === selectedNode ? 2.6 : 2) / k;
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, n.r * sizeBoost + 4/k, 0, Math.PI*2);
+    ctx.stroke();
+  });
+}
+
+/* ── LABELS WITH COLLISION DETECTION ───────────────────────────────── */
+/* Strategy: build a list of candidate labels (priority-ordered), project
+   to screen space, place each only if its bounding box doesn't overlap a
+   placed one. Higher-tier labels go first so they win conflicts. */
+
+const placedRects = [];
+function rectsOverlap(a,b){ return !(a.x+a.w<b.x || b.x+b.w<a.x || a.y+a.h<b.y || b.y+b.h<a.y); }
+function tryPlace(x,y,w,h, padX=4, padY=2){
+  const r = {x:x-w/2-padX, y:y-h/2-padY, w:w+padX*2, h:h+padY*2};
+  for(let i=0;i<placedRects.length;i++) if(rectsOverlap(r, placedRects[i])) return false;
+  placedRects.push(r); return true;
+}
+
+function measureText(text, font){ ctx.font = font; return ctx.measureText(text).width; }
+
+function drawLabels(t, k){
+  placedRects.length = 0;
+  const density = TW.labelDensity;
+
+  /* tier 1: LAYER labels (large) — always drawn first to win conflicts.
+     They appear in god view too but smaller, then grow at T1, then fade
+     at T3 (because element labels matter more close-up). */
+  const layerOp = (k < 0.6) ? 0.55 : (k < 2.0 ? 0.95 : Math.max(0.18, 1 - ramp(k, 2.0, 3.5)*0.78));
+  const layerSize = k < 0.95 ? 22 : (k < 1.6 ? 32 : (k < 3.0 ? 28 : 22));
+  if(layerOp > 0.04){
+    LY.forEach(l=>{
+      const lc = LAYER_ANCHORS[l.id];
+      const [sx, sy] = worldToScreen(lc.x, lc.y - LAYER_RADIUS[l.id] * (k<1.6?1.3:1.55));
+      if(sx < -200 || sx > W+200 || sy < -100 || sy > H+100) return;
+      /* tag (small mono) above label */
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      const tagSize = layerSize < 26 ? 9 : 10;
+      ctx.font = `500 ${tagSize}px 'DM Mono', monospace`;
+      const tagW = measureText(l.tag.split(',')[0].toUpperCase(), ctx.font);
+      if(tryPlace(sx, sy - layerSize*0.6, tagW + 8, tagSize+4, 6, 3)){
+        ctx.fillStyle = ha('#7B7869', layerOp * 0.9);
+        ctx.fillText(l.tag.split(',')[0].toUpperCase(), sx, sy - layerSize*0.6);
+      }
+      /* layer name */
+      ctx.font = `700 ${layerSize}px 'Space Grotesk', sans-serif`;
+      const w = measureText(l.label, ctx.font);
+      if(tryPlace(sx, sy, w + 10, layerSize + 4, 8, 4)){
+        ctx.fillStyle = ha('#18160F', layerOp);
+        ctx.fillText(l.label, sx, sy);
+        /* element count below */
+        const cSize = layerSize < 26 ? 10 : 11;
+        ctx.font = `400 ${cSize}px 'Space Mono', monospace`;
+        ctx.fillStyle = ha('#7B7869', layerOp*0.85);
+        const ct = `${l.count} elements`;
+        if(tryPlace(sx, sy + layerSize*0.62, measureText(ct, ctx.font)+8, cSize+4, 6, 3)){
+          ctx.fillText(ct, sx, sy + layerSize*0.62);
+        }
+      }
+    });
+  }
+
+  /* tier 2: BLOCK labels appear k≥1.3, become full at k≥1.8 */
+  const blockOp = ramp(k, 1.3, 1.8) * Math.min(1, 0.4 + density*0.7);
+  if(blockOp > 0.04){
+    const blockSize = k < 2.0 ? 11 : (k < 3.0 ? 12 : 12);
+    /* render order: by current viewport priority (closer to center first) */
+    const blocks = Object.values(BL).flat().slice().sort((a,b)=>{
+      const ba = BLOCK_ANCHORS[a.id], bb = BLOCK_ANCHORS[b.id];
+      const da = (ba.x-WORLD.minX/2)*(ba.x-WORLD.minX/2) + (ba.y-WORLD.minY/2)*(ba.y-WORLD.minY/2);
+      const db = (bb.x-WORLD.minX/2)*(bb.x-WORLD.minX/2) + (bb.y-WORLD.minY/2)*(bb.y-WORLD.minY/2);
+      return da - db;
+    });
+    blocks.forEach(b=>{
+      const ba = BLOCK_ANCHORS[b.id];
+      const [sx, sy] = worldToScreen(ba.x, ba.y);
+      if(sx < -100 || sx > W+100 || sy < -60 || sy > H+60) return;
+      /* compute average cluster radius for label placement */
+      const labelY = sy - 18;
+      /* code */
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.font = `500 9.5px 'DM Mono', monospace`;
+      const lcol = layerColor(ba.layer);
+      const codeW = measureText(b.id, ctx.font);
+      if(tryPlace(sx, labelY - 9, codeW + 12, 14, 6, 3)){
+        /* small mono code background pill */
+        ctx.fillStyle = ha(lcol, 0.16 * blockOp);
+        roundRect(ctx, sx - codeW/2 - 5, labelY - 9 - 6, codeW + 10, 12, 6);
+        ctx.fill();
+        ctx.fillStyle = ha(LY_BY_ID[ba.layer].dark, blockOp);
+        ctx.fillText(b.id, sx, labelY - 9);
+      }
+      /* block name */
+      ctx.font = `500 ${blockSize}px 'Space Grotesk', sans-serif`;
+      const w = measureText(b.name, ctx.font);
+      if(w > 220){
+        /* two-line wrap */
+        const words = b.name.split(' ');
+        const mid = Math.ceil(words.length/2);
+        const l1 = words.slice(0,mid).join(' '), l2 = words.slice(mid).join(' ');
+        const w1 = measureText(l1, ctx.font), w2 = measureText(l2, ctx.font);
+        const totalH = blockSize*2 + 4;
+        if(tryPlace(sx, labelY + blockSize*0.6, Math.max(w1,w2)+8, totalH, 6, 3)){
+          ctx.fillStyle = ha('#18160F', blockOp);
+          ctx.fillText(l1, sx, labelY + blockSize*0.2);
+          ctx.fillText(l2, sx, labelY + blockSize*1.3);
+        }
+      } else {
+        if(tryPlace(sx, labelY + blockSize*0.6, w+8, blockSize+4, 6, 3)){
+          ctx.fillStyle = ha('#18160F', blockOp);
+          ctx.fillText(b.name, sx, labelY + blockSize*0.6);
+        }
+      }
+    });
+  }
+
+  /* tier 3: ELEMENT codes (mono) at k≥2.4, names at k≥4.0 */
+  const codeOp = ramp(k, 2.4, 3.2) * Math.min(1, 0.4 + density*0.7);
+  const nameOp = ramp(k, 4.0, 5.5) * density;
+  if(codeOp > 0.04 || nameOp > 0.04){
+    /* sort by mml so important elements claim space first; then near-center bias */
+    const candidates = NODES.slice().sort((a,b)=>{
+      if(a.mml !== b.mml) return a.mml - b.mml;
+      return 0;
+    });
+    const codeSize = 10;
+    const nameSize = 11;
+    candidates.forEach(n=>{
+      const [sx, sy] = worldToScreen(n.x, n.y);
+      if(sx < -40 || sx > W+40 || sy < -30 || sy > H+30) return;
+      const matchMML = !mmlFilter || String(n.mml) === mmlFilter;
+      const matchSrch = !searchTerm || matchesNode(n, searchTerm);
+      const dim = (!matchMML || !matchSrch);
+      const op = (dim ? 0.25 : 1);
+
+      if(codeOp > 0.04){
+        ctx.font = `700 ${codeSize}px 'Space Mono', monospace`;
+        const w = measureText(n.code, ctx.font);
+        /* below the node */
+        const ny = sy + n.r*transform.k + 9;
+        if(tryPlace(sx, ny, w+6, codeSize+4, 3, 2)){
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillStyle = ha('#18160F', codeOp * op);
+          ctx.fillText(n.code, sx, ny);
+        }
+      }
+      if(nameOp > 0.04){
+        ctx.font = `400 ${nameSize}px 'Space Grotesk', sans-serif`;
+        const w = measureText(n.name, ctx.font);
+        const ny = sy + n.r*transform.k + 9 + codeSize + 4;
+        if(tryPlace(sx, ny, w+6, nameSize+4, 3, 2)){
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillStyle = ha('#3c3a30', nameOp * op);
+          ctx.fillText(n.name, sx, ny);
+        }
+      }
+    });
+  }
+}
+
+/* mid-frame selection ring is drawn from nodes function; this hook is
+   reserved if we add a glow effect that lives in screen space */
+function drawSelectionRing(k){}
+
+/* small helper */
+function roundRect(c, x, y, w, h, r){
+  c.beginPath();
+  c.moveTo(x+r, y);
+  c.lineTo(x+w-r, y); c.quadraticCurveTo(x+w, y, x+w, y+r);
+  c.lineTo(x+w, y+h-r); c.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  c.lineTo(x+r, y+h); c.quadraticCurveTo(x, y+h, x, y+h-r);
+  c.lineTo(x, y+r); c.quadraticCurveTo(x, y, x+r, y);
+}
+
+/* ── MINIMAP ───────────────────────────────────────────────────────── */
+let mmDragging = false;
+function mmRect(){
+  const mmW = 200, mmH = 148;
+  const ww = WORLD.maxX - WORLD.minX, wh = WORLD.maxY - WORLD.minY;
+  const sx = mmW / ww, sy = mmH / wh;
+  const s = Math.min(sx, sy) * 0.94;
+  const offX = (mmW - ww*s)/2 - WORLD.minX*s;
+  const offY = (mmH - wh*s)/2 - WORLD.minY*s;
+  return { mmW, mmH, s, offX, offY };
+}
+function drawMinimap(){
+  const { mmW, mmH, s, offX, offY } = mmRect();
+  mmCtx.clearRect(0,0,mmW,mmH);
+  /* background tint */
+  mmCtx.fillStyle = 'rgba(255,255,255,0.18)';
+  mmCtx.fillRect(0,0,mmW,mmH);
+
+  /* layer halos in mini */
+  LY.forEach(l=>{
+    const lc = LAYER_ANCHORS[l.id];
+    const x = lc.x*s + offX, y = lc.y*s + offY;
+    const R = LAYER_RADIUS[l.id] * s * 1.4;
+    const g = mmCtx.createRadialGradient(x,y,0,x,y,R);
+    g.addColorStop(0, ha(l.stroke, 0.40));
+    g.addColorStop(1, ha(l.stroke, 0));
+    mmCtx.fillStyle = g;
+    mmCtx.beginPath(); mmCtx.arc(x,y,R,0,Math.PI*2); mmCtx.fill();
+  });
+
+  /* nodes as tiny dots */
+  for(let i=0;i<NODES.length;i++){
+    const n = NODES[i];
+    mmCtx.fillStyle = layerColor(n.layer);
+    mmCtx.globalAlpha = 0.7;
+    mmCtx.fillRect(n.x*s + offX - 0.7, n.y*s + offY - 0.7, 1.4, 1.4);
+  }
+  mmCtx.globalAlpha = 1;
+
+  /* viewport rect */
+  const tl = transform.invert([0,0]);
+  const br = transform.invert([W,H]);
+  const rx = tl[0]*s + offX, ry = tl[1]*s + offY;
+  const rw = (br[0]-tl[0])*s, rh = (br[1]-tl[1])*s;
+  mmCtx.strokeStyle = '#18160F';
+  mmCtx.lineWidth = 1.25;
+  mmCtx.strokeRect(rx, ry, rw, rh);
+  /* corner marks */
+  mmCtx.fillStyle = 'rgba(24,22,15,0.06)';
+  mmCtx.fillRect(rx, ry, rw, rh);
+}
+function mmClick(ev){
+  const mm = mmCanvas.getBoundingClientRect();
+  const mx = ev.clientX - mm.left, my = ev.clientY - mm.top;
+  const { s, offX, offY } = mmRect();
+  /* convert to world coords */
+  const wx = (mx - offX) / s;
+  const wy = (my - offY) / s;
+  flyTo(wx, wy, transform.k, 480);
+}
+mmCanvas.addEventListener('mousedown', (ev)=>{ mmDragging = true; mmClick(ev); });
+mmCanvas.addEventListener('mousemove', (ev)=>{ if(mmDragging) mmClick(ev); });
+window.addEventListener('mouseup', ()=>{ mmDragging = false; });
+mmCanvas.addEventListener('touchstart', ev=>{ ev.preventDefault(); mmClick(ev.touches[0]); }, {passive:false});
+mmCanvas.addEventListener('touchmove',  ev=>{ ev.preventDefault(); mmClick(ev.touches[0]); }, {passive:false});
+
+/* ── HIT TESTING ───────────────────────────────────────────────────── */
+function pickNode(sx, sy){
+  /* convert to world, scan; keep cost low because tier-aware hit radius */
+  const [wx, wy] = screenToWorld(sx, sy);
+  const k = transform.k;
+  /* minimum hit radius in screen px to make god-view clickable */
+  const minScreenHit = 7;
+  let best = null, bestD2 = Infinity;
+  for(let i=0; i<NODES.length; i++){
+    const n = NODES[i];
+    const dx = n.x - wx, dy = n.y - wy;
+    const d2 = dx*dx + dy*dy;
+    const rWorld = Math.max(n.r + 2, minScreenHit / k);
+    if(d2 <= rWorld*rWorld && d2 < bestD2){ best = n; bestD2 = d2; }
+  }
+  return best;
+}
+
+canvas.addEventListener('mousemove', ev=>{
+  const rect = canvas.getBoundingClientRect();
+  mouseX = ev.clientX - rect.left;
+  mouseY = ev.clientY - rect.top;
+  const n = pickNode(mouseX, mouseY);
+  if(n !== hoveredNode){
+    hoveredNode = n;
+    canvas.classList.toggle('over-node', !!n);
+    if(n) showTip(ev, n); else hideTip();
+  } else if(n){
+    showTip(ev, n);
+  }
+});
+canvas.addEventListener('mouseleave', ()=>{ hoveredNode = null; hideTip(); canvas.classList.remove('over-node'); });
+
+let downX=0, downY=0, downT=0;
+canvas.addEventListener('mousedown', ev=>{ downX=ev.clientX; downY=ev.clientY; downT=performance.now(); });
+canvas.addEventListener('mouseup', ev=>{
+  const dx = ev.clientX - downX, dy = ev.clientY - downY;
+  const dt = performance.now() - downT;
+  /* treat as a click only on minimal movement / short hold */
+  if(dx*dx + dy*dy < 25 && dt < 350){
+    const rect = canvas.getBoundingClientRect();
+    const n = pickNode(ev.clientX - rect.left, ev.clientY - rect.top);
+    if(n){
+      /* if close zoom, open passport immediately; else zoom in first */
+      if(transform.k >= 2.5) openPassport(n);
+      else flyToNode(n, ()=> openPassport(n));
+    } else {
+      /* tap on empty space at close zoom: close passport */
+      if(transform.k >= 2.5) closePassport();
+    }
+  }
+});
+
+/* ── TOOLTIP ───────────────────────────────────────────────────────── */
+const tip = document.getElementById('tip');
+function showTip(ev, n){
+  const l = LY_BY_ID[n.layer];
+  tip.innerHTML = `<span class="tc">${n.code}</span>${n.name}<span class="tm">${l.label} · ${n.block} · MML-${n.mml}</span>`;
+  tip.style.display = 'block';
+  let x = ev.clientX + 14, y = ev.clientY - 32;
+  if(x + tip.offsetWidth > W - 16) x = ev.clientX - tip.offsetWidth - 14;
+  if(y < 8) y = ev.clientY + 18;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+function hideTip(){ tip.style.display = 'none'; }
+
+/* ── FLY-TO / ZOOM TRANSITIONS ─────────────────────────────────────── */
+function flyTo(wx, wy, k, dur=620){
+  const tgt = d3.zoomIdentity.translate(W/2 - wx*k, (H+60)/2 - wy*k).scale(k);
+  d3.select(canvas).transition().duration(dur).ease(d3.easeCubicInOut).call(zoom.transform, tgt);
+}
+function flyToNode(n, cb){
+  const targetK = 4.2;
+  flyTo(n.x, n.y, targetK, 720);
+  if(cb) setTimeout(cb, 720);
+}
+
+/* ── SEARCH ────────────────────────────────────────────────────────── */
+let searchTerm = '';
+let mmlFilter = '';
+let ddIndex = -1;
+let ddResults = [];
+
+function matchesNode(n, term){
+  const t = term.toLowerCase();
+  return n.name.toLowerCase().includes(t)
+      || n.code.toLowerCase().includes(t)
+      || n.block.toLowerCase().includes(t)
+      || n.blockName.toLowerCase().includes(t);
+}
+
+function searchAll(term){
+  const t = term.toLowerCase();
+  if(!t) return [];
+  const results = [];
+  /* layer matches first */
+  LY.forEach(l=>{
+    if(l.label.toLowerCase().includes(t) || l.id.includes(t)){
+      results.push({kind:'layer', layer:l});
+    }
+  });
+  /* block matches */
+  Object.values(BL).flat().forEach(b=>{
+    if(b.name.toLowerCase().includes(t) || b.id.toLowerCase().includes(t)){
+      results.push({kind:'block', block:b});
+    }
+  });
+  /* element matches */
+  NODES.forEach(n=>{
+    if(matchesNode(n, t)) results.push({kind:'element', node:n});
+  });
+  return results.slice(0, 40);
+}
+
+const searchEl = document.getElementById('search');
+const ddEl = document.getElementById('search-dd');
+searchEl.addEventListener('input', ()=>{
+  searchTerm = searchEl.value.trim();
+  ddIndex = -1;
+  renderDropdown();
+});
+searchEl.addEventListener('focus', ()=>{
+  if(searchTerm) renderDropdown();
+});
+document.addEventListener('click', ev=>{
+  if(!ev.target.closest('.searchwrap')) ddEl.classList.remove('on');
+});
+searchEl.addEventListener('keydown', ev=>{
+  if(ev.key === 'ArrowDown'){ ev.preventDefault(); ddIndex = Math.min(ddResults.length-1, ddIndex+1); renderDropdown(true); }
+  else if(ev.key === 'ArrowUp'){ ev.preventDefault(); ddIndex = Math.max(0, ddIndex-1); renderDropdown(true); }
+  else if(ev.key === 'Enter'){ ev.preventDefault(); if(ddResults[ddIndex]) chooseResult(ddResults[ddIndex]); else if(ddResults[0]) chooseResult(ddResults[0]); }
+  else if(ev.key === 'Escape'){ ddEl.classList.remove('on'); searchEl.blur(); }
+});
+
+function renderDropdown(keepOpen){
+  ddResults = searchAll(searchTerm);
+  if(!searchTerm || ddResults.length === 0){
+    if(searchTerm){
+      ddEl.innerHTML = `<div class="dd-empty">No matches for "${escapeHtml(searchTerm)}"</div>`;
+      ddEl.classList.add('on');
+    } else {
+      ddEl.classList.remove('on');
+    }
+    return;
+  }
+  let html = '';
+  let lastKind = '';
+  const kindLabel = { layer:'Layers', block:'Blocks', element:'Elements' };
+  ddResults.forEach((r,i)=>{
+    if(r.kind !== lastKind){
+      html += `<div class="dd-section">${kindLabel[r.kind]}</div>`;
+      lastKind = r.kind;
+    }
+    if(r.kind === 'layer'){
+      html += `<div class="dd-row${i===ddIndex?' cur':''}" data-i="${i}"><div class="dot" style="background:${r.layer.stroke}"></div><div class="code">${r.layer.id.toUpperCase().slice(0,4)}</div><div class="name">${r.layer.label}</div><div class="meta">${r.layer.count} els</div></div>`;
+    } else if(r.kind === 'block'){
+      const layer = Object.entries(BL).find(([lid, arr])=>arr.includes(r.block))[0];
+      html += `<div class="dd-row${i===ddIndex?' cur':''}" data-i="${i}"><div class="dot" style="background:${LY_BY_ID[layer].stroke}"></div><div class="code">${r.block.id}</div><div class="name">${r.block.name}</div><div class="meta">${r.block.count} els</div></div>`;
+    } else {
+      html += `<div class="dd-row${i===ddIndex?' cur':''}" data-i="${i}"><div class="dot" style="background:${LY_BY_ID[r.node.layer].stroke}"></div><div class="code">${r.node.code}</div><div class="name">${r.node.name}</div><div class="meta">MML-${r.node.mml}</div></div>`;
+    }
+  });
+  ddEl.innerHTML = html;
+  ddEl.classList.add('on');
+  ddEl.querySelectorAll('.dd-row').forEach(row=>{
+    row.addEventListener('click', ()=>{
+      const i = +row.dataset.i;
+      chooseResult(ddResults[i]);
+    });
+  });
+  if(keepOpen){
+    const cur = ddEl.querySelector('.dd-row.cur');
+    if(cur) cur.scrollIntoView({ block:'nearest' });
+  }
+}
+
+function chooseResult(r){
+  ddEl.classList.remove('on');
+  if(!r) return;
+  if(r.kind === 'layer'){
+    /* fly to the layer at medium zoom; clear the textual filter so canvas
+       shows everything but the user lands on the cluster. */
+    const lc = LAYER_ANCHORS[r.layer.id];
+    searchTerm = ''; searchEl.value = '';
+    flyTo(lc.x, lc.y, 1.6, 760);
+  } else if(r.kind === 'block'){
+    const ba = BLOCK_ANCHORS[r.block.id];
+    searchTerm = ''; searchEl.value = '';
+    flyTo(ba.x, ba.y, 3.0, 760);
+  } else {
+    const n = r.node;
+    searchTerm = ''; searchEl.value = '';
+    flyToNode(n, ()=> openPassport(n));
+  }
+}
+
+function escapeHtml(s){ return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* MML filter */
+document.getElementById('mml-filter').addEventListener('change', e=>{
+  mmlFilter = e.target.value;
+});
+
+/* ── BREADCRUMB / STATUS — auto-updated from viewport center ───────── */
+const bcEl = document.getElementById('bc');
+const statusEl = document.getElementById('status');
+const zkEl = document.getElementById('zk');
+const zk2El = document.getElementById('zk2');
+
+function viewportCenterContext(){
+  const k = transform.k;
+  /* world point at the screen center */
+  const cw = transform.invert([W/2, H/2]);
+  /* find nearest layer center */
+  let bestLayer = null, bestLD = Infinity;
+  LY.forEach(l=>{
+    const lc = LAYER_ANCHORS[l.id];
+    const d = (lc.x-cw[0])*(lc.x-cw[0]) + (lc.y-cw[1])*(lc.y-cw[1]);
+    if(d < bestLD){ bestLD = d; bestLayer = l; }
+  });
+  /* find nearest block, if zoomed enough */
+  let bestBlock = null, bestBD = Infinity;
+  Object.values(BL).flat().forEach(b=>{
+    const ba = BLOCK_ANCHORS[b.id];
+    const d = (ba.x-cw[0])*(ba.x-cw[0]) + (ba.y-cw[1])*(ba.y-cw[1]);
+    if(d < bestBD){ bestBD = d; bestBlock = b; }
+  });
+  return { k, cw, layer: bestLayer, layerD: Math.sqrt(bestLD), block: bestBlock, blockD: Math.sqrt(bestBD) };
+}
+
+let lastBcSig = '';
+function updateBreadcrumb(){
+  const c = viewportCenterContext();
+  const k = c.k;
+  let sig = `${k.toFixed(2)}`;
+  let html;
+  if(k < 0.95){
+    html = `<button class="crumb current">All layers</button>`;
+    sig += '|all';
+  } else if(k < 1.6){
+    html = `<button class="crumb" data-go="all">All layers</button><span class="sep">›</span><button class="crumb current">${c.layer.label}</button>`;
+    sig += '|'+c.layer.id;
+  } else if(k < 3.0){
+    html = `<button class="crumb" data-go="all">All layers</button><span class="sep">›</span><button class="crumb" data-go="layer:${c.layer.id}">${c.layer.label}</button><span class="sep">›</span><button class="crumb current">${c.block.id} ${c.block.name}</button>`;
+    sig += '|'+c.layer.id+'|'+c.block.id;
+  } else {
+    /* close zoom: also show nearest element when a node is selected */
+    const sel = selectedNode || (hoveredNode && transform.k>3.0 ? hoveredNode : null);
+    const blockOfSelected = sel ? BL_BY_ID[sel.block] : c.block;
+    const layerOfSelected = sel ? LY_BY_ID[sel.layer] : c.layer;
+    html = `<button class="crumb" data-go="all">All layers</button><span class="sep">›</span><button class="crumb" data-go="layer:${layerOfSelected.id}">${layerOfSelected.label}</button><span class="sep">›</span><button class="crumb" data-go="block:${blockOfSelected.id}">${blockOfSelected.id} ${blockOfSelected.name}</button>` +
+      (sel ? `<span class="sep">›</span><button class="crumb current">${sel.code} ${sel.name}</button>` : `<span class="sep">›</span><button class="crumb current">${blockOfSelected.id}</button>`);
+    sig += '|'+layerOfSelected.id+'|'+blockOfSelected.id+'|'+(sel?sel.code:'-');
+  }
+  if(sig !== lastBcSig){
+    bcEl.innerHTML = html;
+    bcEl.querySelectorAll('.crumb[data-go]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const v = b.dataset.go;
+        if(v === 'all') flyTo(0, 0, fitK(), 720);
+        else if(v.startsWith('layer:')){
+          const id = v.split(':')[1]; const lc = LAYER_ANCHORS[id];
+          flyTo(lc.x, lc.y, 1.6, 720);
+        } else if(v.startsWith('block:')){
+          const id = v.split(':')[1]; const ba = BLOCK_ANCHORS[id];
+          flyTo(ba.x, ba.y, 3.0, 720);
+        }
+      });
+    });
+    lastBcSig = sig;
+  }
+}
+function fitK(){
+  const ww = WORLD.maxX - WORLD.minX, wh = WORLD.maxY - WORLD.minY;
+  const sx = (W - 120) / ww, sy = (H - 200) / wh;
+  return Math.min(sx, sy) * 0.92;
+}
+
+function updateZoomUI(){
+  const k = transform.k;
+  zkEl.textContent = k.toFixed(2) + '×';
+  zk2El.textContent = k.toFixed(1) + '×';
+  updateBreadcrumb();
+  updateStatusForTier();
+}
+
+function updateStatusForTier(){
+  const t = tier(transform.k);
+  const k = transform.k;
+  const sl = document.getElementById('status').querySelector('span:first-child');
+  if(!sl) return;
+  if(t === 0){
+    sl.innerHTML = `<em>343</em> PASSPORTS · <em>4</em> LAYERS · <em>46</em> BLOCKS`;
+  } else {
+    const c = viewportCenterContext();
+    if(t === 1){
+      sl.innerHTML = `<em>${c.layer.label.toUpperCase()}</em> · ${c.layer.count} ELEMENTS · ${BL[c.layer.id].length} BLOCKS`;
+    } else if(t === 2){
+      sl.innerHTML = `<em>${c.layer.label.toUpperCase()}</em> · ${c.block.id} ${c.block.name.toUpperCase()} · ${c.block.count} ELEMENTS`;
+    } else {
+      sl.innerHTML = `<em>${c.layer.label.toUpperCase()}</em> · ${c.block.id} · ${c.block.count} ELEMENTS`;
+    }
+  }
+}
+
+/* ── PASSPORT PANEL ────────────────────────────────────────────────── */
+function openPassport(d){
+  selectedNode = d;
+  const l = LY_BY_ID[d.layer];
+  const stripe = document.getElementById('pp-stripe');
+  stripe.innerHTML =
+    `<span style="background:${l.stroke}"></span>` +
+    `<span style="background:${l.stroke};opacity:0.70"></span>` +
+    `<span style="background:${l.stroke};opacity:0.45"></span>` +
+    `<span style="background:${l.stroke};opacity:0.20"></span>`;
+  const mmlHex = ha(l.stroke, 0.12);
+  const mmlTxt = l.dark;
+  const layerPill = `background:${ha(l.stroke,0.12)};color:${l.dark}`;
+  const block = BL_BY_ID[d.block];
+  const html =
+    `<div class="pp-eyebrow">
+       <span>${d.code}</span><span class="pp-dot"></span>
+       <span>${d.block} · ${block.name}</span>
+     </div>
+     <h1 class="pp-title">${d.name}</h1>
+     <div class="pp-badges">
+       <span class="pp-badge" style="${layerPill}">${l.label} layer</span>
+       <span class="pp-badge" style="background:${mmlHex};color:${mmlTxt}">MML-${d.mml} · ${MML_LABEL[d.mml]}</span>
+     </div>
+
+     <div class="pp-lbl"><span>Definition</span><span class="pp-lbl-meta">est. ${d.author}</span></div>
+     <p class="pp-body">${d.definition}</p>
+
+     <div class="pp-lbl">Poles</div>
+     <div class="pp-poles">
+       <div class="pp-pole"><div class="pl">Low pole</div><div class="pv">${d.poleLow}</div></div>
+       <div class="pp-pole"><div class="pl">High pole</div><div class="pv">${d.poleHigh}</div></div>
+     </div>
+
+     <hr class="pp-rule"/>
+
+     <div class="pp-2col">
+       <div><div class="pp-lbl">Trainability</div><div class="pv-mono">${d.trainability}</div></div>
+       <div><div class="pp-lbl">Modifiability</div><div class="pv-mono">${d.modifiability}</div></div>
+     </div>
+
+     <div class="pp-lbl">Nearest neighbors</div>
+     <div class="pp-nbrs">
+       ${(d.neighbors||[]).map(nc=>{
+          const f = ELS_BY_CODE[nc];
+          return `<button class="pp-nbr" data-code="${nc}">${nc}<span class="nb-name">${f?f.name:''}</span></button>`;
+       }).join('')}
+     </div>
+
+     <div class="pp-meta">
+       <span>Author · ${d.author}</span>
+       <span>Updated 2024</span>
+     </div>`;
+  document.getElementById('pp-content').innerHTML = html;
+  document.getElementById('pp-content').querySelectorAll('.pp-nbr').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const code = btn.dataset.code;
+      const n = NODES_BY_CODE[code];
+      if(n) flyToNode(n, ()=> openPassport(n));
+    });
+  });
+  const panel = document.getElementById('panel');
+  panel.classList.add('open'); panel.setAttribute('aria-hidden','false');
+}
+function closePassport(){
+  const p = document.getElementById('panel');
+  p.classList.remove('open'); p.setAttribute('aria-hidden','true');
+  selectedNode = null;
+}
+document.getElementById('pp-close').addEventListener('click', closePassport);
+
+/* ── ZOOM BUTTONS ──────────────────────────────────────────────────── */
+function zoomBy(factor){
+  const cx = W/2, cy = H/2;
+  const k0 = transform.k, k1 = Math.max(0.4, Math.min(9, k0*factor));
+  const wp = transform.invert([cx, cy]);
+  const t = d3.zoomIdentity.translate(cx - wp[0]*k1, cy - wp[1]*k1).scale(k1);
+  d3.select(canvas).transition().duration(360).ease(d3.easeCubicInOut).call(zoom.transform, t);
+}
+document.getElementById('z-in').addEventListener('click', ()=> zoomBy(1.6));
+document.getElementById('z-out').addEventListener('click', ()=> zoomBy(1/1.6));
+document.getElementById('z-reset').addEventListener('click', ()=> { fitToWorld(true); selectedNode = null; });
+
+/* keyboard nav: +/-, 0 to reset, Esc closes panel */
+window.addEventListener('keydown', ev=>{
+  if(ev.target === searchEl) return;
+  if(ev.key === '+' || ev.key === '=') zoomBy(1.4);
+  else if(ev.key === '-' || ev.key === '_') zoomBy(1/1.4);
+  else if(ev.key === '0') fitToWorld(true);
+  else if(ev.key === 'Escape') closePassport();
+});
+
+/* ── VIEWSWITCH (decorative; only Graph implemented) ───────────────── */
+document.querySelectorAll('.viewswitch button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.viewswitch button').forEach(x=>x.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+  });
+});
+
+/* ── TWEAKS PANEL ──────────────────────────────────────────────────── */
+function applyPalette(){
+  const [c,d,q,e] = TW.palette;
+  LY[0].stroke=c; LY[1].stroke=d; LY[2].stroke=q; LY[3].stroke=e;
+  ['core','derived','quantum','emotional'].forEach((k,i)=>{
+    const dot=document.querySelector(`#lg-${k} .lg-dot`);
+    if(dot) dot.style.background = TW.palette[i];
+  });
+  document.documentElement.style.setProperty('--core',c);
+  document.documentElement.style.setProperty('--derived',d);
+  document.documentElement.style.setProperty('--quantum',q);
+  document.documentElement.style.setProperty('--emotional',e);
+}
+function applyLegendVis(){ document.getElementById('legend').style.display = TW.showLegend? 'flex':'none'; }
+function applyMinimapVis(){ document.getElementById('minimap').style.display = TW.showMinimap? 'block':'none'; }
+function applyAll(){ applyPalette(); applyLegendVis(); applyMinimapVis(); refreshForces(); }
+
+function initTweaksPanel(){
+  const wrap = document.createElement('div');
+  wrap.id='tweaks-panel';
+  wrap.innerHTML = `
+    <div class="tp-head">
+      <div class="tp-title">Tweaks</div>
+      <button class="tp-close" aria-label="Close tweaks">✕</button>
+    </div>
+    <div class="tp-body">
+
+      <div class="tp-sec">
+        <div class="tp-lbl">Layer palette</div>
+        <div class="tp-swatches" id="tp-pal"></div>
+      </div>
+
+      <div class="tp-sec">
+        <div class="tp-row"><span class="tp-lbl">Cluster strength</span><span class="tp-val" id="tp-cl-v"></span></div>
+        <input class="tp-slider" id="tp-cl" type="range" min="0.02" max="0.30" step="0.01"/>
+      </div>
+
+      <div class="tp-sec">
+        <div class="tp-row"><span class="tp-lbl">Node repulsion</span><span class="tp-val" id="tp-rp-v"></span></div>
+        <input class="tp-slider" id="tp-rp" type="range" min="0" max="60" step="2"/>
+      </div>
+
+      <div class="tp-sec">
+        <div class="tp-row"><span class="tp-lbl">Label density</span><span class="tp-val" id="tp-ld-v"></span></div>
+        <input class="tp-slider" id="tp-ld" type="range" min="0.2" max="1.6" step="0.05"/>
+      </div>
+
+      <div class="tp-sec">
+        <div class="tp-row"><span class="tp-lbl">Edge density</span><span class="tp-val" id="tp-ed-v"></span></div>
+        <input class="tp-slider" id="tp-ed" type="range" min="0" max="1.8" step="0.05"/>
+      </div>
+
+      <div class="tp-sec">
+        <div class="tp-row"><span class="tp-lbl">Halo intensity</span><span class="tp-val" id="tp-halo-v"></span></div>
+        <input class="tp-slider" id="tp-halo" type="range" min="0" max="1.5" step="0.05"/>
+      </div>
+
+      <div class="tp-sec">
+        <div class="tp-row"><span class="tp-lbl">MML fade floor</span><span class="tp-val" id="tp-mml-v"></span></div>
+        <input class="tp-slider" id="tp-mml" type="range" min="0.05" max="0.6" step="0.01"/>
+      </div>
+
+      <div class="tp-sec">
+        <div class="tp-lbl">Tethers</div>
+        <div class="tp-seg" id="tp-tether">
+          <button data-v="solid">Solid</button><button data-v="dashed">Dashed</button>
+        </div>
+      </div>
+
+      <div class="tp-sec">
+        <label class="tp-toggle"><span>Cross-block tethers</span><input type="checkbox" id="tp-xb"/><span class="tp-sw"></span></label>
+        <label class="tp-toggle"><span>Cross-layer tethers</span><input type="checkbox" id="tp-xl"/><span class="tp-sw"></span></label>
+        <label class="tp-toggle"><span>Show legend</span><input type="checkbox" id="tp-legend"/><span class="tp-sw"></span></label>
+        <label class="tp-toggle"><span>Show minimap</span><input type="checkbox" id="tp-mm"/><span class="tp-sw"></span></label>
+      </div>
+
+    </div>`;
+  document.body.appendChild(wrap);
+
+  const palettes=[
+    ['#3C91D6','#2EA397','#CC5023','#9A49B8'],
+    ['#2B6CB0','#4A7C59','#B4612D','#6B4E7D'],
+    ['#1F3A5F','#2E5D4F','#8B3A1E','#3D2459'],
+    ['#5BA8E8','#3FBDB0','#E26B40','#B566D1']
+  ];
+  const palEl=document.getElementById('tp-pal');
+  palettes.forEach((p,i)=>{
+    const b=document.createElement('button');
+    b.className='tp-pal'; b.dataset.idx=i;
+    b.innerHTML = p.map(c=>`<span style="background:${c}"></span>`).join('');
+    palEl.appendChild(b);
+  });
+  function syncPal(){
+    [...palEl.children].forEach((b,i)=>{
+      const match = palettes[i].every((c,j)=>c===TW.palette[j]);
+      b.classList.toggle('on', match);
+    });
+  }
+  palEl.addEventListener('click', e=>{
+    const b=e.target.closest('.tp-pal'); if(!b)return;
+    TW.palette = palettes[+b.dataset.idx];
+    persist({palette:TW.palette}); syncPal(); applyAll();
+  });
+
+  function bindSlider(id, key, fmt){
+    const el=document.getElementById('tp-'+id), v=document.getElementById('tp-'+id+'-v');
+    el.value = TW[key]; v.textContent = fmt(TW[key]);
+    el.addEventListener('input', ()=>{
+      TW[key] = +el.value; v.textContent = fmt(+el.value);
+      persist({[key]:TW[key]}); applyAll();
+    });
+  }
+  bindSlider('cl',  'clusterStrength', v=>(+v).toFixed(2));
+  bindSlider('rp',  'repelStrength',   v=>(+v).toFixed(0));
+  bindSlider('ld',  'labelDensity',    v=>(+v).toFixed(2));
+  bindSlider('ed',  'edgeDensity',     v=>(+v).toFixed(2));
+  bindSlider('halo','haloIntensity',   v=>(+v).toFixed(2));
+  bindSlider('mml', 'mmlFade',         v=>(+v).toFixed(2));
+
+  const tetherEl=document.getElementById('tp-tether');
+  function syncTether(){ [...tetherEl.children].forEach(b=>b.classList.toggle('on', b.dataset.v===TW.tetherStyle)); }
+  tetherEl.addEventListener('click', e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    TW.tetherStyle = b.dataset.v; persist({tetherStyle:TW.tetherStyle}); syncTether();
+  });
+
+  const xb = document.getElementById('tp-xb'), xl = document.getElementById('tp-xl');
+  const legendT = document.getElementById('tp-legend'), mmT = document.getElementById('tp-mm');
+  function syncToggles(){
+    xb.checked = TW.showCrossBlock; xl.checked = TW.showCrossLayer;
+    legendT.checked = TW.showLegend; mmT.checked = TW.showMinimap;
+  }
+  xb.addEventListener('change', ()=>{ TW.showCrossBlock = xb.checked; persist({showCrossBlock:TW.showCrossBlock}); });
+  xl.addEventListener('change', ()=>{ TW.showCrossLayer = xl.checked; persist({showCrossLayer:TW.showCrossLayer}); });
+  legendT.addEventListener('change', ()=>{ TW.showLegend = legendT.checked; persist({showLegend:TW.showLegend}); applyLegendVis(); });
+  mmT.addEventListener('change', ()=>{ TW.showMinimap = mmT.checked; persist({showMinimap:TW.showMinimap}); applyMinimapVis(); });
+
+  function syncAll(){ syncPal(); syncTether(); syncToggles(); }
+
+  function persist(edits){ try{ window.parent.postMessage({type:'__edit_mode_set_keys',edits},'*'); }catch(_){} }
+
+  window.addEventListener('message', ev=>{
+    const t = ev.data && ev.data.type;
+    if(t === '__activate_edit_mode'){ wrap.classList.add('on'); syncAll(); }
+    else if(t === '__deactivate_edit_mode'){ wrap.classList.remove('on'); }
+  });
+  wrap.querySelector('.tp-close').addEventListener('click', ()=>{
+    wrap.classList.remove('on');
+    try{ window.parent.postMessage({type:'__edit_mode_dismissed'},'*'); }catch(_){}
+  });
+  try{ window.parent.postMessage({type:'__edit_mode_available'},'*'); }catch(_){}
+}
+
+/* ── INIT ──────────────────────────────────────────────────────────── */
+resize();
+applyAll();
+fitToWorld(false);
+updateZoomUI();
+initTweaksPanel();
+
+/* run simulation to settle before first paint feels nice, but also
+   keep running for a while so clusters tighten organically. */
+sim.alpha(1).restart();
+setTimeout(()=> sim.alphaTarget(0), 4500);
+</script>
+</body>
+</html>
