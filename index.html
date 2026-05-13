@@ -115,10 +115,10 @@
     /* Cards grid */
     .cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 380px));
+      grid-template-columns: repeat(auto-fit, minmax(260px, 360px));
       gap: 20px;
       width: 100%;
-      max-width: 840px;
+      max-width: 1160px;
     }
 
     .card {
@@ -140,6 +140,7 @@
 
     .card:nth-child(1) { animation-delay: 0.3s; }
     .card:nth-child(2) { animation-delay: 0.4s; }
+    .card:nth-child(3) { animation-delay: 0.5s; }
 
     .card::before {
       content: '';
@@ -260,6 +261,18 @@
         <span class="card-tag">God View</span>
         <p class="card-title">Network Explorer — God View</p>
         <p class="card-desc">Full-scope aerial overview of the entire HES network with elevated visibility.</p>
+        <span class="card-arrow">
+          Open
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </a>
+
+      <a class="card" href="HES Network Explorer - Continuous Field.html">
+        <span class="card-tag">Continuous Field</span>
+        <p class="card-title">Network Explorer — Continuous Field</p>
+        <p class="card-desc">Visualise the HES network as a continuous field with smooth gradient transitions across elements.</p>
         <span class="card-arrow">
           Open
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
