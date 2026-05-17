@@ -1,0 +1,2365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>HES — Passport Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=DM+Mono:wght@400;500&family=Geologica:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --vellum-1:#EBEEF2;
+  --vellum-2:#E3DED8;
+  --carbon:#18160F;
+  --dust:#7B7869;
+  --core:#3C91D6;       --core-dark:#1D3D82;
+  --derived:#2EA397;    --derived-dark:#2A6348;
+  --quantum:#CC5023;    --quantum-dark:#B84020;
+  --emotional:#9A49B8;  --emotional-dark:#5E3080;
+  --hairline: rgba(24,22,15,0.14);
+  --hairline-strong: rgba(24,22,15,0.22);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grotesk',sans-serif;color:var(--carbon)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* ── shell ─────────────────────────────────────────────────────── */
+#app{
+  position:relative;width:100vw;height:100vh;overflow:hidden;
+  background:linear-gradient(160deg,var(--vellum-1) 0%,var(--vellum-2) 100%);
+}
+#app::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(60% 50% at 18% 22%, rgba(255,255,255,0.55), transparent 70%),
+    radial-gradient(50% 40% at 82% 86%, rgba(150,135,110,0.10), transparent 75%);
+  z-index:0;
+}
+
+/* ── top bar ───────────────────────────────────────────────────── */
+#topbar{
+  position:absolute;top:0;left:0;right:0;height:64px;z-index:30;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;
+}
+#topbar::after{
+  content:"";position:absolute;left:32px;right:32px;bottom:0;height:1px;
+  background:rgba(24,22,15,0.95);
+}
+.lockup{display:flex;align-items:center;gap:14px}
+.lockup .mark{width:22px;height:22px;border-radius:50%;background:var(--carbon);position:relative}
+.lockup .mark::after{
+  content:"";position:absolute;inset:5px;border-radius:50%;
+  background:linear-gradient(135deg,var(--vellum-1),var(--vellum-2));
+}
+.lockup .wm{font-family:'DM Mono',monospace;font-weight:500;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:var(--carbon)}
+.lockup .wm .sep{color:var(--dust);margin:0 8px}
+.lockup .wm .lab{color:var(--dust)}
+.lockup .wm .mode{margin-left:14px;padding:3px 8px;border:0.5px solid var(--hairline-strong);color:var(--carbon);letter-spacing:0.16em;font-size:10px}
+
+.controls{display:flex;align-items:center;gap:14px}
+.viewswitch{
+  display:inline-flex;border:0.5px solid var(--hairline-strong);border-radius:2px;overflow:hidden;
+  font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+}
+.viewswitch button{
+  background:transparent;border:none;color:var(--dust);padding:7px 14px;cursor:pointer;
+  letter-spacing:inherit;text-transform:inherit;font:inherit;
+  border-right:0.5px solid var(--hairline-strong);
+  transition:background 0.15s,color 0.15s;
+}
+.viewswitch button:last-child{border-right:none}
+.viewswitch button:hover{color:var(--carbon)}
+.viewswitch button[aria-pressed="true"]{background:var(--carbon);color:var(--vellum-1)}
+
+.searchwrap{position:relative;display:flex;align-items:center}
+.searchwrap svg{position:absolute;left:10px;color:var(--dust);pointer-events:none}
+#search{
+  background:rgba(24,22,15,0.04);border:0.5px solid var(--hairline-strong);border-radius:2px;
+  font-family:'Space Mono',monospace;font-size:12px;color:var(--carbon);
+  padding:8px 12px 8px 32px;width:260px;outline:none;
+  transition:border-color 0.15s,background 0.15s;
+}
+#search::placeholder{color:var(--dust)}
+#search:focus{border-color:var(--carbon);background:rgba(255,255,255,0.4)}
+#search-dd{
+  position:absolute;top:calc(100% + 6px);right:0;width:340px;max-height:340px;overflow-y:auto;
+  background:rgba(246,244,238,0.98);backdrop-filter:blur(10px);
+  border:0.5px solid var(--hairline-strong);
+  box-shadow:0 24px 56px -22px rgba(24,22,15,0.28),0 2px 6px rgba(24,22,15,0.06);
+  border-radius:2px;display:none;z-index:50;
+}
+#search-dd.on{display:block}
+.dd-row{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:0.5px solid var(--hairline);transition:background 0.12s}
+.dd-row:last-child{border-bottom:none}
+.dd-row:hover,.dd-row.cur{background:rgba(24,22,15,0.06)}
+.dd-row .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dd-row .code{font-family:'Space Mono',monospace;font-size:11px;color:var(--carbon);min-width:42px}
+.dd-row .name{font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--carbon);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dd-row .meta{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--dust)}
+.dd-empty{padding:14px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--dust);text-align:center}
+.dd-section{padding:6px 14px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.20em;text-transform:uppercase;color:var(--dust);background:rgba(24,22,15,0.025);border-bottom:0.5px solid var(--hairline)}
+
+#mml-filter{
+  background:rgba(24,22,15,0.04);border:0.5px solid var(--hairline-strong);border-radius:2px;
+  font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--carbon);padding:8px 10px;outline:none;cursor:pointer;
+}
+#mml-filter:focus{border-color:var(--carbon)}
+
+/* ── sub-bar / breadcrumb ──────────────────────────────────────── */
+#subbar{
+  position:absolute;top:64px;left:0;right:0;height:54px;z-index:25;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;pointer-events:none;
+}
+#subbar > *{pointer-events:auto}
+.bc{
+  display:flex;align-items:center;gap:10px;
+  font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+}
+.bc .crumb{color:var(--dust);background:none;border:none;font:inherit;letter-spacing:inherit;text-transform:inherit;padding:0;transition:color 0.18s;cursor:pointer}
+.bc .crumb:hover{color:var(--carbon)}
+.bc .crumb.current{color:var(--carbon)}
+.bc .sep{color:var(--dust);opacity:0.45}
+.statusline{
+  font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.10em;text-transform:uppercase;
+  color:var(--dust);display:flex;gap:18px;align-items:center;
+}
+.statusline em{font-style:normal;color:var(--carbon)}
+.statusline .zoom{display:inline-flex;align-items:center;gap:6px;color:var(--carbon)}
+.statusline .zoom .pulse{width:5px;height:5px;border-radius:50%;background:var(--carbon)}
+
+/* ── canvas ────────────────────────────────────────────────────── */
+#canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none;z-index:1}
+#canvas.drag{cursor:grabbing}
+#canvas.over-node{cursor:pointer}
+
+/* ── legend ────────────────────────────────────────────────────── */
+#legend{
+  position:absolute;left:32px;bottom:28px;z-index:10;pointer-events:none;
+  display:flex;flex-direction:column;gap:10px;
+  background:rgba(246,244,238,0.6);backdrop-filter:blur(6px);
+  border:0.5px solid var(--hairline);
+  padding:14px 16px;border-radius:2px;
+  min-width:200px;
+}
+#legend .lg-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--dust);display:flex;justify-content:space-between;align-items:center}
+#legend .lg-row{display:flex;align-items:center;gap:10px;font-family:'Space Mono',monospace;font-size:10px;color:var(--carbon);letter-spacing:0.04em}
+#legend .lg-dot{width:9px;height:9px;border-radius:50%;background:var(--carbon)}
+#legend .lg-label{flex:1;color:var(--dust)}
+#legend .lg-meta{color:var(--carbon);font-size:9px;letter-spacing:0.10em;text-transform:uppercase}
+
+/* ── zoom controls ─────────────────────────────────────────────── */
+#zoom-controls{
+  position:absolute;right:32px;bottom:200px;z-index:10;
+  display:flex;flex-direction:column;
+  background:rgba(246,244,238,0.85);backdrop-filter:blur(6px);
+  border:0.5px solid var(--hairline-strong);border-radius:2px;
+  font-family:'DM Mono',monospace;
+}
+#zoom-controls button{
+  background:transparent;border:none;color:var(--carbon);
+  width:36px;height:36px;font-size:16px;line-height:1;
+  cursor:pointer;border-bottom:0.5px solid var(--hairline);
+  transition:background 0.15s;
+}
+#zoom-controls button:last-child{border-bottom:none}
+#zoom-controls button:hover{background:rgba(24,22,15,0.06)}
+#zoom-controls .zlbl{
+  height:24px;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--dust);display:flex;align-items:center;justify-content:center;
+  border-bottom:0.5px solid var(--hairline);
+}
+
+/* ── minimap ───────────────────────────────────────────────────── */
+#minimap{
+  position:absolute;right:32px;bottom:28px;z-index:10;
+  width:200px;height:148px;
+  background:rgba(246,244,238,0.70);backdrop-filter:blur(8px);
+  border:0.5px solid var(--hairline-strong);border-radius:2px;
+  overflow:hidden;
+}
+#minimap canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:pointer}
+#minimap .mm-tag{
+  position:absolute;top:6px;left:8px;
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--dust);pointer-events:none;
+}
+
+/* ── tooltip ───────────────────────────────────────────────────── */
+#tip{
+  position:absolute;pointer-events:none;z-index:40;display:none;
+  background:var(--carbon);color:var(--vellum-1);
+  font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.04em;
+  padding:6px 10px;border-radius:2px;white-space:nowrap;
+  box-shadow:0 8px 24px rgba(24,22,15,0.18);
+}
+#tip .tc{color:rgba(235,238,242,0.55);margin-right:8px}
+#tip .tm{color:rgba(235,238,242,0.45);margin-left:8px;font-size:9.5px;letter-spacing:0.10em;text-transform:uppercase}
+
+/* ── passport panel ───────────────────────────────────────────── */
+#panel{
+  position:absolute;top:0;right:0;bottom:0;width:520px;max-width:46vw;
+  background:linear-gradient(180deg,var(--vellum-1) 0%,var(--vellum-2) 100%);
+  border-left:0.5px solid var(--hairline-strong);
+  box-shadow:-40px 0 60px -24px rgba(24,22,15,0.10);
+  transform:translateX(102%);transition:transform 0.55s cubic-bezier(0.22,1,0.36,1);
+  z-index:35;overflow-y:auto;
+}
+#panel.open{transform:translateX(0)}
+#panel .stripe{display:flex;height:36px;width:100%}
+#panel .stripe span{flex:1;height:100%}
+#panel .close{
+  position:absolute;top:16px;right:18px;z-index:2;
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(255,255,255,0.45);border:0.5px solid var(--hairline);
+  color:var(--carbon);font-size:16px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background 0.15s,border-color 0.15s;
+}
+#panel .close:hover{background:rgba(255,255,255,0.8);border-color:var(--carbon)}
+#panel .pad{padding:40px 44px 56px}
+.pp-eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--dust);margin-bottom:18px;display:flex;gap:12px;align-items:center}
+.pp-eyebrow .pp-dot{width:5px;height:5px;border-radius:50%;background:var(--dust)}
+.pp-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:42px;line-height:1.04;letter-spacing:0.005em;color:var(--carbon);margin-bottom:22px;text-wrap:balance}
+.pp-badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:28px}
+.pp-badge{font-family:'Geologica','DM Sans',sans-serif;font-weight:500;font-size:11px;letter-spacing:0.04em;padding:5px 12px;border-radius:100px}
+.pp-rule{height:1px;background:var(--hairline);margin:24px 0;border:none}
+.pp-lbl{font-family:'DM Mono',monospace;font-weight:500;font-size:10px;letter-spacing:0.20em;text-transform:uppercase;color:var(--dust);margin-bottom:8px;display:flex;justify-content:space-between;align-items:baseline}
+.pp-lbl .pp-lbl-meta{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:none;color:var(--dust);opacity:0.75}
+.pp-body{font-family:'Space Grotesk',sans-serif;font-weight:300;font-size:17px;line-height:1.55;letter-spacing:-0.003em;color:#3c3a30;margin-bottom:24px;text-wrap:pretty}
+.pp-poles{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:6px}
+.pp-pole{padding:14px 14px 12px;background:rgba(255,255,255,0.32);border:0.5px solid var(--hairline);border-radius:2px}
+.pp-pole .pl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.20em;text-transform:uppercase;color:var(--dust);margin-bottom:6px}
+.pp-pole .pv{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:400;line-height:1.5;color:var(--carbon)}
+.pp-2col{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
+.pp-2col .pv-mono{font-family:'Space Mono',monospace;font-size:12px;color:var(--carbon);letter-spacing:0.02em}
+.pp-nbrs{display:flex;flex-wrap:wrap;gap:6px}
+.pp-nbr{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.06em;padding:5px 10px;border-radius:2px;border:0.5px solid var(--hairline-strong);background:rgba(255,255,255,0.4);color:var(--carbon);cursor:pointer;transition:all 0.15s}
+.pp-nbr .nb-name{color:var(--dust);margin-left:6px}
+.pp-nbr:hover{border-color:var(--carbon);background:var(--carbon);color:var(--vellum-1)}
+.pp-nbr:hover .nb-name{color:rgba(235,238,242,0.7)}
+.pp-meta{display:flex;justify-content:space-between;margin-top:32px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--dust)}
+
+/* ── tree view ────────────────────────────────────────────────── */
+#tree-view{
+  position:absolute;top:64px;left:0;right:0;bottom:0;
+  display:none;flex-direction:column;
+  background:linear-gradient(160deg,var(--vellum-1) 0%,var(--vellum-2) 100%);
+  z-index:20;
+}
+#tree-view.active{display:flex}
+#tree-breadcrumb{
+  height:54px;flex-shrink:0;
+  display:flex;align-items:center;
+  padding:0 32px;
+  border-bottom:0.5px solid var(--hairline);
+  font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+  gap:10px;
+}
+#tree-breadcrumb .crumb{color:var(--dust);background:none;border:none;font:inherit;letter-spacing:inherit;text-transform:inherit;padding:0;cursor:pointer;transition:color 0.18s}
+#tree-breadcrumb .crumb:hover{color:var(--carbon)}
+#tree-breadcrumb .crumb.current{color:var(--carbon)}
+#tree-breadcrumb .sep{color:var(--dust);opacity:0.45}
+#tree-cols{flex:1;display:flex;min-height:0;overflow:hidden}
+.tree-col{
+  display:flex;flex-direction:column;
+  border-right:0.5px solid var(--hairline-strong);
+  overflow-y:auto;
+  min-width:240px;
+  width:280px;flex-shrink:0;
+}
+.tree-col-wide{flex:1;border-right:none;min-width:340px;width:auto}
+.tree-col-header{
+  padding:14px 20px 10px;
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--dust);
+  border-bottom:0.5px solid var(--hairline);
+  position:sticky;top:0;
+  background:rgba(235,238,242,0.92);backdrop-filter:blur(6px);
+  z-index:2;
+  display:flex;justify-content:space-between;align-items:baseline;
+}
+.tree-col-header em{font-style:normal;color:var(--carbon)}
+.tree-layer-row,.tree-block-row,.tree-element-row{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 20px;
+  border-bottom:0.5px solid var(--hairline);
+  cursor:pointer;
+  transition:background 0.12s;
+  position:relative;
+}
+.tree-layer-row:hover,.tree-block-row:hover,.tree-element-row:hover{
+  background:rgba(24,22,15,0.04);
+}
+.tree-layer-row.active,.tree-block-row.active{
+  background:rgba(24,22,15,0.05);
+}
+.tree-layer-row.active::before,.tree-block-row.active::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--carbon);
+}
+.tree-row-left-accent{
+  width:3px;height:36px;border-radius:2px;flex-shrink:0;
+}
+.tree-row-body{flex:1;min-width:0}
+.tree-row-name{
+  font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:14px;color:var(--carbon);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.tree-row-desc{
+  font-family:'DM Mono',monospace;font-size:11px;color:var(--dust);margin-top:3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.tree-row-count{
+  font-family:'Space Mono',monospace;font-size:11px;color:var(--dust);
+  margin-left:auto;white-space:nowrap;
+}
+.tree-empty-hint{
+  padding:24px 20px;
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--dust);
+  line-height:1.6;
+}
+#tree-filter-bar{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 20px;
+  border-bottom:0.5px solid var(--hairline);
+  background:rgba(235,238,242,0.6);
+  flex-wrap:wrap;
+}
+.tree-filter-group{display:flex;align-items:center;gap:6px}
+.tree-filter-label{
+  font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--dust);
+}
+.tree-filter-chip{
+  background:transparent;border:0.5px solid var(--hairline-strong);
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.10em;text-transform:uppercase;
+  padding:4px 9px;color:var(--dust);cursor:pointer;border-radius:2px;
+  transition:background 0.12s,color 0.12s,border-color 0.12s;
+}
+.tree-filter-chip:hover{color:var(--carbon)}
+.tree-filter-chip.on{background:var(--carbon);color:var(--vellum-1);border-color:var(--carbon)}
+#tree-filter-status{
+  margin-left:auto;font-family:'Space Mono',monospace;font-size:10px;color:var(--dust);
+}
+.tree-element-row{padding:12px 20px}
+.tree-element-row.dimmed{opacity:0.32}
+.tree-element-row.flash{animation:treeFlash 0.8s ease-out 1}
+@keyframes treeFlash{
+  0%{background:rgba(24,22,15,0.16)}
+  100%{background:transparent}
+}
+.tree-el-code{
+  font-family:'Space Mono',monospace;font-size:11px;color:var(--dust);
+  min-width:46px;
+}
+.tree-el-name{
+  font-family:'Space Grotesk',sans-serif;font-size:14px;color:var(--carbon);flex:1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.tree-el-mml{display:flex;gap:6px;flex-shrink:0}
+.mml-badge{
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;
+  padding:3px 8px;border-radius:2px;border:0.5px solid currentColor;
+  white-space:nowrap;
+}
+.mml-1{color:#1D3D82;background:rgba(29,61,130,0.08)}
+.mml-2{color:#2A6348;background:rgba(42,99,72,0.08)}
+.mml-3{color:#B84020;background:rgba(184,64,32,0.08)}
+.mml-4{color:#5E3080;background:rgba(94,48,128,0.08)}
+.mml-5{color:#7B7869;background:rgba(123,120,105,0.08)}
+.tree-el-arrow{color:var(--dust);font-family:'Space Mono',monospace;font-size:12px}
+.tree-el-meta-bar{
+  padding:10px 20px;
+  font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--dust);text-align:center;
+  border-top:0.5px solid var(--hairline);
+}
+</style>
+</head>
+<body>
+
+<template id="__bundler_thumbnail" data-bg-color="#E7E6E0">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="vellum" x1="0" x2="1" y1="0" y2="1">
+        <stop offset="0%" stop-color="#EBEEF2"/>
+        <stop offset="100%" stop-color="#E3DED8"/>
+      </linearGradient>
+    </defs>
+    <rect width="1200" height="800" fill="url(#vellum)"/>
+    <!-- A single continuous mass — colors mixed, no separation -->
+    <g opacity="0.95">
+      <g fill="#3C91D6"><circle cx="540" cy="380" r="5"/><circle cx="580" cy="410" r="5"/><circle cx="520" cy="430" r="5"/><circle cx="610" cy="370" r="5"/><circle cx="560" cy="450" r="5"/><circle cx="490" cy="400" r="5"/><circle cx="640" cy="430" r="5"/><circle cx="500" cy="370" r="5"/></g>
+      <g fill="#2EA397"><circle cx="660" cy="400" r="5"/><circle cx="700" cy="380" r="5"/><circle cx="680" cy="430" r="5"/><circle cx="720" cy="410" r="5"/><circle cx="740" cy="450" r="5"/><circle cx="660" cy="460" r="5"/><circle cx="700" cy="460" r="5"/><circle cx="640" cy="390" r="5"/></g>
+      <g fill="#CC5023"><circle cx="600" cy="320" r="5"/><circle cx="580" cy="350" r="5"/><circle cx="640" cy="340" r="5"/><circle cx="620" cy="370" r="5"/><circle cx="660" cy="310" r="5"/></g>
+      <g fill="#9A49B8"><circle cx="560" cy="480" r="5"/><circle cx="610" cy="490" r="5"/><circle cx="640" cy="470" r="5"/><circle cx="590" cy="510" r="5"/></g>
+    </g>
+    <text x="600" y="180" text-anchor="middle" font-family="DM Mono, monospace" font-size="22" letter-spacing="6" fill="#18160F">HES / NETWORK EXPLORER · FIELD</text>
+  </svg>
+</template>
+
+<h2 class="sr-only">HES Network Explorer — Continuous Field. A single shared canvas rendering all 343 elements of the Human Elements System as one mass. Layer identity is conveyed by color only; position is determined entirely by neighbor relationships. Cross-layer connections become visible as color mixing where unlike colors land near each other.</h2>
+
+<div id="app">
+  <header id="topbar">
+    <div class="lockup">
+      <div class="mark" aria-hidden="true"></div>
+      <div class="wm">
+        HES<span class="sep">/</span><span class="lab">LIBRARY</span>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="viewswitch" role="tablist" aria-label="View mode">
+        <button id="btn-explorer" aria-pressed="true">Explorer</button>
+        <button id="btn-tree"     aria-pressed="false">Tree</button>
+      </div>
+      <div class="searchwrap">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" aria-hidden="true">
+          <circle cx="7" cy="7" r="5"></circle><path d="m11 11 4 4"></path>
+        </svg>
+        <input id="search" type="text" placeholder="search elements, codes, blocks…" autocomplete="off"/>
+        <div id="search-dd" role="listbox" aria-label="Search results"></div>
+      </div>
+      <select id="mml-filter" aria-label="MML filter">
+        <option value="">All MML</option>
+        <option value="1">MML-1 · Established</option>
+        <option value="2">MML-2 · Validated</option>
+        <option value="3">MML-3 · Emerging</option>
+        <option value="4">MML-4 · Theoretical</option>
+        <option value="5">MML-5 · Speculative</option>
+      </select>
+    </div>
+  </header>
+
+  <div id="subbar">
+    <nav class="bc" id="bc" aria-label="Breadcrumb"><button class="crumb current">All elements</button></nav>
+    <div class="statusline" id="status">
+      <span><em>343</em> PASSPORTS · <em>4</em> LAYERS · <em>46</em> BLOCKS</span>
+      <span class="zoom" id="zoom-display"><span class="pulse"></span>ZOOM <em id="zk">1.00×</em></span>
+    </div>
+  </div>
+
+  <canvas id="canvas"></canvas>
+
+  <div id="legend" aria-hidden="true">
+    <div class="lg-title"><span>Layers</span><span>elements</span></div>
+    <div class="lg-row" id="lg-core"><div class="lg-dot" style="background:#3C91D6"></div><div class="lg-label">Core</div><div class="lg-meta">106</div></div>
+    <div class="lg-row" id="lg-derived"><div class="lg-dot" style="background:#2EA397"></div><div class="lg-label">Derived</div><div class="lg-meta">154</div></div>
+    <div class="lg-row" id="lg-quantum"><div class="lg-dot" style="background:#CC5023"></div><div class="lg-label">Quantum</div><div class="lg-meta">40</div></div>
+    <div class="lg-row" id="lg-emotional"><div class="lg-dot" style="background:#9A49B8"></div><div class="lg-label">Emotional</div><div class="lg-meta">43</div></div>
+  </div>
+
+  <div id="zoom-controls" aria-label="Zoom controls">
+    <button id="z-in" title="Zoom in" aria-label="Zoom in">+</button>
+    <div class="zlbl" id="zk2">1.0×</div>
+    <button id="z-out" title="Zoom out" aria-label="Zoom out">−</button>
+    <button id="z-reset" title="Reset view" aria-label="Reset view" style="font-size:12px">⤢</button>
+  </div>
+
+  <div id="minimap">
+    <div class="mm-tag">All 343 · drag or click to navigate</div>
+    <canvas id="mm-canvas"></canvas>
+  </div>
+
+  <div id="tip"></div>
+
+  <aside id="panel" aria-hidden="true">
+    <div class="stripe" id="pp-stripe"></div>
+    <button class="close" id="pp-close" aria-label="Close passport">✕</button>
+    <div class="pad" id="pp-content"></div>
+  </aside>
+
+  <!-- ── TREE VIEW ── full-screen DOM panel overlaying the canvas ── -->
+  <section id="tree-view" aria-hidden="true">
+    <nav id="tree-breadcrumb" aria-label="Library breadcrumb">
+      <button class="crumb current" data-tb-go="home">Home</button>
+      <span class="sep">›</span>
+      <button class="crumb current">Library</button>
+    </nav>
+    <div id="tree-cols">
+      <div id="tree-layer-col" class="tree-col">
+        <div class="tree-col-header"><span>Layer · <em id="tree-layer-status">1 of 4 selected</em></span></div>
+        <div id="tree-layer-list"></div>
+      </div>
+      <div id="tree-block-col" class="tree-col">
+        <div class="tree-col-header"><span>Blocks in <em id="tree-block-layer-label">CORE</em> · <em id="tree-block-count">0</em></span></div>
+        <div id="tree-block-list"></div>
+      </div>
+      <div id="tree-element-col" class="tree-col tree-col-wide">
+        <div class="tree-col-header"><span>Elements in <em id="tree-el-context">—</em> · <em id="tree-el-count">0</em></span></div>
+        <div id="tree-filter-bar">
+          <div class="tree-filter-group">
+            <span class="tree-filter-label">MML</span>
+            <button class="tree-filter-chip" data-fmml="1">1</button>
+            <button class="tree-filter-chip" data-fmml="2">2</button>
+            <button class="tree-filter-chip" data-fmml="3">3</button>
+            <button class="tree-filter-chip" data-fmml="4">4</button>
+            <button class="tree-filter-chip" data-fmml="5">5</button>
+          </div>
+          <div class="tree-filter-group">
+            <span class="tree-filter-label">Trainability</span>
+            <button class="tree-filter-chip" data-ftr="High">Hi</button>
+            <button class="tree-filter-chip" data-ftr="Mid">Mid</button>
+            <button class="tree-filter-chip" data-ftr="Low">Lo</button>
+          </div>
+          <div class="tree-filter-group">
+            <span class="tree-filter-label">Modifiability</span>
+            <button class="tree-filter-chip" data-fmd="High">Hi</button>
+            <button class="tree-filter-chip" data-fmd="Mid">Mid</button>
+            <button class="tree-filter-chip" data-fmd="Low">Lo</button>
+          </div>
+          <span id="tree-filter-status"></span>
+        </div>
+        <div id="tree-element-list"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   HES NETWORK EXPLORER — CONTINUOUS FIELD
+   One shared world. No layer anchors, no block anchors, no halos.
+   Position is entirely emergent from neighbor link forces.
+   Layer identity is color only. Blocks emerge as soft sub-clusters
+   wherever the synthetic neighbor graph naturally clumps. Cross-layer
+   relationships become visible as color mixing between adjacent dots.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── DETERMINISTIC RNG ────────────────────────────────────────────────
+   Override Math.random with a seeded Mulberry32 BEFORE any other code
+   runs. The initial node scatter and d3-force's internal jiggle both
+   read from Math.random, so seeding here makes the entire equilibrium
+   reproducible. Users returning to a session find every element in the
+   same place. Change SEED to scramble. */
+(function(){
+  const SEED = 0x9E3779B9; /* golden ratio constant — arbitrary fixed seed */
+  let s = SEED >>> 0;
+  Math.random = function(){
+    s = (s + 0x6D2B79F5) >>> 0;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+})();
+
+/* ── DATA MODEL (unchanged from God View v1) ───────────────────────── */
+const LY=[
+  {id:'core',     label:'Core',     tag:'foundational, stable', count:106, stroke:'#3C91D6', dark:'#1D3D82',
+   desc:'The foundational layer. Stable, well-evidenced capacities that underlie all higher cognition — attention, memory, executive control, sensory and motor systems. These elements change slowly and are measurable across the lifespan.'},
+  {id:'derived',  label:'Derived',  tag:'grown from core',      count:154, stroke:'#2EA397', dark:'#2A6348',
+   desc:'Capacities that grow out of the core layer through experience and culture — cognitive styles, communication, decision-making, identity, belief. They are plastic, shaped by environment, and form the bulk of individual character.'},
+  {id:'quantum',  label:'Quantum',  tag:'volatile, rupture',    count:40,  stroke:'#CC5023', dark:'#B84020',
+   desc:'Discontinuous states that interrupt ordinary function: freeze, collapse, overwhelm, dissociation, panic, shame loops. They are rupture rather than gradient — short-lived but consequential, and often misread as the layers beneath them.'},
+  {id:'emotional',label:'Emotional',tag:'rare, shifting',       count:43,  stroke:'#9A49B8', dark:'#5E3080',
+   desc:'The capacity to hold and manipulate emotional information across time — the workbench of conscious affect. Underpins reasoning about meaning, comprehension of others, and learning from felt experience.'},
+];
+const BL={
+  core:[{id:'B01',name:'Attention & Processing',count:8},{id:'B02',name:'Memory Systems',count:7},{id:'B03',name:'Executive Function',count:9},{id:'B04',name:'Sensory Processing',count:6},{id:'B05',name:'Emotional Core',count:8},{id:'B06',name:'Social Cognition',count:7},{id:'B07',name:'Motor & Coordination',count:5},{id:'B08',name:'Interoception',count:6},{id:'B09',name:'Temporal Processing',count:5},{id:'B10',name:'Reward & Motivation',count:7},{id:'B11',name:'Language Foundation',count:6},{id:'B12',name:'Pattern Recognition',count:8},{id:'B13',name:'Arousal & Energy',count:7},{id:'B14',name:'Biological Rhythms',count:7}],
+  derived:[{id:'BD01',name:'Cognitive Styles',count:12},{id:'BD02',name:'Learning & Adaptation',count:11},{id:'BD03',name:'Emotional Regulation',count:10},{id:'BD04',name:'Social Dynamics',count:13},{id:'BD05',name:'Communication',count:11},{id:'BD06',name:'Creativity & Imagination',count:9},{id:'BD07',name:'Decision Making',count:12},{id:'BD08',name:'Identity & Self',count:10},{id:'BD09',name:'Values & Meaning',count:11},{id:'BD10',name:'Resilience & Coping',count:10},{id:'BD11',name:'Motivation Styles',count:9},{id:'BD12',name:'Metacognition',count:11},{id:'BD13',name:'Interpersonal Patterns',count:12},{id:'BD14',name:'Belief Systems',count:13}],
+  quantum:[{id:'QB01',name:'Freeze States',count:5},{id:'QB02',name:'Collapse Modes',count:4},{id:'QB03',name:'Overwhelm Patterns',count:5},{id:'QB04',name:'Dissociation Types',count:4},{id:'QB05',name:'Rage & Dysregulation',count:4},{id:'QB06',name:'Shutdown States',count:4},{id:'QB07',name:'Spiral Patterns',count:4},{id:'QB08',name:'Panic Architecture',count:4},{id:'QB09',name:'Shame Loops',count:3},{id:'QB10',name:'Trauma Responses',count:3}],
+  emotional:[{id:'EB01',name:'Positive Affect',count:6},{id:'EB02',name:'Negative Affect',count:6},{id:'EB03',name:'Ambivalent States',count:5},{id:'EB04',name:'Social Emotions',count:6},{id:'EB05',name:'Self-Conscious Emotions',count:5},{id:'EB06',name:'Existential Affect',count:5},{id:'EB07',name:'Aesthetic Emotions',count:5},{id:'EB08',name:'Background Emotions',count:5}],
+};
+const DEFS=[
+  'The capacity to hold and manipulate information in mind over short periods — the workbench of conscious thought. Underpins reasoning, comprehension, and learning.',
+  'Latency between stimulus and motor response — the most consistently measurable elementary cognitive capacity across the lifespan.',
+  'Filtering of task-relevant input from competing distractors during goal-directed activity. Modulated by arousal and motivation.',
+  'Capacity to suppress prepotent responses when they conflict with current goals. A cornerstone of executive function.',
+  'The baseline rate at which well-learned mental operations are carried out under controlled conditions.',
+  'Sensitivity to physiological signals arising from the body interior; the somatic substrate of emotional experience.',
+  'The ability to shift attentional focus between different tasks, rules, or mental sets without performance decrement.',
+  'The capacity to maintain focused engagement on a single stimulus stream over extended duration despite fatigue.',
+];
+const POLES_LO=[
+  'Difficulty maintaining engagement under normal conditions; attention drifts within minutes.',
+  'High distractibility, frequent rule-switching errors, weak inhibition of irrelevant input.',
+  'Slow consolidation; retrieval requires repeated cues even for recent material.',
+];
+const POLES_HI=[
+  'Exceptional performance even under high cognitive load or competing stimuli.',
+  'Sustained vigilance through extended duty cycles; resistant to fatigue effects.',
+  'Strong manipulation of held information; flexible recombination under demand.',
+];
+const AUTHORS=['Baddeley','Posner','Diamond','Deisseroth','Davidson','Damasio','Tulving','Anderson','Treisman','Kahneman'];
+const MML_D=[1,1,1,2,2,2,2,3,3,3,4,4,4,5];
+const MML_LABEL=['','Established','Validated','Emerging','Theoretical','Speculative'];
+const NAME_VOCAB=['Stability','Switching','Capacity','Filtering','Control','Speed','Awareness','Flexibility','Threshold','Resonance','Coherence','Drift','Aperture','Latency'];
+
+const ELS=[];
+Object.entries(BL).forEach(([lid,blocks])=>{
+  const px=lid==='core'?'C':lid==='derived'?'D':lid==='quantum'?'Q':'E';
+  let counter=0;
+  blocks.forEach(bl=>{
+    for(let i=0;i<bl.count;i++){
+      counter++;
+      const n=String(counter).padStart(3,'0');
+      const base=bl.name.split(/\s|&/)[0];
+      const suffix=NAME_VOCAB[(i+bl.id.charCodeAt(1))%NAME_VOCAB.length];
+      ELS.push({
+        id:`${px}${n}_${bl.id}`,
+        code:`${px}${n}`,
+        name:`${base} ${suffix}`,
+        layer:lid, block:bl.id, blockName:bl.name,
+        mml:MML_D[(i+counter)%MML_D.length],
+        definition:DEFS[(i+counter)%DEFS.length],
+        poleLow:POLES_LO[(i+counter)%POLES_LO.length],
+        poleHigh:POLES_HI[(i+counter)%POLES_HI.length],
+        trainability:['High','Mid','Low'][(i+counter)%3],
+        modifiability:['High','Mid','High','Low'][(i+counter)%4],
+        author:AUTHORS[(i+counter)%AUTHORS.length],
+        neighbors:[],
+      });
+    }
+  });
+});
+ELS.forEach((el,i)=>{
+  const same=ELS.filter(e=>e.block===el.block&&e.id!==el.id);
+  const diff=ELS.filter(e=>e.layer===el.layer&&e.block!==el.block);
+  const cross=ELS.filter(e=>e.layer!==el.layer);
+  const p=[];
+  if(same.length)p.push(same[Math.abs(i*3)%same.length]);
+  if(same.length>1)p.push(same[Math.abs(i*7+2)%same.length]);
+  if(diff.length)p.push(diff[Math.abs(i*11)%diff.length]);
+  if(i%4===0&&cross.length)p.push(cross[Math.abs(i*13)%cross.length]);
+  el.neighbors=[...new Set(p.filter(x=>x&&x.id!==el.id))].slice(0,4).map(x=>x.code);
+});
+const ELS_BY_CODE = Object.fromEntries(ELS.map(e=>[e.code,e]));
+const LY_BY_ID = Object.fromEntries(LY.map(l=>[l.id,l]));
+const BL_BY_ID = {}; Object.values(BL).flat().forEach(b=>BL_BY_ID[b.id]=b);
+const BLOCK_LAYER = {}; Object.entries(BL).forEach(([lid,blocks])=>{ blocks.forEach(b=>{ BLOCK_LAYER[b.id]=lid; }); });
+
+/* ── BLOCK DESCRIPTIONS (placeholder — client provides real text) ─────
+   Six templates cycled deterministically so every block has a 2–3 sentence
+   description for the sidebar card. Replace this with authored content
+   when wiring up real passport JSON. */
+const BLOCK_DESC_TEMPLATES = [
+  (b, l) => `${b.name} groups the ${b.count} ${l.label} elements concerned with how the system handles signal, decision, and routing under typical conditions. Construct boundaries with adjacent blocks tend to fuzz at developmental transitions and clarify at maturity.`,
+  (b, l) => `${b.count} elements that share a common neuropsychological substrate and tend to co-vary across individuals. ${b.name} sits within the broader ${l.label} layer and is most informative when read against the blocks immediately adjacent to it.`,
+  (b, l) => `These ${b.count} constructs operate together in everyday function and respond to similar interventions. ${b.name} loads on a shared latent factor in factor-analytic work; element-level distinctions become useful for fine-grained clinical or research questions.`,
+  (b, l) => `An MML-mixed block: the ${b.count} elements within range from Established to Speculative. Reading at the block level rather than the element level is sometimes the right resolution, especially for population-scale questions.`,
+  (b, l) => `${b.count} elements concerned with ${b.name.toLowerCase()}. Construct boundaries are clearest at midlife and fuzziest at the developmental edges — early childhood and late-life decline — where adjacent blocks bleed into one another.`,
+  (b, l) => `Internal boundaries within ${b.name} are tighter than between this block and its neighbors in ${l.label}. The ${b.count} elements share measurement strategies and, where established, anatomical localization.`,
+];
+const BLOCK_DESCRIPTIONS = {};
+Object.values(BL).flat().forEach((b, i)=>{
+  const l = LY_BY_ID[BLOCK_LAYER[b.id]];
+  BLOCK_DESCRIPTIONS[b.id] = BLOCK_DESC_TEMPLATES[i % BLOCK_DESC_TEMPLATES.length](b, l);
+});
+
+/* ── ELEMENT RADIUS — same as v1, MML-keyed ─────────────────────────── */
+function elementRadius(e){
+  return 5.5 + (5 - e.mml) * 0.4;
+}
+
+/* ── BUILD SIMULATION NODES — hierarchical gravity ──────────────────
+   Three node populations share one world: 4 layer anchors, 46 block
+   anchors, and 343 element nodes. Layer nodes hold a fixed cross-pattern
+   initial position so the simulation has a head start; block nodes
+   scatter around their layer; element nodes scatter randomly in a small
+   disc. Equilibrium is shaped by the hierarchical link structure
+   (layer→block, block→element) plus the element-neighbor relationships. */
+const INIT_RADIUS = 320;
+const NODES = ELS.map((e, idx)=>{
+  const a = Math.random() * Math.PI * 2;
+  const r = Math.sqrt(Math.random()) * INIT_RADIUS;
+  return {
+    ...e,
+    kind: 'element',
+    r: elementRadius(e),
+    x: Math.cos(a) * r,
+    y: Math.sin(a) * r,
+    vx: 0, vy: 0,
+  };
+});
+const NODES_BY_CODE = Object.fromEntries(NODES.map(n=>[n.code,n]));
+
+/* Layer nodes: 4 anchors in a wide cross pattern. */
+const LAYER_INIT = {
+  core:      {x:-300, y:-200},
+  derived:   {x: 300, y:-200},
+  quantum:   {x:-300, y: 200},
+  emotional: {x: 300, y: 200},
+};
+const LAYER_NODES = LY.map(l => ({
+  id: 'layer__' + l.id,
+  kind: 'layer',
+  layer: l.id,
+  label: l.label,
+  tag: l.tag,
+  desc: l.desc,
+  count: l.count,
+  r: 22,
+  x: LAYER_INIT[l.id].x,
+  y: LAYER_INIT[l.id].y,
+  vx: 0, vy: 0,
+  fx: null, fy: null,
+}));
+const LAYER_NODES_BY_ID = Object.fromEntries(LAYER_NODES.map(ln => [ln.layer, ln]));
+
+/* Block nodes: one per block, initialised around their layer. */
+const BLOCK_NODES = Object.values(BL).flat().map(b => {
+  const lid = BLOCK_LAYER[b.id];
+  const ln = LAYER_NODES_BY_ID[lid];
+  const ang = Math.random() * Math.PI * 2;
+  const rad = 60 + Math.random() * 120; /* ±180 disc, biased toward outer */
+  return {
+    id: 'block__' + b.id,
+    kind: 'block',
+    layer: lid,
+    blockId: b.id,
+    blockName: b.name,
+    count: b.count,
+    r: 11,
+    x: ln.x + Math.cos(ang) * rad,
+    y: ln.y + Math.sin(ang) * rad,
+    vx: 0, vy: 0,
+    fx: null, fy: null,
+  };
+});
+const BLOCK_NODES_BY_ID = Object.fromEntries(BLOCK_NODES.map(bn => [bn.blockId, bn]));
+
+/* The full simulation population. */
+const ALL_NODES = [...LAYER_NODES, ...BLOCK_NODES, ...NODES];
+
+/* ── EDGES — element-to-element relationships (existing 3 categories) ── */
+const EDGES_INTRA  = [];
+const EDGES_XBLOCK = [];
+const EDGES_XLAYER = [];
+const ALL_EDGES    = [];
+const seenEdge = new Set();
+NODES.forEach(n=>{
+  (n.neighbors||[]).forEach(nc=>{
+    const t = NODES_BY_CODE[nc];
+    if(!t) return;
+    const key = n.code < t.code ? n.code+'|'+t.code : t.code+'|'+n.code;
+    if(seenEdge.has(key)) return;
+    seenEdge.add(key);
+    const e = { source:n, target:t };
+    if(n.block === t.block)       EDGES_INTRA.push(e);
+    else if(n.layer === t.layer)  EDGES_XBLOCK.push(e);
+    else                          EDGES_XLAYER.push(e);
+    ALL_EDGES.push(e);
+  });
+});
+
+/* ── STRUCTURAL LINKS — hierarchy encoded as force-link constraints ────
+   Each block node is linked to its layer (short, strong). Each element
+   node is linked to its block (medium). The neighbor edges above are
+   layered on top as supplementary intra-block cohesion.  */
+const LAYER_BLOCK_LINKS = BLOCK_NODES.map(bn => ({
+  source: LAYER_NODES_BY_ID[bn.layer],
+  target: bn,
+  distance: 120,
+  strength: 0.6,
+  kind: 'layer-block',
+}));
+const BLOCK_ELEMENT_LINKS = NODES.map(n => ({
+  source: BLOCK_NODES_BY_ID[n.block],
+  target: n,
+  distance: 55,
+  strength: 0.35,
+  kind: 'block-element',
+}));
+const SIM_LINKS = [...LAYER_BLOCK_LINKS, ...BLOCK_ELEMENT_LINKS, ...ALL_EDGES];
+
+/* ── DYNAMIC WORLD BOUNDS — measured from current node positions ────── */
+let WORLD = { minX:-INIT_RADIUS, maxX:INIT_RADIUS, minY:-INIT_RADIUS, maxY:INIT_RADIUS };
+function recomputeBounds(){
+  let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
+  for(let i=0;i<ALL_NODES.length;i++){
+    const n = ALL_NODES[i];
+    if(n.x < minX) minX = n.x;
+    if(n.x > maxX) maxX = n.x;
+    if(n.y < minY) minY = n.y;
+    if(n.y > maxY) maxY = n.y;
+  }
+  const pad = 80;
+  WORLD = { minX: minX-pad, maxX: maxX+pad, minY: minY-pad, maxY: maxY+pad };
+}
+
+/* ── DEFAULTS — hardcoded production constants ──────────────────────── */
+const TW = {
+  palette: ["#3C91D6", "#2EA397", "#CC5023", "#9A49B8"],
+  linkStrength: 0.32,
+  linkDistance: 62,
+  repelStrength: 50,
+  labelDensity: 1.0,
+  edgeDensity: 1.0,
+  mmlFade: 0.34,
+  tetherStyle: 'solid',
+  showCrossLayer: true,
+  showCrossBlock: true,
+  showLegend: true,
+  showMinimap: true,
+};
+
+/* ── COLOR HELPERS ───────────────────────────────────────────────────── */
+function ha(hex,a){
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+function layerColor(lid){ return LY_BY_ID[lid].stroke; }
+function mmlVis(m){ const floor = TW.mmlFade; const t=(5-m)/4; return 1 - t*(1-floor); }
+
+/* ── CANVAS SETUP ────────────────────────────────────────────────────── */
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d', { alpha: true });
+const mmCanvas = document.getElementById('mm-canvas');
+const mmCtx = mmCanvas.getContext('2d', { alpha: true });
+
+let W=0, H=0, DPR=1;
+function resize(){
+  W = window.innerWidth; H = window.innerHeight;
+  DPR = window.devicePixelRatio || 1;
+  canvas.width = W * DPR; canvas.height = H * DPR;
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  const mmW = 200, mmH = 148;
+  mmCanvas.width = mmW * DPR; mmCanvas.height = mmH * DPR;
+  mmCtx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener('resize', ()=>{ resize(); fitToWorld(false); });
+
+/* ── ZOOM / TRANSFORM ────────────────────────────────────────────────── */
+let transform = d3.zoomIdentity;
+let hoveredNode = null;
+let selectedNode = null;
+let mouseX = -999, mouseY = -999;
+
+const zoom = d3.zoom()
+  .scaleExtent([0.3, 9])
+  .filter(ev => {
+    if(ev.type === 'mousedown' || ev.type === 'touchstart'){
+      const tgt = ev.target;
+      return tgt === canvas;
+    }
+    return !ev.button;
+  })
+  .on('start', () => { canvas.classList.add('drag'); })
+  .on('zoom',  (ev) => { transform = ev.transform; updateZoomUI(); })
+  .on('end',   () => { canvas.classList.remove('drag'); });
+
+d3.select(canvas).call(zoom).on('dblclick.zoom', null);
+
+function fitToWorld(animate=true){
+  const ww = WORLD.maxX - WORLD.minX, wh = WORLD.maxY - WORLD.minY;
+  const pad = 60;
+  const sx = (W - pad*2) / ww, sy = (H - 200) / wh;
+  const k = Math.min(sx, sy) * 0.92;
+  const cx = (WORLD.minX + WORLD.maxX)/2, cy = (WORLD.minY + WORLD.maxY)/2;
+  const t = d3.zoomIdentity.translate(W/2 - cx*k, (H+60)/2 - cy*k).scale(k);
+  const sel = d3.select(canvas);
+  if(animate) sel.transition().duration(700).ease(d3.easeCubicInOut).call(zoom.transform, t);
+  else sel.call(zoom.transform, t);
+}
+function fitK(){
+  const ww = WORLD.maxX - WORLD.minX, wh = WORLD.maxY - WORLD.minY;
+  const sx = (W - 120) / ww, sy = (H - 200) / wh;
+  return Math.min(sx, sy) * 0.92;
+}
+
+function worldToScreen(x,y){ return [transform.applyX(x), transform.applyY(y)]; }
+function screenToWorld(x,y){ return transform.invert([x,y]); }
+
+/* ── FORCE SIMULATION ──────────────────────────────────────────────────
+   Hierarchy in physics: layer nodes hold positions in a wide cross,
+   block nodes orbit their layer via strong short links, element nodes
+   orbit their block via medium links, and the neighbor relationships
+   layer on top as supplementary intra-block cohesion. ManyBody and
+   collide are kind-aware so layer/block nodes carve appropriate room
+   without exploding the field. */
+let sim = null;
+function buildSim(){
+  if(sim) sim.stop();
+  sim = d3.forceSimulation(ALL_NODES)
+    .alpha(0.9)
+    .alphaDecay(0.008)
+    .velocityDecay(0.40)
+    .force('link', d3.forceLink(SIM_LINKS)
+        .distance(d => d.distance || TW.linkDistance)
+        .strength(d => d.strength || TW.linkStrength))
+    .force('charge', d3.forceManyBody()
+        .strength(d => d.kind === 'layer' ? -180
+                     : d.kind === 'block' ? -80
+                     : -TW.repelStrength)
+        .distanceMax(260))
+    .force('collide', d3.forceCollide()
+        .radius(d => d.kind === 'layer' ? d.r + 4
+                   : d.kind === 'block' ? d.r + 3
+                   : d.r + 1.6)
+        .iterations(2))
+    .on('tick', ()=>{});
+}
+buildSim();
+
+function refreshForces(){
+  if(!sim) return;
+  /* Distance/strength on element-neighbor links still respond to TW
+     sliders; structural links keep their hardcoded values via the
+     `|| TW.linkDistance` fallback. */
+  sim.force('link').distance(d => d.distance || TW.linkDistance)
+                   .strength(d => d.strength || TW.linkStrength);
+  sim.force('charge').strength(d => d.kind === 'layer' ? -180
+                                  : d.kind === 'block' ? -80
+                                  : -TW.repelStrength);
+  sim.alpha(0.4).restart();
+}
+
+/* ── CENTROIDS — recomputed each frame, low-pass smoothed for labels ── */
+const layerCentroid    = {};   /* raw, instantaneous */
+const blockCentroid    = {};
+const layerCentroidS   = {};   /* smoothed, used for label placement */
+const blockCentroidS   = {};
+const SMOOTH = 0.10;
+function computeCentroids(){
+  const lsx={}, lsy={}, lc={};
+  const bsx={}, bsy={}, bc={};
+  for(let i=0;i<NODES.length;i++){
+    const n = NODES[i];
+    lsx[n.layer]=(lsx[n.layer]||0)+n.x; lsy[n.layer]=(lsy[n.layer]||0)+n.y; lc[n.layer]=(lc[n.layer]||0)+1;
+    bsx[n.block]=(bsx[n.block]||0)+n.x; bsy[n.block]=(bsy[n.block]||0)+n.y; bc[n.block]=(bc[n.block]||0)+1;
+  }
+  for(const k in lc){
+    layerCentroid[k] = {x: lsx[k]/lc[k], y: lsy[k]/lc[k]};
+    if(!layerCentroidS[k]) layerCentroidS[k] = {x: layerCentroid[k].x, y: layerCentroid[k].y};
+    else {
+      layerCentroidS[k].x += (layerCentroid[k].x - layerCentroidS[k].x) * SMOOTH;
+      layerCentroidS[k].y += (layerCentroid[k].y - layerCentroidS[k].y) * SMOOTH;
+    }
+  }
+  for(const k in bc){
+    blockCentroid[k] = {x: bsx[k]/bc[k], y: bsy[k]/bc[k]};
+    if(!blockCentroidS[k]) blockCentroidS[k] = {x: blockCentroid[k].x, y: blockCentroid[k].y};
+    else {
+      blockCentroidS[k].x += (blockCentroid[k].x - blockCentroidS[k].x) * SMOOTH;
+      blockCentroidS[k].y += (blockCentroid[k].y - blockCentroidS[k].y) * SMOOTH;
+    }
+  }
+}
+
+/* ── ZOOM TIER LOGIC — same thresholds as v1 ────────────────────────── */
+function tier(k){
+  if(k < 0.95) return 0;
+  if(k < 1.6)  return 1;
+  if(k < 3.0)  return 2;
+  return 3;
+}
+function ramp(k, a, b){ if(k<=a) return 0; if(k>=b) return 1; const t=(k-a)/(b-a); return t*t*(3-2*t); }
+
+/* ── RENDER LOOP ─────────────────────────────────────────────────────── */
+let lastFrame = performance.now();
+let fps = 60, fpsAcc = 0, fpsCount = 0;
+let lastBoundsRefresh = 0;
+
+function render(now){
+  const dt = now - lastFrame; lastFrame = now;
+  if(dt > 0){ fpsAcc += 1000/dt; fpsCount++; if(fpsCount>=30){ fps = fpsAcc/fpsCount; fpsAcc=0; fpsCount=0; } }
+
+  /* refresh dynamic bounds at most twice a second */
+  if(now - lastBoundsRefresh > 500){ recomputeBounds(); lastBoundsRefresh = now; }
+
+  const k = transform.k;
+  const t = tier(k);
+
+  ctx.clearRect(0,0,W,H);
+
+  ctx.save();
+  ctx.translate(transform.x, transform.y);
+  ctx.scale(k, k);
+
+  const tl = transform.invert([0,0]);
+  const br = transform.invert([W,H]);
+  const view = { minX:tl[0]-20, minY:tl[1]-20, maxX:br[0]+20, maxY:br[1]+20 };
+
+  /* NO halos at any layer. The field stands alone. */
+  drawEdges(t, k, view);
+  drawNodes(t, k, view);
+
+  ctx.restore();
+
+  drawLabels(t, k);
+
+  if(TW.showMinimap) drawMinimap();
+
+  requestAnimationFrame(render);
+}
+requestAnimationFrame(render);
+
+/* ── EDGES ─────────────────────────────────────────────────────────────
+   Two edge populations: structural tethers (layer↔block, block↔element)
+   visualise the hierarchy, and the three neighbor-relationship edges
+   (intra-block / cross-block / cross-layer) show element-to-element
+   relationships. Selection/hover highlight on top. */
+function drawEdges(t, k, view){
+  const dens = TW.edgeDensity;
+  const sel = selectedNode;
+  const hov = hoveredNode;
+
+  /* layer→block tethers — faint dashed, always visible.
+     These signal the layer hierarchy even at god view. */
+  {
+    ctx.lineWidth = 0.8 / k;
+    ctx.setLineDash([4/k, 5/k]);
+    for(let i=0;i<LAYER_BLOCK_LINKS.length;i++){
+      const e = LAYER_BLOCK_LINKS[i];
+      const s = e.source, tg = e.target;
+      if((s.x < view.minX && tg.x < view.minX) || (s.x > view.maxX && tg.x > view.maxX) ||
+         (s.y < view.minY && tg.y < view.minY) || (s.y > view.maxY && tg.y > view.maxY)) continue;
+      ctx.strokeStyle = ha(layerColor(s.layer), 0.22 * dens);
+      ctx.beginPath();
+      ctx.moveTo(s.x, s.y); ctx.lineTo(tg.x, tg.y);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+  }
+
+  /* block→element tethers — very faint, visible only at mid+ zoom.
+     These let the eye trace an element back to its block. */
+  const aBlockEl = ramp(k, 1.4, 2.6) * 0.18 * dens;
+  if(aBlockEl > 0.01){
+    ctx.lineWidth = 0.6 / k;
+    for(let i=0;i<BLOCK_ELEMENT_LINKS.length;i++){
+      const e = BLOCK_ELEMENT_LINKS[i];
+      const s = e.source, tg = e.target;
+      if((s.x < view.minX && tg.x < view.minX) || (s.x > view.maxX && tg.x > view.maxX) ||
+         (s.y < view.minY && tg.y < view.minY) || (s.y > view.maxY && tg.y > view.maxY)) continue;
+      ctx.strokeStyle = ha(layerColor(s.layer), aBlockEl);
+      ctx.beginPath();
+      ctx.moveTo(s.x, s.y); ctx.lineTo(tg.x, tg.y);
+      ctx.stroke();
+    }
+  }
+
+  if(t === 0) return;
+
+  /* intra-block: fade in k=1.2..2.2 */
+  const aIntra = ramp(k, 1.2, 2.2) * 0.55 * dens;
+  if(aIntra > 0.02){
+    ctx.lineWidth = 1 / k;
+    drawEdgeList(EDGES_INTRA, view, (e)=>{
+      const l = layerColor(e.source.layer);
+      return ha(l, aIntra);
+    }, TW.tetherStyle === 'dashed' ? [3/k, 4/k] : null);
+  }
+
+  /* cross-block (same layer): fade in k=2.0..3.4 */
+  if(TW.showCrossBlock){
+    const aXB = ramp(k, 2.0, 3.4) * 0.42 * dens;
+    if(aXB > 0.02){
+      ctx.lineWidth = 0.9 / k;
+      drawEdgeList(EDGES_XBLOCK, view, (e)=>{
+        const l = layerColor(e.source.layer);
+        return ha(l, aXB);
+      }, [2/k, 5/k]);
+    }
+  }
+
+  /* cross-layer: very faint, fade in k=2.5..4.5 */
+  if(TW.showCrossLayer){
+    const aXL = ramp(k, 2.5, 4.5) * 0.38 * dens;
+    if(aXL > 0.02){
+      ctx.lineWidth = 0.8 / k;
+      drawEdgeList(EDGES_XLAYER, view, ()=>`rgba(123,120,105,${aXL})`, [1/k, 5/k]);
+    }
+  }
+
+  const focus = sel || hov;
+  if(focus && t >= 2){
+    ctx.lineWidth = 1.4 / k;
+    const lcol = layerColor(focus.layer);
+    EDGES_INTRA.concat(EDGES_XBLOCK, EDGES_XLAYER).forEach(e=>{
+      if(e.source === focus || e.target === focus){
+        const other = e.source === focus ? e.target : e.source;
+        ctx.strokeStyle = ha(lcol, 0.85);
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(focus.x, focus.y); ctx.lineTo(other.x, other.y);
+        ctx.stroke();
+      }
+    });
+  }
+}
+
+function drawEdgeList(list, view, colorFn, dash){
+  if(dash) ctx.setLineDash(dash); else ctx.setLineDash([]);
+  for(let i=0; i<list.length; i++){
+    const e = list[i];
+    const s = e.source, t = e.target;
+    if((s.x < view.minX && t.x < view.minX) || (s.x > view.maxX && t.x > view.maxX) ||
+       (s.y < view.minY && t.y < view.minY) || (s.y > view.maxY && t.y > view.maxY)) continue;
+    ctx.strokeStyle = colorFn(e);
+    ctx.beginPath();
+    ctx.moveTo(s.x, s.y); ctx.lineTo(t.x, t.y);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+}
+
+/* ── NODES ─────────────────────────────────────────────────────────────
+   Three populations drawn in z-order: elements (bottom), blocks (mid),
+   layers (top). Element nodes keep the existing MML/filter behaviour.
+   Block and layer nodes are structural — never dimmed by MML filter,
+   always full opacity. */
+function drawNodes(t, k, view){
+  const mfilt = mmlFilter;
+  const sterm = searchTerm;
+
+  /* gentle size boost at god view so element dots remain readable. */
+  const sizeBoost = k < 0.95 ? 1.45 : (k < 1.6 ? 1.2 : 1.0);
+
+  /* ── 1. ELEMENT NODES (bottom) ── */
+  for(let i=0; i<NODES.length; i++){
+    const n = NODES[i];
+    if(n.x < view.minX || n.x > view.maxX || n.y < view.minY || n.y > view.maxY) continue;
+
+    const matchMML = !mfilt || String(n.mml) === mfilt;
+    const matchSrch = !sterm || matchesNode(n, sterm);
+    const dim = (!matchMML || !matchSrch);
+
+    const l = LY_BY_ID[n.layer];
+    const lcol = l.stroke;
+    const m = mmlVis(n.mml);
+    const baseR = n.r * sizeBoost;
+    const baseAlpha = dim ? 0.15 : (0.50 + m*0.50);
+
+    ctx.fillStyle = ha(lcol, dim ? 0.10 : 0.32 + m*0.20);
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, baseR, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.strokeStyle = ha(lcol, baseAlpha);
+    ctx.lineWidth = (k < 1.6 ? 1.1 : 1.25) / k;
+    ctx.stroke();
+  }
+
+  /* ── 2. BLOCK NODES (mid) ── */
+  for(let i=0; i<BLOCK_NODES.length; i++){
+    const bn = BLOCK_NODES[i];
+    if(bn.x < view.minX || bn.x > view.maxX || bn.y < view.minY || bn.y > view.maxY) continue;
+    const lcol = layerColor(bn.layer);
+    const isHov = (hoveredNode === bn);
+
+    ctx.fillStyle = ha(lcol, 0.18);
+    ctx.beginPath();
+    ctx.arc(bn.x, bn.y, bn.r, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.strokeStyle = ha(lcol, isHov ? 1 : 0.65);
+    ctx.lineWidth = (isHov ? 2 : 1.5) / k;
+    ctx.stroke();
+  }
+
+  /* ── 3. LAYER NODES (top) ── */
+  for(let i=0; i<LAYER_NODES.length; i++){
+    const ln = LAYER_NODES[i];
+    if(ln.x < view.minX || ln.x > view.maxX || ln.y < view.minY || ln.y > view.maxY) continue;
+    const lcol = layerColor(ln.layer);
+    const isHov = (hoveredNode === ln);
+
+    /* outer ring */
+    ctx.fillStyle = ha(lcol, 0.12);
+    ctx.beginPath();
+    ctx.arc(ln.x, ln.y, ln.r, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.strokeStyle = ha(lcol, isHov ? 1 : 0.90);
+    ctx.lineWidth = (isHov ? 3 : 2) / k;
+    ctx.stroke();
+
+    /* inner dot */
+    ctx.fillStyle = lcol;
+    ctx.beginPath();
+    ctx.arc(ln.x, ln.y, 5, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  /* ── HOVER / SELECT rings on top of everything ── */
+  [hoveredNode, selectedNode].forEach(n=>{
+    if(!n) return;
+    if(n.x < view.minX || n.x > view.maxX || n.y < view.minY || n.y > view.maxY) return;
+    const lcol = layerColor(n.layer);
+    ctx.strokeStyle = ha(lcol, n === selectedNode ? 1 : 0.85);
+    ctx.lineWidth = (n === selectedNode ? 2.6 : 2) / k;
+    const baseR = n.kind === 'element' ? n.r * sizeBoost : n.r;
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, baseR + 4/k, 0, Math.PI*2);
+    ctx.stroke();
+  });
+}
+
+/* ── LABELS — anchored to live (smoothed) centroids ──────────────────
+   labelHitRects tracks every layer/block label rectangle that was
+   successfully placed this frame, so the click handler can hit-test
+   them and open the layer/block info card on the right. */
+const placedRects = [];
+const labelHitRects = []; /* { rect:{x,y,w,h}, kind:'layer'|'block', id } */
+function rectsOverlap(a,b){ return !(a.x+a.w<b.x || b.x+b.w<a.x || a.y+a.h<b.y || b.y+b.h<a.y); }
+function tryPlace(x,y,w,h, padX=4, padY=2){
+  const r = {x:x-w/2-padX, y:y-h/2-padY, w:w+padX*2, h:h+padY*2};
+  for(let i=0;i<placedRects.length;i++) if(rectsOverlap(r, placedRects[i])) return false;
+  placedRects.push(r); return true;
+}
+function pickLabel(sx, sy){
+  /* iterate newest first so labels drawn on top win */
+  for(let i=labelHitRects.length-1; i>=0; i--){
+    const r = labelHitRects[i].rect;
+    if(sx >= r.x && sx <= r.x + r.w && sy >= r.y && sy <= r.y + r.h) return labelHitRects[i];
+  }
+  return null;
+}
+function measureText(text, font){ ctx.font = font; return ctx.measureText(text).width; }
+
+function drawLabels(t, k){
+  placedRects.length = 0;
+  labelHitRects.length = 0;
+  const density = TW.labelDensity;
+
+  /* tier 1: LAYER labels — anchored to the layer NODE's screen position.
+     The node is always visible, so the label never floats unanchored. */
+  const layerOp = (k < 0.6) ? 0.55 : (k < 2.0 ? 0.95 : Math.max(0.18, 1 - ramp(k, 2.0, 3.5)*0.78));
+  const layerSize = k < 0.95 ? 22 : (k < 1.6 ? 32 : (k < 3.0 ? 28 : 22));
+  if(layerOp > 0.04){
+    LY.forEach(l=>{
+      const ln = LAYER_NODES_BY_ID[l.id];
+      if(!ln) return;
+      /* anchor in screen space so the offset from the node ring stays
+         constant regardless of zoom. sx/sy is the center of the label
+         group (name row), positioned above the node. */
+      const [nx, ny] = worldToScreen(ln.x, ln.y);
+      const _tagSizeEst = layerSize < 26 ? 9 : 10;
+      const _cSizeEst   = layerSize < 26 ? 10 : 11;
+      const _halfGroupH = layerSize*0.82 + _cSizeEst/2 + 16;
+      const nodeRadiusPx = ln.r * k;
+      const sx = nx;
+      const sy = ny - (nodeRadiusPx + _halfGroupH + 4);
+      if(sx < -200 || sx > W+200 || sy < -100 || sy > H+100) return;
+
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      const tagText = l.tag.split(',')[0].toUpperCase();
+      const tagSize = layerSize < 26 ? 9 : 10;
+      const cSize = layerSize < 26 ? 10 : 11;
+      const countText = `${l.count} elements`;
+
+      /* measure all three rows */
+      ctx.font = `500 ${tagSize}px 'DM Mono', monospace`;
+      const tagW = measureText(tagText, ctx.font);
+      ctx.font = `700 ${layerSize}px 'Space Grotesk', sans-serif`;
+      const nameW = measureText(l.label, ctx.font);
+      ctx.font = `400 ${cSize}px 'Space Mono', monospace`;
+      const countW = measureText(countText, ctx.font);
+      const maxW = Math.max(tagW, nameW, countW);
+
+      /* group bounds — single backdrop for the whole label group.
+         Vertical spacing between rows is now noticeably looser. */
+      const tagY   = sy - layerSize*0.82;
+      const nameY  = sy;
+      const countY = sy + layerSize*0.82;
+      const groupTop = tagY   - tagSize/2 - 8;
+      const groupBot = countY + cSize/2   + 8;
+      const groupH = groupBot - groupTop;
+      const bgW = maxW + 28;
+      const groupCy = (groupTop + groupBot) / 2;
+
+      /* atomic placement: backdrop + texts are one group */
+      if(!tryPlace(sx, groupCy, bgW, groupH, 4, 4)) return;
+
+      /* register this rect for label hit-testing (click → openLayerCard) */
+      labelHitRects.push({
+        rect: { x: sx - bgW/2 - 4, y: groupTop - 4, w: bgW + 8, h: groupH + 8 },
+        kind: 'layer',
+        id: l.id,
+      });
+
+      /* frosted vellum backdrop. Canvas 2D can't render real
+         backdrop-filter blur, so a slightly opaque fill plus a soft
+         drop shadow approximates the frosted-glass feel. */
+      ctx.save();
+      ctx.shadowColor = 'rgba(24,22,15,0.06)';
+      ctx.shadowBlur = 10;
+      ctx.shadowOffsetY = 1;
+      ctx.fillStyle = ha('#F6F4EE', 0.68 * layerOp);
+      roundRect(ctx, sx - bgW/2, groupTop, bgW, groupH, 5);
+      ctx.fill();
+      ctx.restore();
+      ctx.strokeStyle = ha('#18160F', 0.08 * layerOp);
+      ctx.lineWidth = 0.5;
+      roundRect(ctx, sx - bgW/2, groupTop, bgW, groupH, 5);
+      ctx.stroke();
+
+      /* texts on top of backdrop */
+      ctx.font = `500 ${tagSize}px 'DM Mono', monospace`;
+      ctx.fillStyle = ha('#7B7869', layerOp * 0.9);
+      ctx.fillText(tagText, sx, tagY);
+
+      ctx.font = `700 ${layerSize}px 'Space Grotesk', sans-serif`;
+      ctx.fillStyle = ha('#18160F', layerOp);
+      ctx.fillText(l.label, sx, nameY);
+
+      ctx.font = `400 ${cSize}px 'Space Mono', monospace`;
+      ctx.fillStyle = ha('#7B7869', layerOp*0.85);
+      ctx.fillText(countText, sx, countY);
+    });
+  }
+
+  /* tier 2: BLOCK labels — anchored to the block NODE's screen position.
+     Fade in slightly earlier than v1 (k > 1.1 instead of 1.3). */
+  const blockOp = ramp(k, 1.1, 1.6) * Math.min(1, 0.4 + density*0.7);
+  if(blockOp > 0.04){
+    const blockSize = k < 2.0 ? 11 : (k < 3.0 ? 12 : 12);
+    /* render order: closer to origin first (so center labels claim space) */
+    const blocks = Object.values(BL).flat().slice().sort((a,b)=>{
+      const ba = BLOCK_NODES_BY_ID[a.id], bb = BLOCK_NODES_BY_ID[b.id];
+      if(!ba || !bb) return 0;
+      return (ba.x*ba.x + ba.y*ba.y) - (bb.x*bb.x + bb.y*bb.y);
+    });
+    blocks.forEach(b=>{
+      const bn = BLOCK_NODES_BY_ID[b.id];
+      if(!bn) return;
+      /* place label group just above the block node ring (screen space) */
+      const [nx, ny] = worldToScreen(bn.x, bn.y);
+      const nodeRadiusPx = bn.r * k;
+      const sx = nx;
+      /* sy is the code-pill area center; the name sits below */
+      const sy = ny - (nodeRadiusPx + 18 + 4);
+      if(sx < -100 || sx > W+100 || sy < -60 || sy > H+60) return;
+
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      const layerOfBlock = BLOCK_LAYER[b.id];
+      const lcol = layerColor(layerOfBlock);
+      const labelY = sy - 18;
+
+      /* measure code */
+      ctx.font = `500 9.5px 'DM Mono', monospace`;
+      const codeW = measureText(b.id, ctx.font);
+
+      /* measure name (possibly two-line) */
+      ctx.font = `500 ${blockSize}px 'Space Grotesk', sans-serif`;
+      const nameW = measureText(b.name, ctx.font);
+      const twoLine = nameW > 220;
+      let l1='', l2='', l1W=0, l2W=0;
+      if(twoLine){
+        const words = b.name.split(' ');
+        const mid = Math.ceil(words.length/2);
+        l1 = words.slice(0,mid).join(' '); l2 = words.slice(mid).join(' ');
+        l1W = measureText(l1, ctx.font); l2W = measureText(l2, ctx.font);
+      }
+
+      /* atomic group bounds: code pill on top, name(s) below */
+      const widthForName = twoLine ? Math.max(l1W, l2W) : nameW;
+      const groupW = Math.max(codeW + 14, widthForName) + 14;
+      const groupTop = labelY - 18;
+      const groupBot = twoLine ? labelY + blockSize*1.85 + 4 : labelY + blockSize + 6;
+      const groupH = groupBot - groupTop;
+      const groupCy = (groupTop + groupBot) / 2;
+
+      if(!tryPlace(sx, groupCy, groupW, groupH, 4, 3)) return;
+
+      /* register block label rect for click → openBlockCard */
+      labelHitRects.push({
+        rect: { x: sx - groupW/2 - 4, y: groupTop - 3, w: groupW + 8, h: groupH + 6 },
+        kind: 'block',
+        id: b.id,
+      });
+
+      /* frosted backdrop (lighter than layer label backdrops) */
+      ctx.save();
+      ctx.shadowColor = 'rgba(24,22,15,0.04)';
+      ctx.shadowBlur = 6;
+      ctx.shadowOffsetY = 1;
+      ctx.fillStyle = ha('#F6F4EE', 0.58 * blockOp);
+      roundRect(ctx, sx - groupW/2, groupTop, groupW, groupH, 4);
+      ctx.fill();
+      ctx.restore();
+      ctx.strokeStyle = ha('#18160F', 0.06 * blockOp);
+      ctx.lineWidth = 0.5;
+      roundRect(ctx, sx - groupW/2, groupTop, groupW, groupH, 4);
+      ctx.stroke();
+
+      /* colored code pill on top of backdrop */
+      ctx.font = `500 9.5px 'DM Mono', monospace`;
+      ctx.fillStyle = ha(lcol, 0.20 * blockOp);
+      roundRect(ctx, sx - codeW/2 - 5, labelY - 9 - 6, codeW + 10, 12, 6);
+      ctx.fill();
+      ctx.fillStyle = ha(LY_BY_ID[layerOfBlock].dark, blockOp);
+      ctx.fillText(b.id, sx, labelY - 9);
+
+      /* name */
+      ctx.font = `500 ${blockSize}px 'Space Grotesk', sans-serif`;
+      ctx.fillStyle = ha('#18160F', blockOp);
+      if(twoLine){
+        ctx.fillText(l1, sx, labelY + blockSize*0.2);
+        ctx.fillText(l2, sx, labelY + blockSize*1.3);
+      } else {
+        ctx.fillText(b.name, sx, labelY + blockSize*0.6);
+      }
+    });
+  }
+
+  /* tier 3: ELEMENT codes at k≥2.4, names at k≥4.0 */
+  const codeOp = ramp(k, 2.4, 3.2) * Math.min(1, 0.4 + density*0.7);
+  const nameOp = ramp(k, 4.0, 5.5) * density;
+  if(codeOp > 0.04 || nameOp > 0.04){
+    const candidates = NODES.slice().sort((a,b)=>{
+      if(a.mml !== b.mml) return a.mml - b.mml;
+      return 0;
+    });
+    const codeSize = 10;
+    const nameSize = 11;
+    candidates.forEach(n=>{
+      const [sx, sy] = worldToScreen(n.x, n.y);
+      if(sx < -40 || sx > W+40 || sy < -30 || sy > H+30) return;
+      const matchMML = !mmlFilter || String(n.mml) === mmlFilter;
+      const matchSrch = !searchTerm || matchesNode(n, searchTerm);
+      const dim = (!matchMML || !matchSrch);
+      const op = (dim ? 0.25 : 1);
+
+      if(codeOp > 0.04){
+        ctx.font = `700 ${codeSize}px 'Space Mono', monospace`;
+        const w = measureText(n.code, ctx.font);
+        const ny = sy + n.r*transform.k + 9;
+        if(tryPlace(sx, ny, w+6, codeSize+4, 3, 2)){
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillStyle = ha('#18160F', codeOp * op);
+          ctx.fillText(n.code, sx, ny);
+        }
+      }
+      if(nameOp > 0.04){
+        ctx.font = `400 ${nameSize}px 'Space Grotesk', sans-serif`;
+        const w = measureText(n.name, ctx.font);
+        const ny = sy + n.r*transform.k + 9 + codeSize + 4;
+        if(tryPlace(sx, ny, w+6, nameSize+4, 3, 2)){
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillStyle = ha('#3c3a30', nameOp * op);
+          ctx.fillText(n.name, sx, ny);
+        }
+      }
+    });
+  }
+}
+
+function roundRect(c, x, y, w, h, r){
+  c.beginPath();
+  c.moveTo(x+r, y);
+  c.lineTo(x+w-r, y); c.quadraticCurveTo(x+w, y, x+w, y+r);
+  c.lineTo(x+w, y+h-r); c.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  c.lineTo(x+r, y+h); c.quadraticCurveTo(x, y+h, x, y+h-r);
+  c.lineTo(x, y+r); c.quadraticCurveTo(x, y, x+r, y);
+}
+
+/* ── MINIMAP — no halos, just node dots + viewport rect ─────────────── */
+let mmDragging = false;
+function mmRect(){
+  const mmW = 200, mmH = 148;
+  const ww = WORLD.maxX - WORLD.minX, wh = WORLD.maxY - WORLD.minY;
+  const sx = mmW / ww, sy = mmH / wh;
+  const s = Math.min(sx, sy) * 0.94;
+  const offX = (mmW - ww*s)/2 - WORLD.minX*s;
+  const offY = (mmH - wh*s)/2 - WORLD.minY*s;
+  return { mmW, mmH, s, offX, offY };
+}
+function drawMinimap(){
+  const { mmW, mmH, s, offX, offY } = mmRect();
+  mmCtx.clearRect(0,0,mmW,mmH);
+  mmCtx.fillStyle = 'rgba(255,255,255,0.18)';
+  mmCtx.fillRect(0,0,mmW,mmH);
+
+  /* nodes only — color tells the layer story. No halos. */
+  for(let i=0;i<NODES.length;i++){
+    const n = NODES[i];
+    mmCtx.fillStyle = layerColor(n.layer);
+    mmCtx.globalAlpha = 0.78;
+    mmCtx.fillRect(n.x*s + offX - 0.8, n.y*s + offY - 0.8, 1.6, 1.6);
+  }
+  mmCtx.globalAlpha = 1;
+
+  const tl = transform.invert([0,0]);
+  const br = transform.invert([W,H]);
+  const rx = tl[0]*s + offX, ry = tl[1]*s + offY;
+  const rw = (br[0]-tl[0])*s, rh = (br[1]-tl[1])*s;
+  mmCtx.strokeStyle = '#18160F';
+  mmCtx.lineWidth = 1.25;
+  mmCtx.strokeRect(rx, ry, rw, rh);
+  mmCtx.fillStyle = 'rgba(24,22,15,0.06)';
+  mmCtx.fillRect(rx, ry, rw, rh);
+}
+function mmClick(ev){
+  const mm = mmCanvas.getBoundingClientRect();
+  const mx = ev.clientX - mm.left, my = ev.clientY - mm.top;
+  const { s, offX, offY } = mmRect();
+  const wx = (mx - offX) / s;
+  const wy = (my - offY) / s;
+  flyTo(wx, wy, transform.k, 480);
+}
+mmCanvas.addEventListener('mousedown', (ev)=>{ mmDragging = true; mmClick(ev); });
+mmCanvas.addEventListener('mousemove', (ev)=>{ if(mmDragging) mmClick(ev); });
+window.addEventListener('mouseup', ()=>{ mmDragging = false; });
+mmCanvas.addEventListener('touchstart', ev=>{ ev.preventDefault(); mmClick(ev.touches[0]); }, {passive:false});
+mmCanvas.addEventListener('touchmove',  ev=>{ ev.preventDefault(); mmClick(ev.touches[0]); }, {passive:false});
+
+/* ── HIT TESTING ──────────────────────────────────────────────────────
+   Hit-tests across all three node kinds. Layer nodes win over block
+   nodes which win over element nodes for any given click point (since
+   they're drawn on top, the user expects clicks to land on the visible
+   element). Sorted iteration handles the tie-breaking. */
+function pickNode(sx, sy){
+  const [wx, wy] = screenToWorld(sx, sy);
+  const k = transform.k;
+  const minScreenHit = 7;
+  /* iterate elements first (least priority), then blocks, then layers,
+     so layer hits naturally override blocks override elements when
+     overlapping. */
+  let best = null, bestD2 = Infinity;
+  const pools = [NODES, BLOCK_NODES, LAYER_NODES];
+  for(let p=0; p<pools.length; p++){
+    const pool = pools[p];
+    for(let i=0; i<pool.length; i++){
+      const n = pool[i];
+      const dx = n.x - wx, dy = n.y - wy;
+      const d2 = dx*dx + dy*dy;
+      const rWorld = Math.max(n.r + 2, minScreenHit / k);
+      if(d2 <= rWorld*rWorld){ best = n; bestD2 = d2; }
+    }
+  }
+  return best;
+}
+
+canvas.addEventListener('mousemove', ev=>{
+  const rect = canvas.getBoundingClientRect();
+  mouseX = ev.clientX - rect.left;
+  mouseY = ev.clientY - rect.top;
+  /* labels take cursor priority — they sit on top of dots visually */
+  const lbl = pickLabel(mouseX, mouseY);
+  if(lbl){
+    if(hoveredNode){ hoveredNode = null; hideTip(); }
+    canvas.classList.add('over-node');
+    return;
+  }
+  const n = pickNode(mouseX, mouseY);
+  if(n !== hoveredNode){
+    hoveredNode = n;
+    canvas.classList.toggle('over-node', !!n);
+    if(n) showTip(ev, n); else hideTip();
+  } else if(n){
+    showTip(ev, n);
+  }
+});
+canvas.addEventListener('mouseleave', ()=>{ hoveredNode = null; hideTip(); canvas.classList.remove('over-node'); });
+
+/* ── CLICK HANDLING ──────────────────────────────────────────────────
+   Window-level pointer events with explicit drag tracking. d3-zoom v7
+   captures the pointer on its own mousedown, which made canvas-scoped
+   `mouseup` listeners unreliable for click detection. Doing this at
+   window scope sidesteps that entirely: we record pointerdown if it
+   started on the canvas, watch for movement, and on pointerup decide
+   whether it was a click or a drag. */
+let _downX=0, _downY=0, _downT=0, _downValid=false, _movedSinceDown=false;
+window.addEventListener('pointerdown', ev=>{
+  if(ev.target !== canvas){ _downValid = false; return; }
+  _downX = ev.clientX; _downY = ev.clientY; _downT = performance.now();
+  _downValid = true; _movedSinceDown = false;
+}, true);
+window.addEventListener('pointermove', ev=>{
+  if(!_downValid) return;
+  const dx = ev.clientX - _downX, dy = ev.clientY - _downY;
+  if(dx*dx + dy*dy > 25) _movedSinceDown = true;
+}, true);
+window.addEventListener('pointerup', ev=>{
+  if(!_downValid) return;
+  _downValid = false;
+  if(_movedSinceDown) return;
+  const dt = performance.now() - _downT;
+  if(dt > 400) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const sx = ev.clientX - rect.left;
+  const sy = ev.clientY - rect.top;
+  if(sx < 0 || sx > W || sy < 0 || sy > H) return;
+
+  /* labels first — they're drawn on top of dots */
+  const lbl = pickLabel(sx, sy);
+  if(lbl){
+    if(lbl.kind === 'layer') openLayerCard(LY_BY_ID[lbl.id]);
+    else if(lbl.kind === 'block') openBlockCard(BL_BY_ID[lbl.id]);
+    return;
+  }
+
+  /* then nodes — dispatch by kind */
+  const n = pickNode(sx, sy);
+  if(n){
+    if(n.kind === 'layer'){
+      openLayerCard(LY_BY_ID[n.layer]);
+    } else if(n.kind === 'block'){
+      openBlockCard(BL_BY_ID[n.blockId]);
+    } else {
+      /* element */
+      if(transform.k >= 2.5) openPassport(n);
+      else flyToNode(n, ()=> openPassport(n));
+    }
+  } else {
+    if(transform.k >= 2.5) closePassport();
+  }
+}, true);
+
+/* ── TOOLTIP ─────────────────────────────────────────────────────────── */
+const tip = document.getElementById('tip');
+function showTip(ev, n){
+  const l = LY_BY_ID[n.layer];
+  let html;
+  if(n.kind === 'layer'){
+    html = `<span class="tc">LAYER</span>${l.label}<span class="tm">${l.count} elements · ${BL[l.id].length} blocks</span>`;
+  } else if(n.kind === 'block'){
+    html = `<span class="tc">${n.blockId}</span>${n.blockName}<span class="tm">${l.label} · ${n.count} elements</span>`;
+  } else {
+    html = `<span class="tc">${n.code}</span>${n.name}<span class="tm">${l.label} · ${n.block} · MML-${n.mml}</span>`;
+  }
+  tip.innerHTML = html;
+  tip.style.display = 'block';
+  let x = ev.clientX + 14, y = ev.clientY - 32;
+  if(x + tip.offsetWidth > W - 16) x = ev.clientX - tip.offsetWidth - 14;
+  if(y < 8) y = ev.clientY + 18;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+function hideTip(){ tip.style.display = 'none'; }
+
+/* ── FLY-TO / ZOOM TRANSITIONS ───────────────────────────────────────── */
+function flyTo(wx, wy, k, dur=620){
+  const tgt = d3.zoomIdentity.translate(W/2 - wx*k, (H+60)/2 - wy*k).scale(k);
+  d3.select(canvas).transition().duration(dur).ease(d3.easeCubicInOut).call(zoom.transform, tgt);
+}
+function flyToNode(n, cb){
+  const targetK = 4.2;
+  flyTo(n.x, n.y, targetK, 720);
+  if(cb) setTimeout(cb, 720);
+}
+
+/* ── SEARCH ──────────────────────────────────────────────────────────── */
+let searchTerm = '';
+let mmlFilter = '';
+let ddIndex = -1;
+let ddResults = [];
+
+function matchesNode(n, term){
+  const t = term.toLowerCase();
+  return n.name.toLowerCase().includes(t)
+      || n.code.toLowerCase().includes(t)
+      || n.block.toLowerCase().includes(t)
+      || n.blockName.toLowerCase().includes(t);
+}
+
+function searchAll(term){
+  const t = term.toLowerCase();
+  if(!t) return [];
+  const results = [];
+  LY.forEach(l=>{
+    if(l.label.toLowerCase().includes(t) || l.id.includes(t)){
+      results.push({kind:'layer', layer:l});
+    }
+  });
+  Object.values(BL).flat().forEach(b=>{
+    if(b.name.toLowerCase().includes(t) || b.id.toLowerCase().includes(t)){
+      results.push({kind:'block', block:b});
+    }
+  });
+  NODES.forEach(n=>{
+    if(matchesNode(n, t)) results.push({kind:'element', node:n});
+  });
+  return results.slice(0, 40);
+}
+
+const searchEl = document.getElementById('search');
+const ddEl = document.getElementById('search-dd');
+searchEl.addEventListener('input', ()=>{
+  searchTerm = searchEl.value.trim();
+  ddIndex = -1;
+  renderDropdown();
+});
+searchEl.addEventListener('focus', ()=>{
+  if(searchTerm) renderDropdown();
+});
+document.addEventListener('click', ev=>{
+  if(!ev.target.closest('.searchwrap')) ddEl.classList.remove('on');
+});
+searchEl.addEventListener('keydown', ev=>{
+  if(ev.key === 'ArrowDown'){ ev.preventDefault(); ddIndex = Math.min(ddResults.length-1, ddIndex+1); renderDropdown(true); }
+  else if(ev.key === 'ArrowUp'){ ev.preventDefault(); ddIndex = Math.max(0, ddIndex-1); renderDropdown(true); }
+  else if(ev.key === 'Enter'){ ev.preventDefault(); if(ddResults[ddIndex]) chooseResult(ddResults[ddIndex]); else if(ddResults[0]) chooseResult(ddResults[0]); }
+  else if(ev.key === 'Escape'){ ddEl.classList.remove('on'); searchEl.blur(); }
+});
+
+function renderDropdown(keepOpen){
+  ddResults = searchAll(searchTerm);
+  if(!searchTerm || ddResults.length === 0){
+    if(searchTerm){
+      ddEl.innerHTML = `<div class="dd-empty">No matches for "${escapeHtml(searchTerm)}"</div>`;
+      ddEl.classList.add('on');
+    } else {
+      ddEl.classList.remove('on');
+    }
+    return;
+  }
+  let html = '';
+  let lastKind = '';
+  const kindLabel = { layer:'Layers', block:'Blocks', element:'Elements' };
+  ddResults.forEach((r,i)=>{
+    if(r.kind !== lastKind){
+      html += `<div class="dd-section">${kindLabel[r.kind]}</div>`;
+      lastKind = r.kind;
+    }
+    if(r.kind === 'layer'){
+      html += `<div class="dd-row${i===ddIndex?' cur':''}" data-i="${i}"><div class="dot" style="background:${r.layer.stroke}"></div><div class="code">${r.layer.id.toUpperCase().slice(0,4)}</div><div class="name">${r.layer.label}</div><div class="meta">${r.layer.count} els</div></div>`;
+    } else if(r.kind === 'block'){
+      const layer = Object.entries(BL).find(([lid, arr])=>arr.includes(r.block))[0];
+      html += `<div class="dd-row${i===ddIndex?' cur':''}" data-i="${i}"><div class="dot" style="background:${LY_BY_ID[layer].stroke}"></div><div class="code">${r.block.id}</div><div class="name">${r.block.name}</div><div class="meta">${r.block.count} els</div></div>`;
+    } else {
+      html += `<div class="dd-row${i===ddIndex?' cur':''}" data-i="${i}"><div class="dot" style="background:${LY_BY_ID[r.node.layer].stroke}"></div><div class="code">${r.node.code}</div><div class="name">${r.node.name}</div><div class="meta">MML-${r.node.mml}</div></div>`;
+    }
+  });
+  ddEl.innerHTML = html;
+  ddEl.classList.add('on');
+  ddEl.querySelectorAll('.dd-row').forEach(row=>{
+    row.addEventListener('click', ()=>{
+      const i = +row.dataset.i;
+      chooseResult(ddResults[i]);
+    });
+  });
+  if(keepOpen){
+    const cur = ddEl.querySelector('.dd-row.cur');
+    if(cur) cur.scrollIntoView({ block:'nearest' });
+  }
+}
+
+function chooseResult(r){
+  ddEl.classList.remove('on');
+  if(!r) return;
+  /* Tree view: pick result and update tree state instead of flying. */
+  if(typeof currentView !== 'undefined' && currentView === 'tree'){
+    if(r.kind === 'layer'){
+      selectTreeLayer(r.layer.id);
+    } else if(r.kind === 'block'){
+      const lid = BLOCK_LAYER[r.block.id];
+      selectTreeLayer(lid);
+      selectTreeBlock(r.block.id);
+    } else {
+      const n = r.node;
+      const lid = n.layer;
+      selectTreeLayer(lid);
+      selectTreeBlock(n.block);
+      highlightTreeElement(n.code);
+    }
+    searchTerm = ''; searchEl.value = '';
+    return;
+  }
+  /* Explorer: fly to the actual node positions. */
+  if(r.kind === 'layer'){
+    const ln = LAYER_NODES_BY_ID[r.layer.id];
+    searchTerm = ''; searchEl.value = '';
+    if(ln) flyTo(ln.x, ln.y, 1.6, 760);
+  } else if(r.kind === 'block'){
+    const bn = BLOCK_NODES_BY_ID[r.block.id];
+    searchTerm = ''; searchEl.value = '';
+    if(bn) flyTo(bn.x, bn.y, 3.0, 760);
+  } else {
+    const n = r.node;
+    searchTerm = ''; searchEl.value = '';
+    flyToNode(n, ()=> openPassport(n));
+  }
+}
+
+function escapeHtml(s){ return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+document.getElementById('mml-filter').addEventListener('change', e=>{
+  mmlFilter = e.target.value;
+});
+
+/* ── BREADCRUMB / STATUS — k-NEAREST viewport context ────────────────
+   With no fixed anchors, "what cluster am I looking at?" is answered by
+   the modal layer and modal block among the K nodes nearest screen
+   center. This reflects what's actually under the cursor rather than
+   the distance to a phantom anchor. */
+const bcEl = document.getElementById('bc');
+const statusEl = document.getElementById('status');
+const zkEl = document.getElementById('zk');
+const zk2El = document.getElementById('zk2');
+
+function viewportCenterContext(){
+  const k = transform.k;
+  const cw = transform.invert([W/2, H/2]);
+  const K_NEAREST = Math.min(12, NODES.length);
+  /* Find K nearest by partial sort (cheap for 343 nodes). */
+  const arr = new Array(NODES.length);
+  for(let i=0;i<NODES.length;i++){
+    const n = NODES[i];
+    const dx = n.x - cw[0], dy = n.y - cw[1];
+    arr[i] = { n, d2: dx*dx + dy*dy };
+  }
+  arr.sort((a,b)=>a.d2 - b.d2);
+  const near = arr.slice(0, K_NEAREST);
+
+  const layerCount = {};
+  const blockCount = {};
+  near.forEach(({n})=>{
+    layerCount[n.layer] = (layerCount[n.layer]||0)+1;
+    blockCount[n.block] = (blockCount[n.block]||0)+1;
+  });
+  let bestL = null, bestLN = -1;
+  for(const lid in layerCount){
+    if(layerCount[lid] > bestLN){ bestLN = layerCount[lid]; bestL = lid; }
+  }
+  let bestB = null, bestBN = -1;
+  for(const bid in blockCount){
+    if(blockCount[bid] > bestBN){ bestBN = blockCount[bid]; bestB = bid; }
+  }
+  return {
+    k, cw,
+    layer: bestL ? LY_BY_ID[bestL] : LY[0],
+    block: bestB ? BL_BY_ID[bestB] : Object.values(BL)[0][0],
+    layerDominance: bestLN / K_NEAREST,
+    blockDominance: bestBN / K_NEAREST,
+  };
+}
+
+let lastBcSig = '';
+function updateBreadcrumb(){
+  const c = viewportCenterContext();
+  const k = c.k;
+  let sig = `${k.toFixed(2)}`;
+  let html;
+  if(k < 0.95){
+    html = `<button class="crumb current">All elements</button>`;
+    sig += '|all';
+  } else if(k < 1.6){
+    html = `<button class="crumb" data-go="all">All elements</button><span class="sep">›</span><button class="crumb current">${c.layer.label}</button>`;
+    sig += '|'+c.layer.id;
+  } else if(k < 3.0){
+    html = `<button class="crumb" data-go="all">All elements</button><span class="sep">›</span><button class="crumb" data-go="layer:${c.layer.id}">${c.layer.label}</button><span class="sep">›</span><button class="crumb current">${c.block.id} ${c.block.name}</button>`;
+    sig += '|'+c.layer.id+'|'+c.block.id;
+  } else {
+    const sel = selectedNode || (hoveredNode && transform.k>3.0 ? hoveredNode : null);
+    const blockOfSelected = sel ? BL_BY_ID[sel.block] : c.block;
+    const layerOfSelected = sel ? LY_BY_ID[sel.layer] : c.layer;
+    html = `<button class="crumb" data-go="all">All elements</button><span class="sep">›</span><button class="crumb" data-go="layer:${layerOfSelected.id}">${layerOfSelected.label}</button><span class="sep">›</span><button class="crumb" data-go="block:${blockOfSelected.id}">${blockOfSelected.id} ${blockOfSelected.name}</button>` +
+      (sel ? `<span class="sep">›</span><button class="crumb current">${sel.code} ${sel.name}</button>` : `<span class="sep">›</span><button class="crumb current">${blockOfSelected.id}</button>`);
+    sig += '|'+layerOfSelected.id+'|'+blockOfSelected.id+'|'+(sel?sel.code:'-');
+  }
+  if(sig !== lastBcSig){
+    bcEl.innerHTML = html;
+    bcEl.querySelectorAll('.crumb[data-go]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const v = b.dataset.go;
+        if(v === 'all') flyTo(0, 0, fitK(), 720);
+        else if(v.startsWith('layer:')){
+          const id = v.split(':')[1];
+          const ln = LAYER_NODES_BY_ID[id];
+          if(ln) flyTo(ln.x, ln.y, 1.6, 720);
+        } else if(v.startsWith('block:')){
+          const id = v.split(':')[1];
+          const bn = BLOCK_NODES_BY_ID[id];
+          if(bn) flyTo(bn.x, bn.y, 3.0, 720);
+        }
+      });
+    });
+    lastBcSig = sig;
+  }
+}
+
+function updateZoomUI(){
+  const k = transform.k;
+  zkEl.textContent = k.toFixed(2) + '×';
+  zk2El.textContent = k.toFixed(1) + '×';
+  updateBreadcrumb();
+  updateStatusForTier();
+}
+
+function updateStatusForTier(){
+  const t = tier(transform.k);
+  const sl = document.getElementById('status').querySelector('span:first-child');
+  if(!sl) return;
+  if(t === 0){
+    sl.innerHTML = `<em>343</em> PASSPORTS · <em>4</em> LAYERS · <em>46</em> BLOCKS`;
+  } else {
+    const c = viewportCenterContext();
+    if(t === 1){
+      sl.innerHTML = `<em>${c.layer.label.toUpperCase()}</em> · ${c.layer.count} ELEMENTS · ${BL[c.layer.id].length} BLOCKS`;
+    } else if(t === 2){
+      sl.innerHTML = `<em>${c.layer.label.toUpperCase()}</em> · ${c.block.id} ${c.block.name.toUpperCase()} · ${c.block.count} ELEMENTS`;
+    } else {
+      sl.innerHTML = `<em>${c.layer.label.toUpperCase()}</em> · ${c.block.id} · ${c.block.count} ELEMENTS`;
+    }
+  }
+}
+
+/* ── INFO CARDS / PASSPORT PANEL ────────────────────────────────────
+   The same right-side panel hosts three kinds of content:
+     · openLayerCard(layer)   — clicked a layer label
+     · openBlockCard(block)   — clicked a block label
+     · openPassport(node)     — clicked an element node
+   All three share the colored stripe, close button, and slide-in
+   transition. Neighbor / block / element buttons inside the cards are
+   wired through a single delegation pass at the bottom of the function. */
+
+function _bindCardNav(){
+  document.getElementById('pp-content').querySelectorAll('.pp-nbr').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(btn.dataset.code){
+        const n = NODES_BY_CODE[btn.dataset.code];
+        if(n){
+          if(transform.k >= 2.5) openPassport(n);
+          else flyToNode(n, ()=> openPassport(n));
+        }
+      } else if(btn.dataset.block){
+        const b = BL_BY_ID[btn.dataset.block];
+        if(b) openBlockCard(b);
+      } else if(btn.dataset.layer){
+        const l = LY_BY_ID[btn.dataset.layer];
+        if(l) openLayerCard(l);
+      }
+    });
+  });
+}
+
+function _showPanel(stripeLayer){
+  const stripe = document.getElementById('pp-stripe');
+  const l = stripeLayer;
+  stripe.innerHTML =
+    `<span style="background:${l.stroke}"></span>` +
+    `<span style="background:${l.stroke};opacity:0.70"></span>` +
+    `<span style="background:${l.stroke};opacity:0.45"></span>` +
+    `<span style="background:${l.stroke};opacity:0.20"></span>`;
+  const panel = document.getElementById('panel');
+  panel.classList.add('open'); panel.setAttribute('aria-hidden','false');
+}
+
+function openLayerCard(l){
+  selectedNode = null;
+  _showPanel(l);
+  const blocks = BL[l.id];
+  const html =
+    `<div class="pp-eyebrow">
+       <span>${l.id.toUpperCase()} LAYER</span><span class="pp-dot"></span>
+       <span>${l.count} elements · ${blocks.length} blocks</span>
+     </div>
+     <h1 class="pp-title">${l.label}</h1>
+     <div class="pp-badges">
+       <span class="pp-badge" style="background:${ha(l.stroke,0.12)};color:${l.dark}">${l.tag}</span>
+     </div>
+
+     <div class="pp-lbl"><span>Layer description</span></div>
+     <p class="pp-body">${l.desc}</p>
+
+     <hr class="pp-rule"/>
+
+     <div class="pp-lbl">Blocks <span class="pp-lbl-meta">${blocks.length}</span></div>
+     <div class="pp-nbrs">
+       ${blocks.map(b=>`<button class="pp-nbr" data-block="${b.id}">${b.id}<span class="nb-name">${b.name}</span></button>`).join('')}
+     </div>
+
+     <div class="pp-meta">
+       <span>HES · ${l.label} layer</span>
+       <span>v1.0 placeholder</span>
+     </div>`;
+  document.getElementById('pp-content').innerHTML = html;
+  _bindCardNav();
+}
+
+function openBlockCard(b){
+  selectedNode = null;
+  const lid = BLOCK_LAYER[b.id];
+  const l = LY_BY_ID[lid];
+  _showPanel(l);
+  const elementsInBlock = NODES.filter(n => n.block === b.id);
+  const layerPill = `background:${ha(l.stroke,0.12)};color:${l.dark}`;
+  const html =
+    `<div class="pp-eyebrow">
+       <span>${b.id}</span><span class="pp-dot"></span>
+       <span>${b.count} elements</span>
+     </div>
+     <h1 class="pp-title">${b.name}</h1>
+     <div class="pp-badges">
+       <button class="pp-badge" style="${layerPill};border:none;cursor:pointer;font:inherit" data-go-layer="${l.id}">${l.label} layer</button>
+     </div>
+
+     <div class="pp-lbl"><span>Block description</span></div>
+     <p class="pp-body">${BLOCK_DESCRIPTIONS[b.id]}</p>
+
+     <hr class="pp-rule"/>
+
+     <div class="pp-lbl">Elements <span class="pp-lbl-meta">${b.count}</span></div>
+     <div class="pp-nbrs">
+       ${elementsInBlock.map(n=>`<button class="pp-nbr" data-code="${n.code}">${n.code}<span class="nb-name">${n.name}</span></button>`).join('')}
+     </div>
+
+     <div class="pp-meta">
+       <span>${l.label} · ${b.id}</span>
+       <span>v1.0 placeholder</span>
+     </div>`;
+  document.getElementById('pp-content').innerHTML = html;
+  _bindCardNav();
+  /* the layer badge is a separate "go to layer" button */
+  const lbtn = document.getElementById('pp-content').querySelector('[data-go-layer]');
+  if(lbtn) lbtn.addEventListener('click', ()=> openLayerCard(LY_BY_ID[lbtn.dataset.goLayer]));
+}
+
+function openPassport(d){
+  selectedNode = d;
+  const l = LY_BY_ID[d.layer];
+  _showPanel(l);
+  const mmlHex = ha(l.stroke, 0.12);
+  const mmlTxt = l.dark;
+  const layerPill = `background:${ha(l.stroke,0.12)};color:${l.dark}`;
+  const block = BL_BY_ID[d.block];
+  const html =
+    `<div class="pp-eyebrow">
+       <span>${d.code}</span><span class="pp-dot"></span>
+       <span><button class="pp-nbr" style="padding:2px 8px;font-size:10px" data-block="${d.block}">${d.block} · ${block.name}</button></span>
+     </div>
+     <h1 class="pp-title">${d.name}</h1>
+     <div class="pp-badges">
+       <button class="pp-badge" style="${layerPill};border:none;cursor:pointer;font:inherit" data-go-layer="${l.id}">${l.label} layer</button>
+       <span class="pp-badge" style="background:${mmlHex};color:${mmlTxt}">MML-${d.mml} · ${MML_LABEL[d.mml]}</span>
+     </div>
+
+     <div class="pp-lbl"><span>Definition</span><span class="pp-lbl-meta">est. ${d.author}</span></div>
+     <p class="pp-body">${d.definition}</p>
+
+     <div class="pp-lbl">Poles</div>
+     <div class="pp-poles">
+       <div class="pp-pole"><div class="pl">Low pole</div><div class="pv">${d.poleLow}</div></div>
+       <div class="pp-pole"><div class="pl">High pole</div><div class="pv">${d.poleHigh}</div></div>
+     </div>
+
+     <hr class="pp-rule"/>
+
+     <div class="pp-2col">
+       <div><div class="pp-lbl">Trainability</div><div class="pv-mono">${d.trainability}</div></div>
+       <div><div class="pp-lbl">Modifiability</div><div class="pv-mono">${d.modifiability}</div></div>
+     </div>
+
+     <div class="pp-lbl">Nearest neighbors</div>
+     <div class="pp-nbrs">
+       ${(d.neighbors||[]).map(nc=>{
+          const f = ELS_BY_CODE[nc];
+          return `<button class="pp-nbr" data-code="${nc}">${nc}<span class="nb-name">${f?f.name:''}</span></button>`;
+       }).join('')}
+     </div>
+
+     <div class="pp-meta">
+       <span>Author · ${d.author}</span>
+       <span>Updated 2024</span>
+     </div>`;
+  document.getElementById('pp-content').innerHTML = html;
+  _bindCardNav();
+  /* layer badge is a separate "go to layer" button */
+  const lbtn = document.getElementById('pp-content').querySelector('[data-go-layer]');
+  if(lbtn) lbtn.addEventListener('click', ()=> openLayerCard(LY_BY_ID[lbtn.dataset.goLayer]));
+}
+function closePassport(){
+  const p = document.getElementById('panel');
+  p.classList.remove('open'); p.setAttribute('aria-hidden','true');
+  selectedNode = null;
+}
+document.getElementById('pp-close').addEventListener('click', closePassport);
+
+/* ── ZOOM BUTTONS ────────────────────────────────────────────────────── */
+function zoomBy(factor){
+  const cx = W/2, cy = H/2;
+  const k0 = transform.k, k1 = Math.max(0.3, Math.min(9, k0*factor));
+  const wp = transform.invert([cx, cy]);
+  const t = d3.zoomIdentity.translate(cx - wp[0]*k1, cy - wp[1]*k1).scale(k1);
+  d3.select(canvas).transition().duration(360).ease(d3.easeCubicInOut).call(zoom.transform, t);
+}
+document.getElementById('z-in').addEventListener('click', ()=> zoomBy(1.6));
+document.getElementById('z-out').addEventListener('click', ()=> zoomBy(1/1.6));
+document.getElementById('z-reset').addEventListener('click', ()=> { fitToWorld(true); selectedNode = null; });
+
+window.addEventListener('keydown', ev=>{
+  if(ev.target === searchEl) return;
+  if(ev.key === '+' || ev.key === '=') zoomBy(1.4);
+  else if(ev.key === '-' || ev.key === '_') zoomBy(1/1.4);
+  else if(ev.key === '0') fitToWorld(true);
+  else if(ev.key === 'Escape') closePassport();
+});
+
+/* ── VIEWSWITCH (decorative; only Graph implemented) ─────────────────── */
+document.querySelectorAll('.viewswitch button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.viewswitch button').forEach(x=>x.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+  });
+});
+
+/* ── TWEAKS PANEL ────────────────────────────────────────────────────── */
+function applyPalette(){
+  const [c,d,q,e] = TW.palette;
+  LY[0].stroke=c; LY[1].stroke=d; LY[2].stroke=q; LY[3].stroke=e;
+  ['core','derived','quantum','emotional'].forEach((k,i)=>{
+    const dot=document.querySelector(`#lg-${k} .lg-dot`);
+    if(dot) dot.style.background = TW.palette[i];
+  });
+  document.documentElement.style.setProperty('--core',c);
+  document.documentElement.style.setProperty('--derived',d);
+  document.documentElement.style.setProperty('--quantum',q);
+  document.documentElement.style.setProperty('--emotional',e);
+}
+function applyLegendVis(){ document.getElementById('legend').style.display = TW.showLegend? 'flex':'none'; }
+function applyMinimapVis(){ document.getElementById('minimap').style.display = TW.showMinimap? 'block':'none'; }
+function applyAll(){ applyPalette(); applyLegendVis(); applyMinimapVis(); refreshForces(); }
+
+/* tweaks panel removed in Passport Library build — TW constants are now
+   hardcoded above. Keeping `refreshForces` for internal use only. */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TREE VIEW
+   A separate full-screen DOM panel that overlays the canvas. Three
+   columns drill from layer → block → element. Filter chips operate on
+   MML, Trainability and Modifiability. Search results select the
+   matching column rows rather than flying through the canvas. */
+
+let tree_selectedLayer = 'core';
+let tree_selectedBlock = null;
+const tree_filterMML = new Set();
+const tree_filterTr  = new Set();
+const tree_filterMd  = new Set();
+
+function _tShortDesc(b){
+  /* take first ~38 chars of the block description as a subtitle */
+  const d = BLOCK_DESCRIPTIONS[b.id] || '';
+  const first = d.split('.')[0];
+  return first.length > 40 ? first.slice(0,40) + '…' : first;
+}
+
+function renderTreeLayerCol(){
+  const list = document.getElementById('tree-layer-list');
+  list.innerHTML = LY.map(l => {
+    const active = l.id === tree_selectedLayer ? ' active' : '';
+    return `<div class="tree-layer-row${active}" data-layer="${l.id}">
+      <div class="tree-row-left-accent" style="background:${l.stroke}"></div>
+      <div class="tree-row-body">
+        <div class="tree-row-name">${l.label}</div>
+        <div class="tree-row-desc">${l.tag}</div>
+      </div>
+      <div class="tree-row-count">${l.count} →</div>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.tree-layer-row').forEach(row => {
+    row.addEventListener('click', ()=> selectTreeLayer(row.dataset.layer));
+  });
+  /* status: "X of 4 selected" — always shows the active layer name */
+  const idx = LY.findIndex(l => l.id === tree_selectedLayer);
+  document.getElementById('tree-layer-status').textContent =
+    `${idx+1} of 4 · ${LY[idx].label.toUpperCase()}`;
+}
+
+function renderTreeBlockCol(){
+  const list = document.getElementById('tree-block-list');
+  if(!tree_selectedLayer){ list.innerHTML = ''; return; }
+  const blocks = BL[tree_selectedLayer];
+  list.innerHTML = blocks.map(b => {
+    const active = b.id === tree_selectedBlock ? ' active' : '';
+    return `<div class="tree-block-row${active}" data-block="${b.id}">
+      <div class="tree-row-body">
+        <div class="tree-row-name">${b.name}</div>
+        <div class="tree-row-desc">${_tShortDesc(b)}</div>
+      </div>
+      <div class="tree-row-count">${b.count} →</div>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.tree-block-row').forEach(row => {
+    row.addEventListener('click', ()=> selectTreeBlock(row.dataset.block));
+  });
+  document.getElementById('tree-block-layer-label').textContent =
+    LY_BY_ID[tree_selectedLayer].label.toUpperCase();
+  document.getElementById('tree-block-count').textContent = blocks.length;
+}
+
+function _treeElementMatchesFilters(n){
+  let match = true;
+  if(tree_filterMML.size && !tree_filterMML.has(String(n.mml))) match = false;
+  if(tree_filterTr.size  && !tree_filterTr.has(n.trainability)) match = false;
+  if(tree_filterMd.size  && !tree_filterMd.has(n.modifiability)) match = false;
+  /* shared MML filter from topbar */
+  if(mmlFilter && String(n.mml) !== mmlFilter) match = false;
+  return match;
+}
+
+function renderTreeElementCol(){
+  const list = document.getElementById('tree-element-list');
+  const ctxEl = document.getElementById('tree-el-context');
+  const countEl = document.getElementById('tree-el-count');
+  if(!tree_selectedBlock){
+    list.innerHTML = `<div class="tree-empty-hint">Select a block on the left to see its elements.</div>`;
+    ctxEl.textContent = '—';
+    countEl.textContent = '0';
+    return;
+  }
+  const b = BL_BY_ID[tree_selectedBlock];
+  const l = LY_BY_ID[BLOCK_LAYER[b.id]];
+  const elementsInBlock = NODES.filter(n => n.block === b.id);
+  ctxEl.textContent = `${l.label.toUpperCase()} · ${b.name.toUpperCase()}`;
+  countEl.textContent = elementsInBlock.length;
+  const anyFilter = tree_filterMML.size || tree_filterTr.size || tree_filterMd.size || mmlFilter;
+  let filteredCount = 0;
+  list.innerHTML = elementsInBlock.map(n => {
+    const match = _treeElementMatchesFilters(n);
+    if(match) filteredCount++;
+    const dimmed = (anyFilter && !match) ? ' dimmed' : '';
+    return `<div class="tree-element-row${dimmed}" data-code="${n.code}" title="${(n.definition||'').replace(/"/g,'&quot;')}">
+      <div class="tree-el-code">${n.code}</div>
+      <div class="tree-el-name">${n.name}</div>
+      <div class="tree-el-mml"><span class="mml-badge mml-${n.mml}">MML-${n.mml}</span></div>
+      <div class="tree-el-arrow">→</div>
+    </div>`;
+  }).join('') + `<div class="tree-el-meta-bar">· ${elementsInBlock.length} elements in this block ·</div>`;
+  list.querySelectorAll('.tree-element-row').forEach(row => {
+    row.addEventListener('click', ()=>{
+      /* In a real build this navigates to /library/[code]. In the
+         prototype we open the passport panel for inspection. */
+      const n = NODES_BY_CODE[row.dataset.code];
+      if(n) openPassport(n);
+    });
+  });
+  /* filter status */
+  const fs = document.getElementById('tree-filter-status');
+  if(anyFilter){
+    fs.textContent = `${filteredCount} of ${elementsInBlock.length} match`;
+  } else {
+    fs.textContent = '';
+  }
+}
+
+function selectTreeLayer(lid){
+  tree_selectedLayer = lid;
+  tree_selectedBlock = null;
+  renderTreeLayerCol();
+  renderTreeBlockCol();
+  renderTreeElementCol();
+  updateTreeBreadcrumb();
+}
+function selectTreeBlock(bid){
+  tree_selectedBlock = bid;
+  renderTreeBlockCol();
+  renderTreeElementCol();
+  updateTreeBreadcrumb();
+}
+
+function highlightTreeElement(code){
+  /* Scroll the element row into view and flash it briefly. */
+  const list = document.getElementById('tree-element-list');
+  const row = list.querySelector(`[data-code="${code}"]`);
+  if(!row) return;
+  row.scrollIntoView({ block:'center', behavior:'smooth' });
+  row.classList.remove('flash'); void row.offsetWidth; /* restart anim */
+  row.classList.add('flash');
+}
+
+function updateTreeBreadcrumb(){
+  const bc = document.getElementById('tree-breadcrumb');
+  const layer = LY_BY_ID[tree_selectedLayer];
+  const block = tree_selectedBlock ? BL_BY_ID[tree_selectedBlock] : null;
+  let html = `<button class="crumb" data-tb-go="home">Home</button><span class="sep">›</span>`;
+  html += `<button class="crumb${block?'':' current'}" data-tb-go="library">Library</button>`;
+  if(layer){
+    html += `<span class="sep">›</span><button class="crumb${block?'':' current'}" data-tb-go="layer:${layer.id}">${layer.label}</button>`;
+  }
+  if(block){
+    html += `<span class="sep">›</span><button class="crumb current">${block.name}</button>`;
+  }
+  bc.innerHTML = html;
+  bc.querySelectorAll('[data-tb-go]').forEach(btn => {
+    btn.addEventListener('click', ()=>{
+      const v = btn.dataset.tbGo;
+      if(v === 'home' || v === 'library'){
+        /* stay in tree view, just clear block selection */
+        tree_selectedBlock = null;
+        renderTreeBlockCol();
+        renderTreeElementCol();
+        updateTreeBreadcrumb();
+      } else if(v.startsWith('layer:')){
+        const lid = v.split(':')[1];
+        selectTreeLayer(lid);
+      }
+    });
+  });
+}
+
+/* filter chip click handlers (delegated, set up once) */
+function setupTreeFilterChips(){
+  document.querySelectorAll('#tree-filter-bar .tree-filter-chip').forEach(chip => {
+    chip.addEventListener('click', ()=>{
+      let set, val;
+      if(chip.dataset.fmml){ set = tree_filterMML; val = chip.dataset.fmml; }
+      else if(chip.dataset.ftr){ set = tree_filterTr; val = chip.dataset.ftr; }
+      else if(chip.dataset.fmd){ set = tree_filterMd; val = chip.dataset.fmd; }
+      if(!set) return;
+      if(set.has(val)){ set.delete(val); chip.classList.remove('on'); }
+      else { set.add(val); chip.classList.add('on'); }
+      renderTreeElementCol();
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   VIEW SWITCHING
+   Toggles the tree-view overlay, hides explorer chrome when in tree mode,
+   pushes ?view= via replaceState so reloads land on the same view. */
+
+let currentView = 'explorer';
+function activateView(view){
+  const isExplorer = (view === 'explorer');
+  currentView = isExplorer ? 'explorer' : 'tree';
+
+  document.getElementById('tree-view').classList.toggle('active', !isExplorer);
+  document.getElementById('tree-view').setAttribute('aria-hidden', isExplorer ? 'true' : 'false');
+  document.getElementById('canvas').style.display = isExplorer ? 'block' : 'none';
+  document.getElementById('minimap').style.display = (isExplorer && TW.showMinimap) ? 'block' : 'none';
+  document.getElementById('legend').style.display  = (isExplorer && TW.showLegend) ? 'flex' : 'none';
+  document.getElementById('zoom-controls').style.display = isExplorer ? 'flex' : 'none';
+  document.getElementById('subbar').style.display = isExplorer ? 'flex' : 'none';
+
+  document.getElementById('btn-explorer').setAttribute('aria-pressed', isExplorer ? 'true' : 'false');
+  document.getElementById('btn-tree').setAttribute('aria-pressed', isExplorer ? 'false' : 'true');
+
+  history.replaceState(null, '', '?view=' + currentView);
+
+  if(!isExplorer){
+    renderTreeLayerCol();
+    renderTreeBlockCol();
+    renderTreeElementCol();
+    updateTreeBreadcrumb();
+  }
+}
+document.getElementById('btn-explorer').addEventListener('click', ()=> activateView('explorer'));
+document.getElementById('btn-tree').addEventListener('click', ()=> activateView('tree'));
+setupTreeFilterChips();
+
+/* When the topbar MML filter changes while in tree view, refresh rows. */
+const _mmlFilterEl = document.getElementById('mml-filter');
+_mmlFilterEl.addEventListener('change', ()=>{
+  if(currentView === 'tree') renderTreeElementCol();
+});
+
+/* ── INIT ────────────────────────────────────────────────────────────── */
+resize();
+applyAll();
+/* Run a longer pre-settle so the hierarchical orbits (layer→block→element)
+   have time to find their equilibrium before first paint. */
+for(let i=0;i<200;i++) sim.tick();
+recomputeBounds();
+fitToWorld(false);
+updateZoomUI();
+
+/* Read ?view= from URL and activate the appropriate view on load. */
+const _urlView = new URLSearchParams(location.search).get('view') || 'explorer';
+activateView(_urlView);
+
+/* Keep running for a while so the field tightens organically, then ease off. */
+sim.alpha(1).restart();
+setTimeout(()=> sim.alphaTarget(0), 5000);
+</script>
+</body>
+</html>
