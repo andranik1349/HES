@@ -158,6 +158,7 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
   background:rgba(246,244,238,0.85);backdrop-filter:blur(6px);
   border:0.5px solid var(--hairline-strong);border-radius:2px;
   font-family:'DM Mono',monospace;
+  transition:right 0.55s cubic-bezier(0.22,1,0.36,1);
 }
 #zoom-controls button{
   background:transparent;border:none;color:var(--carbon);
@@ -180,12 +181,88 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
   background:rgba(246,244,238,0.70);backdrop-filter:blur(8px);
   border:0.5px solid var(--hairline-strong);border-radius:2px;
   overflow:hidden;
+  transition:right 0.55s cubic-bezier(0.22,1,0.36,1);
+}
+
+/* When the passport drawer slides in, push the navigation tools left
+   by the panel width (520px capped at 46vw — matching #panel) plus the
+   existing 32px gutter, so they stay visible alongside the drawer. */
+#app:has(#panel.open) #zoom-controls,
+#app:has(#panel.open) #minimap{
+  right:calc(32px + min(520px, 46vw));
 }
 #minimap canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:pointer}
 #minimap .mm-tag{
   position:absolute;top:6px;left:8px;
   font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;
   color:var(--dust);pointer-events:none;
+}
+
+/* ── recents strip ─────────────────────────────────────────────── */
+#recents-strip{
+  position:absolute;
+  left:calc(32px + 200px + 16px);  /* clear legend */
+  right:calc(32px + 200px + 16px); /* clear minimap */
+  bottom:28px;
+  height:44px;z-index:11;
+  display:flex;align-items:center;gap:12px;
+  pointer-events:none;
+  transition:right 0.55s cubic-bezier(0.22,1,0.36,1);
+}
+#recents-strip > *{pointer-events:auto}
+/* When the drawer is open, push the strip's right edge left in lockstep
+   with the minimap, so chips never disappear under the drawer. */
+#app:has(#panel.open) #recents-strip{
+  right:calc(32px + min(520px, 46vw) + 200px + 16px);
+}
+.rec-label{
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--dust);flex-shrink:0;padding-right:2px;
+}
+#recents-scroller{
+  flex:1;min-width:0;
+  display:flex;align-items:center;gap:6px;
+  overflow-x:auto;overflow-y:hidden;
+  scroll-behavior:smooth;
+  scrollbar-width:thin;scrollbar-color:rgba(24,22,15,0.18) transparent;
+  height:36px;padding:0 4px;
+  /* Soft fade at the scroll edges so chips dissolve into the canvas
+     rather than getting clipped abruptly. */
+  -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+  mask-image:linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+}
+#recents-scroller::-webkit-scrollbar{height:5px}
+#recents-scroller::-webkit-scrollbar-thumb{background:rgba(24,22,15,0.18);border-radius:3px}
+#recents-scroller::-webkit-scrollbar-track{background:transparent}
+.rec-chip{
+  flex-shrink:0;
+  display:inline-flex;align-items:center;gap:8px;
+  height:28px;padding:0 4px 0 10px;
+  background:rgba(246,244,238,0.85);backdrop-filter:blur(6px);
+  border:0.5px solid var(--hairline-strong);border-radius:2px;
+  cursor:pointer;font:inherit;color:var(--carbon);
+  transition:background 0.12s,border-color 0.12s;
+}
+.rec-chip:hover{background:rgba(255,255,255,0.95);border-color:var(--carbon)}
+.rec-chip .rec-code{
+  font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:0.04em;color:var(--carbon);
+}
+.rec-chip .rec-name{
+  font-family:'Space Grotesk',sans-serif;font-size:12px;color:var(--dust);
+  max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.rec-x{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;margin-left:2px;
+  border-radius:50%;background:transparent;
+  color:var(--dust);font-size:13px;line-height:1;cursor:pointer;
+  transition:background 0.12s,color 0.12s;
+  flex-shrink:0;
+}
+.rec-x:hover{background:rgba(24,22,15,0.10);color:var(--carbon)}
+.rec-empty{
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--dust);opacity:0.55;
 }
 
 /* ── tooltip ───────────────────────────────────────────────────── */
@@ -467,6 +544,11 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
 
   <div id="tip"></div>
 
+  <div id="recents-strip" aria-label="Recently viewed passports">
+    <div class="rec-label">Recent</div>
+    <div id="recents-scroller" role="list"></div>
+  </div>
+
   <aside id="panel" aria-hidden="true">
     <div class="stripe" id="pp-stripe"></div>
     <button class="close" id="pp-close" aria-label="Close passport">✕</button>
@@ -679,35 +761,37 @@ const NODES = ELS.map((e, idx)=>{
 });
 const NODES_BY_CODE = Object.fromEntries(NODES.map(n=>[n.code,n]));
 
-/* Layer nodes: 4 anchors in a wide cross pattern. */
-const LAYER_INIT = {
-  core:      {x:-300, y:-200},
-  derived:   {x: 300, y:-200},
-  quantum:   {x:-300, y: 200},
-  emotional: {x: 300, y: 200},
+/* ── GEOMETRIC HIERARCHY ────────────────────────────────────────────
+   Solar-system layout: 4 layer suns at fixed positions, each surrounded
+   by a ring of block planets, each of those surrounded by a ring of
+   element moons. Layers and blocks are pinned (fx/fy). Elements start
+   at their orbital position and are kept in orbit by forceRadial.    */
+const LAYER_POSITIONS = {
+  core:      { x: -420, y: -280 },
+  derived:   { x:  420, y: -280 },
+  quantum:   { x: -420, y:  280 },
+  emotional: { x:  420, y:  280 },
 };
-const LAYER_NODES = LY.map(l => ({
-  id: 'layer__' + l.id,
-  kind: 'layer',
-  layer: l.id,
-  label: l.label,
-  tag: l.tag,
-  desc: l.desc,
-  count: l.count,
-  r: 22,
-  x: LAYER_INIT[l.id].x,
-  y: LAYER_INIT[l.id].y,
-  vx: 0, vy: 0,
-  fx: null, fy: null,
-}));
+const LAYER_NODES = LY.map(l => {
+  const p = LAYER_POSITIONS[l.id];
+  return {
+    id: 'layer__' + l.id,
+    kind: 'layer',
+    layer: l.id,
+    label: l.label,
+    tag: l.tag,
+    desc: l.desc,
+    count: l.count,
+    r: 22,
+    x: p.x, y: p.y,
+    fx: p.x, fy: p.y,   /* pinned — d3 won't move it */
+    vx: 0, vy: 0,
+  };
+});
 const LAYER_NODES_BY_ID = Object.fromEntries(LAYER_NODES.map(ln => [ln.layer, ln]));
 
-/* Block nodes: one per block, initialised around their layer. */
 const BLOCK_NODES = Object.values(BL).flat().map(b => {
   const lid = BLOCK_LAYER[b.id];
-  const ln = LAYER_NODES_BY_ID[lid];
-  const ang = Math.random() * Math.PI * 2;
-  const rad = 60 + Math.random() * 120; /* ±180 disc, biased toward outer */
   return {
     id: 'block__' + b.id,
     kind: 'block',
@@ -716,15 +800,56 @@ const BLOCK_NODES = Object.values(BL).flat().map(b => {
     blockName: b.name,
     count: b.count,
     r: 11,
-    x: ln.x + Math.cos(ang) * rad,
-    y: ln.y + Math.sin(ang) * rad,
+    x: 0, y: 0,         /* set by placeBlockNodes() below */
+    fx: null, fy: null, /* set by placeBlockNodes() below */
     vx: 0, vy: 0,
-    fx: null, fy: null,
   };
 });
 const BLOCK_NODES_BY_ID = Object.fromEntries(BLOCK_NODES.map(bn => [bn.blockId, bn]));
 
-/* The full simulation population. */
+const BLOCK_ORBIT_RADIUS = 180;
+function placeBlockNodes(){
+  Object.entries(BL).forEach(([lid, blocks]) => {
+    const ln = LAYER_NODES_BY_ID[lid];
+    const n  = blocks.length;
+    blocks.forEach((b, i) => {
+      const angle = (i / n) * Math.PI * 2 - Math.PI / 2; /* start from top */
+      const bn = BLOCK_NODES_BY_ID[b.id];
+      bn.x  = ln.x + Math.cos(angle) * BLOCK_ORBIT_RADIUS;
+      bn.y  = ln.y + Math.sin(angle) * BLOCK_ORBIT_RADIUS;
+      bn.fx = bn.x; /* pinned */
+      bn.fy = bn.y;
+    });
+  });
+}
+placeBlockNodes();
+
+/* Element orbital radius — same formula used by placeElementNodes()
+   and the forceRadial that holds the ring shape during simulation. */
+function _elementOrbitRadius(blockId){
+  let count = 0;
+  for(let i=0;i<NODES.length;i++) if(NODES[i].block === blockId) count++;
+  return 48 + count * 1.8;
+}
+function placeElementNodes(){
+  Object.entries(BL).forEach(([lid, blocks]) => {
+    blocks.forEach(b => {
+      const bn = BLOCK_NODES_BY_ID[b.id];
+      const elementsInBlock = NODES.filter(n => n.block === b.id);
+      const count = elementsInBlock.length;
+      const R = _elementOrbitRadius(b.id);
+      elementsInBlock.forEach((n, i) => {
+        const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
+        n.x = bn.x + Math.cos(angle) * R;
+        n.y = bn.y + Math.sin(angle) * R;
+        n.vx = 0; n.vy = 0; /* elements are NOT pinned; positions are initial only */
+      });
+    });
+  });
+}
+placeElementNodes();
+
+/* The full simulation population (still used for bounds and minimap). */
 const ALL_NODES = [...LAYER_NODES, ...BLOCK_NODES, ...NODES];
 
 /* ── EDGES — element-to-element relationships (existing 3 categories) ── */
@@ -748,25 +873,10 @@ NODES.forEach(n=>{
   });
 });
 
-/* ── STRUCTURAL LINKS — hierarchy encoded as force-link constraints ────
-   Each block node is linked to its layer (short, strong). Each element
-   node is linked to its block (medium). The neighbor edges above are
-   layered on top as supplementary intra-block cohesion.  */
-const LAYER_BLOCK_LINKS = BLOCK_NODES.map(bn => ({
-  source: LAYER_NODES_BY_ID[bn.layer],
-  target: bn,
-  distance: 120,
-  strength: 0.6,
-  kind: 'layer-block',
-}));
-const BLOCK_ELEMENT_LINKS = NODES.map(n => ({
-  source: BLOCK_NODES_BY_ID[n.block],
-  target: n,
-  distance: 55,
-  strength: 0.35,
-  kind: 'block-element',
-}));
-const SIM_LINKS = [...LAYER_BLOCK_LINKS, ...BLOCK_ELEMENT_LINKS, ...ALL_EDGES];
+/* Structural hierarchy is encoded geometrically (pinned layer/block
+   positions + forceRadial on elements), not as link springs. The only
+   remaining links fed to the simulation are the element-to-element
+   neighbor edges (ALL_EDGES). */
 
 /* ── DYNAMIC WORLD BOUNDS — measured from current node positions ────── */
 let WORLD = { minX:-INIT_RADIUS, maxX:INIT_RADIUS, minY:-INIT_RADIUS, maxY:INIT_RADIUS };
@@ -874,80 +984,76 @@ function screenToWorld(x,y){ return transform.invert([x,y]); }
    layer on top as supplementary intra-block cohesion. ManyBody and
    collide are kind-aware so layer/block nodes carve appropriate room
    without exploding the field. */
+/* ── PER-NODE RADIAL FORCE ────────────────────────────────────────────
+   d3.forceRadial only accepts SCALAR x/y (not accessors), so we can't
+   tell it "each node has its own center". This custom force does the
+   same per-tick math as d3.forceRadial but looks up each element's
+   block center via BLOCK_NODES_BY_ID. It is the spring that holds
+   moons in orbit around their planets. */
+function orbitalForce(strength){
+  let nodes;
+  function force(alpha){
+    for(let i=0;i<nodes.length;i++){
+      const node = nodes[i];
+      const bn = BLOCK_NODES_BY_ID[node.block];
+      if(!bn) continue;
+      const targetR = _elementOrbitRadius(node.block);
+      const dx = node.x - bn.x;
+      const dy = node.y - bn.y;
+      const len = Math.sqrt(dx*dx + dy*dy) || 1e-6;
+      const k = (targetR - len) * strength * alpha / len;
+      node.vx += dx * k;
+      node.vy += dy * k;
+    }
+  }
+  force.initialize = (n) => { nodes = n; };
+  return force;
+}
+
 let sim = null;
 function buildSim(){
   if(sim) sim.stop();
-  sim = d3.forceSimulation(ALL_NODES)
-    .alpha(0.9)
-    .alphaDecay(0.008)
-    .velocityDecay(0.40)
-    .force('link', d3.forceLink(SIM_LINKS)
-        .distance(d => d.distance || TW.linkDistance)
-        .strength(d => d.strength || TW.linkStrength))
+  /* Simulation runs on element nodes only. Layer and block nodes are
+     pinned via fx/fy. Cross-block and cross-layer neighbor edges are
+     excluded from physics — they're rendered as visual relationships
+     only — because their 700+ unit pulls overwhelm any orbital
+     constraint. The custom orbitalForce keeps each element on its
+     block's ring; intra-block links and collide handle sibling spacing. */
+  sim = d3.forceSimulation(NODES)
+    .alpha(0.6)
+    .alphaDecay(0.012)
+    .velocityDecay(0.55)
+    .force('link', d3.forceLink(EDGES_INTRA)
+        .distance(TW.linkDistance * 0.6)
+        .strength(TW.linkStrength * 0.4))
     .force('charge', d3.forceManyBody()
-        .strength(d => d.kind === 'layer' ? -180
-                     : d.kind === 'block' ? -80
-                     : -TW.repelStrength)
-        .distanceMax(260))
+        .strength(-TW.repelStrength * 0.5)
+        .distanceMax(80))
     .force('collide', d3.forceCollide()
-        .radius(d => d.kind === 'layer' ? d.r + 4
-                   : d.kind === 'block' ? d.r + 3
-                   : d.r + 1.6)
-        .iterations(2))
+        .radius(d => d.r + 1.2)
+        .iterations(1))
+    .force('radial', orbitalForce(0.8))
     .on('tick', ()=>{});
 }
 buildSim();
 
 function refreshForces(){
   if(!sim) return;
-  /* Distance/strength on element-neighbor links still respond to TW
-     sliders; structural links keep their hardcoded values via the
-     `|| TW.linkDistance` fallback. */
-  sim.force('link').distance(d => d.distance || TW.linkDistance)
-                   .strength(d => d.strength || TW.linkStrength);
-  sim.force('charge').strength(d => d.kind === 'layer' ? -180
-                                  : d.kind === 'block' ? -80
-                                  : -TW.repelStrength);
+  sim.force('link').distance(TW.linkDistance * 0.6).strength(TW.linkStrength * 0.4);
+  sim.force('charge').strength(-TW.repelStrength * 0.5);
   sim.alpha(0.4).restart();
 }
 
-/* ── CENTROIDS — recomputed each frame, low-pass smoothed for labels ── */
-const layerCentroid    = {};   /* raw, instantaneous */
-const blockCentroid    = {};
-const layerCentroidS   = {};   /* smoothed, used for label placement */
-const blockCentroidS   = {};
-const SMOOTH = 0.10;
-function computeCentroids(){
-  const lsx={}, lsy={}, lc={};
-  const bsx={}, bsy={}, bc={};
-  for(let i=0;i<NODES.length;i++){
-    const n = NODES[i];
-    lsx[n.layer]=(lsx[n.layer]||0)+n.x; lsy[n.layer]=(lsy[n.layer]||0)+n.y; lc[n.layer]=(lc[n.layer]||0)+1;
-    bsx[n.block]=(bsx[n.block]||0)+n.x; bsy[n.block]=(bsy[n.block]||0)+n.y; bc[n.block]=(bc[n.block]||0)+1;
-  }
-  for(const k in lc){
-    layerCentroid[k] = {x: lsx[k]/lc[k], y: lsy[k]/lc[k]};
-    if(!layerCentroidS[k]) layerCentroidS[k] = {x: layerCentroid[k].x, y: layerCentroid[k].y};
-    else {
-      layerCentroidS[k].x += (layerCentroid[k].x - layerCentroidS[k].x) * SMOOTH;
-      layerCentroidS[k].y += (layerCentroid[k].y - layerCentroidS[k].y) * SMOOTH;
-    }
-  }
-  for(const k in bc){
-    blockCentroid[k] = {x: bsx[k]/bc[k], y: bsy[k]/bc[k]};
-    if(!blockCentroidS[k]) blockCentroidS[k] = {x: blockCentroid[k].x, y: blockCentroid[k].y};
-    else {
-      blockCentroidS[k].x += (blockCentroid[k].x - blockCentroidS[k].x) * SMOOTH;
-      blockCentroidS[k].y += (blockCentroid[k].y - blockCentroidS[k].y) * SMOOTH;
-    }
-  }
-}
-
-/* ── ZOOM TIER LOGIC — same thresholds as v1 ────────────────────────── */
+/* ── ZOOM TIER LOGIC — retuned for the solar-system layout ──────────
+   Structure is already legible at god view, so thresholds shift in:
+     T0  k<0.7   full system, layer labels + structural tethers
+     T1  k<1.4   block labels appear, block-element tethers fading in
+     T2  k<2.8   element codes appear
+     T3  k≥2.8   element names + all tethers visible */
 function tier(k){
-  if(k < 0.95) return 0;
-  if(k < 1.6)  return 1;
-  if(k < 3.0)  return 2;
+  if(k < 0.7) return 0;
+  if(k < 1.4) return 1;
+  if(k < 2.8) return 2;
   return 3;
 }
 function ramp(k, a, b){ if(k<=a) return 0; if(k>=b) return 1; const t=(k-a)/(b-a); return t*t*(3-2*t); }
@@ -1001,37 +1107,42 @@ function drawEdges(t, k, view){
   const sel = selectedNode;
   const hov = hoveredNode;
 
-  /* layer→block tethers — faint dashed, always visible.
-     These signal the layer hierarchy even at god view. */
+  /* layer→block tethers — dashed, always visible. With pinned geometry
+     these are now the primary structural signal at god view. */
   {
-    ctx.lineWidth = 0.8 / k;
+    ctx.lineWidth = 1.0 / k;
     ctx.setLineDash([4/k, 5/k]);
-    for(let i=0;i<LAYER_BLOCK_LINKS.length;i++){
-      const e = LAYER_BLOCK_LINKS[i];
-      const s = e.source, tg = e.target;
-      if((s.x < view.minX && tg.x < view.minX) || (s.x > view.maxX && tg.x > view.maxX) ||
-         (s.y < view.minY && tg.y < view.minY) || (s.y > view.maxY && tg.y > view.maxY)) continue;
-      ctx.strokeStyle = ha(layerColor(s.layer), 0.22 * dens);
-      ctx.beginPath();
-      ctx.moveTo(s.x, s.y); ctx.lineTo(tg.x, tg.y);
-      ctx.stroke();
+    for(let li=0; li<LAYER_NODES.length; li++){
+      const ln = LAYER_NODES[li];
+      const lid = ln.layer;
+      const blocks = BL[lid];
+      for(let bi=0; bi<blocks.length; bi++){
+        const bn = BLOCK_NODES_BY_ID[blocks[bi].id];
+        if((ln.x < view.minX && bn.x < view.minX) || (ln.x > view.maxX && bn.x > view.maxX) ||
+           (ln.y < view.minY && bn.y < view.minY) || (ln.y > view.maxY && bn.y > view.maxY)) continue;
+        ctx.strokeStyle = ha(layerColor(lid), 0.30 * dens);
+        ctx.beginPath();
+        ctx.moveTo(ln.x, ln.y); ctx.lineTo(bn.x, bn.y);
+        ctx.stroke();
+      }
     }
     ctx.setLineDash([]);
   }
 
-  /* block→element tethers — very faint, visible only at mid+ zoom.
-     These let the eye trace an element back to its block. */
-  const aBlockEl = ramp(k, 1.4, 2.6) * 0.18 * dens;
+  /* block→element tethers — fade in earlier (k > 0.8) since the
+     orbital structure is now visible at the "planet with moons" zoom. */
+  const aBlockEl = ramp(k, 0.8, 2.0) * 0.28 * dens;
   if(aBlockEl > 0.01){
-    ctx.lineWidth = 0.6 / k;
-    for(let i=0;i<BLOCK_ELEMENT_LINKS.length;i++){
-      const e = BLOCK_ELEMENT_LINKS[i];
-      const s = e.source, tg = e.target;
-      if((s.x < view.minX && tg.x < view.minX) || (s.x > view.maxX && tg.x > view.maxX) ||
-         (s.y < view.minY && tg.y < view.minY) || (s.y > view.maxY && tg.y > view.maxY)) continue;
-      ctx.strokeStyle = ha(layerColor(s.layer), aBlockEl);
+    ctx.lineWidth = 0.7 / k;
+    for(let i=0; i<NODES.length; i++){
+      const n = NODES[i];
+      const bn = BLOCK_NODES_BY_ID[n.block];
+      if(!bn) continue;
+      if((n.x < view.minX && bn.x < view.minX) || (n.x > view.maxX && bn.x > view.maxX) ||
+         (n.y < view.minY && bn.y < view.minY) || (n.y > view.maxY && bn.y > view.maxY)) continue;
+      ctx.strokeStyle = ha(layerColor(n.layer), aBlockEl);
       ctx.beginPath();
-      ctx.moveTo(s.x, s.y); ctx.lineTo(tg.x, tg.y);
+      ctx.moveTo(bn.x, bn.y); ctx.lineTo(n.x, n.y);
       ctx.stroke();
     }
   }
@@ -1222,7 +1333,9 @@ function drawLabels(t, k){
 
   /* tier 1: LAYER labels — anchored to the layer NODE's screen position.
      The node is always visible, so the label never floats unanchored. */
-  const layerOp = (k < 0.6) ? 0.55 : (k < 2.0 ? 0.95 : Math.max(0.18, 1 - ramp(k, 2.0, 3.5)*0.78));
+  /* Layer labels are always visible at strong opacity. They only fade
+     when zoomed very close (k > 3.5) so element labels can claim space. */
+  const layerOp = (k < 3.5) ? 0.85 : Math.max(0.25, 0.85 - ramp(k, 3.5, 5.0) * 0.60);
   const layerSize = k < 0.95 ? 22 : (k < 1.6 ? 32 : (k < 3.0 ? 28 : 22));
   if(layerOp > 0.04){
     LY.forEach(l=>{
@@ -1309,7 +1422,9 @@ function drawLabels(t, k){
 
   /* tier 2: BLOCK labels — anchored to the block NODE's screen position.
      Fade in slightly earlier than v1 (k > 1.1 instead of 1.3). */
-  const blockOp = ramp(k, 1.1, 1.6) * Math.min(1, 0.4 + density*0.7);
+  /* Block labels appear early — solar-system structure is legible from
+     k≈0.6 onward, so block names are useful much sooner than before. */
+  const blockOp = ramp(k, 0.6, 1.0) * Math.min(1, 0.4 + density*0.7);
   if(blockOp > 0.04){
     const blockSize = k < 2.0 ? 11 : (k < 3.0 ? 12 : 12);
     /* render order: closer to origin first (so center labels claim space) */
@@ -1402,8 +1517,8 @@ function drawLabels(t, k){
   }
 
   /* tier 3: ELEMENT codes at k≥2.4, names at k≥4.0 */
-  const codeOp = ramp(k, 2.4, 3.2) * Math.min(1, 0.4 + density*0.7);
-  const nameOp = ramp(k, 4.0, 5.5) * density;
+  const codeOp = ramp(k, 1.8, 2.6) * Math.min(1, 0.4 + density*0.7);
+  const nameOp = ramp(k, 3.5, 5.0) * density;
   if(codeOp > 0.04 || nameOp > 0.04){
     const candidates = NODES.slice().sort((a,b)=>{
       if(a.mml !== b.mml) return a.mml - b.mml;
@@ -1469,14 +1584,35 @@ function drawMinimap(){
   mmCtx.fillStyle = 'rgba(255,255,255,0.18)';
   mmCtx.fillRect(0,0,mmW,mmH);
 
-  /* nodes only — color tells the layer story. No halos. */
+  /* z-order: elements (bottom), then blocks, then layers on top. */
+  mmCtx.globalAlpha = 0.78;
   for(let i=0;i<NODES.length;i++){
     const n = NODES[i];
     mmCtx.fillStyle = layerColor(n.layer);
-    mmCtx.globalAlpha = 0.78;
     mmCtx.fillRect(n.x*s + offX - 0.8, n.y*s + offY - 0.8, 1.6, 1.6);
   }
+  /* blocks: medium dots (~2.4px) so they read as "planets" in the minimap */
+  mmCtx.globalAlpha = 0.95;
+  for(let i=0;i<BLOCK_NODES.length;i++){
+    const bn = BLOCK_NODES[i];
+    mmCtx.fillStyle = layerColor(bn.layer);
+    mmCtx.beginPath();
+    mmCtx.arc(bn.x*s + offX, bn.y*s + offY, 1.6, 0, Math.PI*2);
+    mmCtx.fill();
+  }
+  /* layers: larger dots with a small dark ring */
   mmCtx.globalAlpha = 1;
+  for(let i=0;i<LAYER_NODES.length;i++){
+    const ln = LAYER_NODES[i];
+    const cx = ln.x*s + offX, cy = ln.y*s + offY;
+    mmCtx.fillStyle = layerColor(ln.layer);
+    mmCtx.beginPath();
+    mmCtx.arc(cx, cy, 3, 0, Math.PI*2);
+    mmCtx.fill();
+    mmCtx.strokeStyle = 'rgba(24,22,15,0.55)';
+    mmCtx.lineWidth = 0.6;
+    mmCtx.stroke();
+  }
 
   const tl = transform.invert([0,0]);
   const br = transform.invert([W,H]);
@@ -1909,15 +2045,25 @@ function _bindCardNav(){
       if(btn.dataset.code){
         const n = NODES_BY_CODE[btn.dataset.code];
         if(n){
-          if(transform.k >= 2.5) openPassport(n);
-          else flyToNode(n, ()=> openPassport(n));
+          /* Always fly to the selected neighbor so it's centered and
+             framed, regardless of current zoom. Without this, clicking
+             a neighbor that's off-screen leaves the user disoriented. */
+          flyToNode(n, ()=> openPassport(n));
         }
       } else if(btn.dataset.block){
         const b = BL_BY_ID[btn.dataset.block];
-        if(b) openBlockCard(b);
+        if(b){
+          const bn = BLOCK_NODES_BY_ID[b.id];
+          if(bn) flyTo(bn.x, bn.y, 3.0, 620);
+          openBlockCard(b);
+        }
       } else if(btn.dataset.layer){
         const l = LY_BY_ID[btn.dataset.layer];
-        if(l) openLayerCard(l);
+        if(l){
+          const ln = LAYER_NODES_BY_ID[l.id];
+          if(ln) flyTo(ln.x, ln.y, 1.6, 620);
+          openLayerCard(l);
+        }
       }
     });
   });
@@ -2002,11 +2148,17 @@ function openBlockCard(b){
   _bindCardNav();
   /* the layer badge is a separate "go to layer" button */
   const lbtn = document.getElementById('pp-content').querySelector('[data-go-layer]');
-  if(lbtn) lbtn.addEventListener('click', ()=> openLayerCard(LY_BY_ID[lbtn.dataset.goLayer]));
+  if(lbtn) lbtn.addEventListener('click', ()=>{
+    const l = LY_BY_ID[lbtn.dataset.goLayer];
+    const ln = LAYER_NODES_BY_ID[l.id];
+    if(ln) flyTo(ln.x, ln.y, 1.6, 620);
+    openLayerCard(l);
+  });
 }
 
 function openPassport(d){
   selectedNode = d;
+  pushRecent(d.code);
   const l = LY_BY_ID[d.layer];
   _showPanel(l);
   const mmlHex = ha(l.stroke, 0.12);
@@ -2056,7 +2208,12 @@ function openPassport(d){
   _bindCardNav();
   /* layer badge is a separate "go to layer" button */
   const lbtn = document.getElementById('pp-content').querySelector('[data-go-layer]');
-  if(lbtn) lbtn.addEventListener('click', ()=> openLayerCard(LY_BY_ID[lbtn.dataset.goLayer]));
+  if(lbtn) lbtn.addEventListener('click', ()=>{
+    const l = LY_BY_ID[lbtn.dataset.goLayer];
+    const ln = LAYER_NODES_BY_ID[l.id];
+    if(ln) flyTo(ln.x, ln.y, 1.6, 620);
+    openLayerCard(l);
+  });
 }
 function closePassport(){
   const p = document.getElementById('panel');
@@ -2343,12 +2500,100 @@ _mmlFilterEl.addEventListener('change', ()=>{
   if(currentView === 'tree') renderTreeElementCol();
 });
 
+/* ═══════════════════════════════════════════════════════════════════════
+   RECENTLY VIEWED STRIP
+   Persistent list of the last 12 passports the user opened. Each chip
+   is dismissible and click-to-reopen. Persisted via localStorage so the
+   list survives reload. In Explorer view, opening from a chip flies the
+   canvas to the node first; in Tree view it just opens the passport. */
+const RECENTS_LIMIT = 12;
+const RECENTS_STORAGE_KEY = 'hes-library-recents-v1';
+let recents = [];
+
+function loadRecents(){
+  try{
+    const raw = localStorage.getItem(RECENTS_STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(Array.isArray(parsed)){
+        /* drop any codes that no longer exist (stale data from a prior
+           dataset) */
+        recents = parsed.filter(c => ELS_BY_CODE[c]).slice(0, RECENTS_LIMIT);
+      }
+    }
+  } catch(_){ recents = []; }
+}
+function saveRecents(){
+  try{ localStorage.setItem(RECENTS_STORAGE_KEY, JSON.stringify(recents)); } catch(_){}
+}
+function pushRecent(code){
+  if(!ELS_BY_CODE[code]) return;
+  /* Move-to-front semantics: existing entry is removed, the code goes
+     to the head, and the oldest tail is dropped when over the limit. */
+  recents = [code, ...recents.filter(c => c !== code)].slice(0, RECENTS_LIMIT);
+  saveRecents();
+  renderRecents();
+}
+function dismissRecent(code){
+  recents = recents.filter(c => c !== code);
+  saveRecents();
+  renderRecents();
+}
+function renderRecents(){
+  const scroller = document.getElementById('recents-scroller');
+  if(!scroller) return;
+  if(recents.length === 0){
+    scroller.innerHTML = '<div class="rec-empty">no recent passports</div>';
+    return;
+  }
+  scroller.innerHTML = recents.map(code => {
+    const e = ELS_BY_CODE[code];
+    if(!e) return '';
+    const safeName = e.name.replace(/"/g, '&quot;');
+    return `<div class="rec-chip" role="listitem" data-code="${code}" tabindex="0" aria-label="Open passport for ${e.code} ${safeName}">
+      <span class="rec-code">${e.code}</span>
+      <span class="rec-name">${safeName}</span>
+      <span class="rec-x" data-x="${code}" role="button" aria-label="Remove ${e.code} from recents">×</span>
+    </div>`;
+  }).join('');
+  scroller.querySelectorAll('.rec-chip').forEach(chip => {
+    chip.addEventListener('click', ev => {
+      const dismiss = ev.target.closest('.rec-x');
+      if(dismiss){
+        ev.stopPropagation();
+        dismissRecent(dismiss.dataset.x);
+        return;
+      }
+      const n = NODES_BY_CODE[chip.dataset.code];
+      if(!n) return;
+      if(currentView === 'tree'){
+        openPassport(n);
+      } else {
+        flyToNode(n, ()=> openPassport(n));
+      }
+    });
+    /* keyboard activation */
+    chip.addEventListener('keydown', ev => {
+      if(ev.key === 'Enter' || ev.key === ' '){
+        ev.preventDefault();
+        chip.click();
+      } else if(ev.key === 'Delete' || ev.key === 'Backspace'){
+        ev.preventDefault();
+        dismissRecent(chip.dataset.code);
+      }
+    });
+  });
+}
+
+loadRecents();
+renderRecents();
+
 /* ── INIT ────────────────────────────────────────────────────────────── */
 resize();
 applyAll();
-/* Run a longer pre-settle so the hierarchical orbits (layer→block→element)
-   have time to find their equilibrium before first paint. */
-for(let i=0;i<200;i++) sim.tick();
+/* Brief pre-settle — geometric placement already lands elements on their
+   orbital rings; the simulation just smooths inter-element spacing. */
+for(let i=0;i<80;i++) sim.tick();
 recomputeBounds();
 fitToWorld(false);
 updateZoomUI();
