@@ -468,62 +468,109 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
       </linearGradient>
     </defs>
     <rect width="1200" height="800" fill="url(#vellum)"/>
-    <!-- Four orrery systems — suns with planetary rings, arranged 2×2 -->
+    <!-- Four orrery systems on an asymmetric constellation —
+         Core top-left, Derived top-right, Quantum bottom-just-left,
+         Emotional far-bottom-right. Each system shows nested orbit
+         rings with planet dots on each ring. -->
     <g fill="none" stroke-width="1">
-      <!-- Core (top-left) -->
-      <g transform="translate(420,300)" stroke="#3C91D6">
-        <circle r="120" opacity="0.30"/>
-        <circle cx="0" cy="-120" r="22" opacity="0.20"/>
-        <circle cx="104" cy="60" r="22" opacity="0.20"/>
-        <circle cx="-104" cy="60" r="22" opacity="0.20"/>
+      <!-- Core (top, far-left) — 8 orbit rings -->
+      <g transform="translate(320,320)" stroke="#3C91D6">
+        <circle r="46" opacity="0.22"/>
+        <circle r="62" opacity="0.22"/>
+        <circle r="78" opacity="0.22"/>
+        <circle r="94" opacity="0.22"/>
+        <circle r="110" opacity="0.22"/>
+        <circle r="126" opacity="0.22"/>
+        <circle r="142" opacity="0.22"/>
+        <circle r="158" opacity="0.22"/>
+        <g fill="#3C91D6" stroke="#3C91D6">
+          <circle r="7" fill-opacity="0.3"/>
+          <circle r="3" fill-opacity="1"/>
+        </g>
         <g fill="#3C91D6" stroke="none">
-          <circle r="9"/>
-          <circle cx="0" cy="-120" r="4"/>
-          <circle cx="104" cy="60" r="4"/>
-          <circle cx="-104" cy="60" r="4"/>
+          <circle cx="0" cy="-46" r="4"/>
+          <circle cx="59" cy="-19" r="4"/>
+          <circle cx="65" cy="42" r="4"/>
+          <circle cx="22" cy="91" r="4"/>
+          <circle cx="-58" cy="89" r="4"/>
+          <circle cx="-119" cy="38" r="4"/>
+          <circle cx="-127" cy="-62" r="4"/>
+          <circle cx="-54" cy="-148" r="4"/>
         </g>
       </g>
-      <!-- Derived (top-right) -->
-      <g transform="translate(780,300)" stroke="#2EA397">
-        <circle r="120" opacity="0.30"/>
-        <circle cx="0" cy="-120" r="22" opacity="0.20"/>
-        <circle cx="104" cy="60" r="22" opacity="0.20"/>
-        <circle cx="-104" cy="60" r="22" opacity="0.20"/>
+      <!-- Derived (top-right-of-centre) — 12 orbit rings, biggest system -->
+      <g transform="translate(820,320)" stroke="#2EA397">
+        <circle r="46" opacity="0.22"/>
+        <circle r="62" opacity="0.22"/>
+        <circle r="78" opacity="0.22"/>
+        <circle r="94" opacity="0.22"/>
+        <circle r="110" opacity="0.22"/>
+        <circle r="126" opacity="0.22"/>
+        <circle r="142" opacity="0.22"/>
+        <circle r="158" opacity="0.22"/>
+        <circle r="174" opacity="0.22"/>
+        <circle r="190" opacity="0.22"/>
+        <circle r="206" opacity="0.22"/>
+        <circle r="222" opacity="0.22"/>
+        <g fill="#2EA397" stroke="#2EA397">
+          <circle r="7" fill-opacity="0.3"/>
+          <circle r="3" fill-opacity="1"/>
+        </g>
         <g fill="#2EA397" stroke="none">
-          <circle r="9"/>
-          <circle cx="0" cy="-120" r="4"/>
-          <circle cx="104" cy="60" r="4"/>
-          <circle cx="-104" cy="60" r="4"/>
+          <circle cx="0" cy="-46" r="4"/>
+          <circle cx="32" cy="-53" r="4"/>
+          <circle cx="63" cy="-46" r="4"/>
+          <circle cx="89" cy="-30" r="4"/>
+          <circle cx="106" cy="29" r="4"/>
+          <circle cx="93" cy="86" r="4"/>
+          <circle cx="50" cy="133" r="4"/>
+          <circle cx="-22" cy="157" r="4"/>
+          <circle cx="-104" cy="139" r="4"/>
+          <circle cx="-170" cy="84" r="4"/>
+          <circle cx="-200" cy="-49" r="4"/>
+          <circle cx="-153" cy="-161" r="4"/>
         </g>
       </g>
-      <!-- Quantum (bottom-left) -->
-      <g transform="translate(420,560)" stroke="#CC5023">
-        <circle r="120" opacity="0.30"/>
-        <circle cx="0" cy="-120" r="22" opacity="0.20"/>
-        <circle cx="104" cy="60" r="22" opacity="0.20"/>
-        <circle cx="-104" cy="60" r="22" opacity="0.20"/>
+      <!-- Quantum (bottom-just-left-of-centre) — 5 orbit rings, smaller -->
+      <g transform="translate(540,650)" stroke="#CC5023">
+        <circle r="46" opacity="0.22"/>
+        <circle r="62" opacity="0.22"/>
+        <circle r="78" opacity="0.22"/>
+        <circle r="94" opacity="0.22"/>
+        <circle r="110" opacity="0.22"/>
+        <g fill="#CC5023" stroke="#CC5023">
+          <circle r="7" fill-opacity="0.3"/>
+          <circle r="3" fill-opacity="1"/>
+        </g>
         <g fill="#CC5023" stroke="none">
-          <circle r="9"/>
-          <circle cx="0" cy="-120" r="4"/>
-          <circle cx="104" cy="60" r="4"/>
-          <circle cx="-104" cy="60" r="4"/>
+          <circle cx="0" cy="-46" r="4"/>
+          <circle cx="59" cy="-19" r="4"/>
+          <circle cx="46" cy="63" r="4"/>
+          <circle cx="-50" cy="80" r="4"/>
+          <circle cx="-105" cy="-32" r="4"/>
         </g>
       </g>
-      <!-- Emotional (bottom-right) -->
-      <g transform="translate(780,560)" stroke="#9A49B8">
-        <circle r="120" opacity="0.30"/>
-        <circle cx="0" cy="-120" r="22" opacity="0.20"/>
-        <circle cx="104" cy="60" r="22" opacity="0.20"/>
-        <circle cx="-104" cy="60" r="22" opacity="0.20"/>
+      <!-- Emotional (far-bottom-right) — 5 orbit rings -->
+      <g transform="translate(940,640)" stroke="#9A49B8">
+        <circle r="46" opacity="0.22"/>
+        <circle r="62" opacity="0.22"/>
+        <circle r="78" opacity="0.22"/>
+        <circle r="94" opacity="0.22"/>
+        <circle r="110" opacity="0.22"/>
+        <g fill="#9A49B8" stroke="#9A49B8">
+          <circle r="7" fill-opacity="0.3"/>
+          <circle r="3" fill-opacity="1"/>
+        </g>
         <g fill="#9A49B8" stroke="none">
-          <circle r="9"/>
-          <circle cx="0" cy="-120" r="4"/>
-          <circle cx="104" cy="60" r="4"/>
-          <circle cx="-104" cy="60" r="4"/>
+          <circle cx="0" cy="-46" r="4"/>
+          <circle cx="59" cy="-19" r="4"/>
+          <circle cx="46" cy="63" r="4"/>
+          <circle cx="-50" cy="80" r="4"/>
+          <circle cx="-105" cy="-32" r="4"/>
         </g>
       </g>
     </g>
-    <text x="600" y="120" text-anchor="middle" font-family="DM Mono, monospace" font-size="22" letter-spacing="6" fill="#18160F">HES / PASSPORT LIBRARY · ORRERY</text>
+    <text x="600" y="60" text-anchor="middle" font-family="DM Mono, monospace" font-size="22" letter-spacing="6" fill="#18160F">HES / PASSPORT LIBRARY · ORRERY</text>
   </svg>
 </template>
 
@@ -820,27 +867,34 @@ const NODES = ELS.map((e, idx)=>{
 const NODES_BY_CODE = Object.fromEntries(NODES.map(n=>[n.code,n]));
 
 /* ── ORRERY GEOMETRY ────────────────────────────────────────────────
-   Pure static star-chart layout. Each layer is a sun; each block is a
-   planet on its OWN orbit ring around that sun (BD01 innermost, BD-N
-   outermost); each element is a moon on its OWN orbit ring around its
-   planet (first element innermost, last outermost). Planet radii scale
-   with element count. Sun positions are derived from the measured
-   extents of the four systems plus a gutter, so big systems get more
-   room.                                                              */
+   Each layer is a sun. Each block has a circular TERRITORY around the
+   sun — an annular ring whose outer edge is the visible orbit ring at
+   god view. The planet sits at the MIDDLE of the annular ring, and its
+   moons cluster around the planet on a small number of compact arcs
+   (≤6 moons per arc). At max zoom-out the user sees just suns + the
+   block-territory outer rings; as the user zooms in, the planets in
+   the middle of each annulus come into focus, and finally the moons
+   spread around each planet.                                          */
 const GEO = {
-  sunR: 20,
-  moonR: 4,
-  moonOrbitStep: 13,       /* px between consecutive moon orbit rings */
-  minMoonClearance: 16,    /* gap from planet surface to first moon orbit */
-  interOrbitGap: 28,       /* breathing room between adjacent block systems */
-  sunClearance: 40,        /* gap from sun surface to first planet's innermost moon */
-  systemGutter: 120,       /* min clearance between adjacent layer system extents */
-  /* Planet radius scales with element count. */
-  planetR: (elementCount) => 6 + elementCount * 0.6,
-  /* i-th moon's orbit radius around its planet (0-indexed). */
-  elementOrbitR: (i, pR) => pR + GEO.minMoonClearance + i * GEO.moonOrbitStep,
-  /* Outermost moon orbit radius for a block with n elements. */
-  outerMoonR: (n) => GEO.elementOrbitR(n - 1, GEO.planetR(n)),
+  sunR: 20,                /* layer node radius */
+  planetR: 5,              /* uniform — Figma reference uses uniform small dots */
+  moonR: 3,                /* element node radius */
+  moonsPerArc: 6,          /* moons per concentric arc inside a block */
+  moonOrbitStep: 5,        /* px between consecutive moon arcs */
+  minMoonClearance: 5,     /* gap from planet surface to innermost moon arc */
+  sunClearance: 8,         /* gap from sun surface to innermost block territory */
+  interOrbitGap: 3,        /* gap between adjacent block territories */
+  systemGutter: 110,       /* min clearance between adjacent layer systems */
+  /* Number of moon arcs for a block with n elements (1, 6→1, 7→2, …). */
+  moonArcCount: (n) => (n <= 0 ? 0 : Math.ceil(n / GEO.moonsPerArc)),
+  /* Outermost moon arc radius for a block with n elements (from planet centre). */
+  outerMoonR: (n) => {
+    const arcs = GEO.moonArcCount(n);
+    if(arcs <= 0) return GEO.planetR;
+    return GEO.planetR + GEO.minMoonClearance + (arcs - 1) * GEO.moonOrbitStep;
+  },
+  /* Radius of the j-th moon arc (0-indexed). */
+  moonArcR: (j) => GEO.planetR + GEO.minMoonClearance + j * GEO.moonOrbitStep,
 };
 
 const LAYER_NODES = LY.map(l => ({
@@ -866,7 +920,7 @@ const BLOCK_NODES = Object.values(BL).flat().map(b => {
     blockId: b.id,
     blockName: b.name,
     count: b.count,
-    r: GEO.planetR(b.count),
+    r: GEO.planetR,
     x: 0, y: 0,           /* set by computeOrreryPositions() */
     vx: 0, vy: 0,
   };
@@ -877,47 +931,79 @@ const BLOCK_NODES_BY_ID = Object.fromEntries(BLOCK_NODES.map(bn => [bn.blockId, 
    Pure geometry, runs once. After this returns, every node has its
    final x/y, r, orbitR, and parent coords. No simulation is ever
    created. The packing is sequential:
-     • Per layer, BD01 sits on the innermost block orbit; each
-       subsequent block's orbit equals (previous outer moon edge +
-       interOrbitGap + this block's outer-moon radius).
+     • Per layer, BD01 sits on the innermost block orbit
+       (sunR + sunClearance); each subsequent block sits one
+       blockOrbitStep further out — a fixed-pitch nested ring set.
      • Per block, the first element sits on the innermost moon orbit
        (planet edge + minMoonClearance); each subsequent element is
        moonOrbitStep px further out.
-   Sun positions are computed last so that adjacent layer systems
-   never overlap, regardless of how many blocks each layer has.    */
+   Sun positions are derived from each layer's outermost block orbit so
+   no two systems ever overlap regardless of block count.            */
 function computeBlockOrbits(blocks){
+  /* Each block has an annular territory around the sun whose inner edge
+     starts at `cursor`, whose width is 2·outerMoonR (so the planet's
+     full moon system fits inside), and whose outer edge becomes the
+     visible ring at god view.
+       cursor                            (= inner edge of block i)
+         + outerMoonR_i                  (= planet centre orbit)
+         + outerMoonR_i                  (= outer edge of block i)
+         + interOrbitGap                 (= breathing room → next cursor) */
   const orbits = [];
   let cursor = GEO.sunR + GEO.sunClearance;
-  blocks.forEach((b, i) => {
-    const pR     = GEO.planetR(b.count);
-    const outerR = GEO.outerMoonR(b.count);
-    /* This planet sits at cursor + outerR (so its inner moon clears the cursor). */
-    const blockOrbit = cursor + outerR;
-    orbits.push({ blockId: b.id, orbitR: blockOrbit, planetR: pR, outerMoonR: outerR });
-    /* Advance cursor past this block's outer moon + breathing room. */
-    cursor = blockOrbit + outerR + GEO.interOrbitGap;
+  blocks.forEach((b) => {
+    const outerR    = GEO.outerMoonR(b.count);
+    const innerEdge = cursor;
+    const planetOrbit = cursor + outerR;
+    const outerEdge   = planetOrbit + outerR;
+    orbits.push({
+      blockId:    b.id,
+      orbitR:     planetOrbit,   /* planet sits here (middle of annulus) */
+      innerEdge,                  /* inside boundary of block territory */
+      outerEdge,                  /* visible territory ring at god view */
+      outerMoonR: outerR,         /* used for moon-ring culling */
+      planetR:    GEO.planetR,
+    });
+    cursor = outerEdge + GEO.interOrbitGap;
   });
+  /* System extent = outer edge of outermost block + tiny halo. */
   const totalSystemR = orbits.length
-    ? orbits[orbits.length - 1].orbitR + orbits[orbits.length - 1].outerMoonR
+    ? orbits[orbits.length - 1].outerEdge + 6
     : GEO.sunR;
   return { orbits, totalSystemR };
 }
 
+/* Organic, Figma-derived sun positions.
+   The four suns are NOT on a 2×2 grid — they form an asymmetric
+   constellation: Core sits far top-left, Derived top-right-of-centre,
+   Quantum bottom-just-left-of-centre, Emotional far bottom-right.
+   Proposed offsets are scaled uniformly so adjacent suns never crowd
+   each other given the actual measured system radii.                */
 function computeSunPositions(systemRadii){
-  const hGap = GEO.systemGutter;
-  const vGap = GEO.systemGutter;
-  /* Horizontal centre-to-centre: sum of left + right system extents + gutter. */
-  const hDist = systemRadii.core + systemRadii.derived + hGap;
-  /* Vertical centre-to-centre: max of top-row extents + max of bottom-row + gutter. */
-  const vDist = Math.max(systemRadii.core,      systemRadii.derived)
-              + Math.max(systemRadii.quantum,   systemRadii.emotional)
-              + vGap;
-  return {
-    core:      { x: -hDist / 2, y: -vDist / 2 },
-    derived:   { x:  hDist / 2, y: -vDist / 2 },
-    quantum:   { x: -hDist / 2, y:  vDist / 2 },
-    emotional: { x:  hDist / 2, y:  vDist / 2 },
+  const proposed = {
+    core:      { x: -330, y: -210 },
+    derived:   { x:  240, y: -210 },
+    quantum:   { x:  -80, y:  230 },
+    emotional: { x:  340, y:  210 },
   };
+  const pairs = [
+    ['core','derived'], ['core','quantum'], ['core','emotional'],
+    ['derived','quantum'], ['derived','emotional'], ['quantum','emotional'],
+  ];
+  /* Find the tightest pair and pick the minimum uniform scale that
+     gives every pair at least (Ra + Rb + systemGutter) of clearance. */
+  let scale = 1;
+  pairs.forEach(([a, b]) => {
+    const dx = proposed[a].x - proposed[b].x;
+    const dy = proposed[a].y - proposed[b].y;
+    const dist = Math.hypot(dx, dy);
+    const need = systemRadii[a] + systemRadii[b] + GEO.systemGutter;
+    if(need / dist > scale) scale = need / dist;
+  });
+  const out = {};
+  Object.keys(proposed).forEach(k => {
+    out[k] = { x: proposed[k].x * scale, y: proposed[k].y * scale };
+  });
+  return out;
 }
 
 function computeOrreryPositions(){
@@ -939,40 +1025,54 @@ function computeOrreryPositions(){
     ln.r = GEO.sunR;
     ln.systemR = systemRadii[ln.layer];
   });
-  /* 3. Place block planets — one unique orbit per block, sequential. */
+  /* 3. Place block planets at the MIDDLE of their annular territory. */
   LY.forEach(l => {
     const sun     = LAYER_NODES_BY_ID[l.id];
     const blocks  = BL[l.id];
     const orbits  = layerOrbits[l.id];
     const n       = blocks.length;
     blocks.forEach((b, i) => {
-      const { orbitR, planetR, outerMoonR } = orbits[i];
+      const { orbitR, planetR, outerMoonR, outerEdge, innerEdge } = orbits[i];
       const angle = (i / n) * Math.PI * 2 - Math.PI / 2; /* sequential, start at top */
       const bn = BLOCK_NODES_BY_ID[b.id];
       bn.x          = sun.x + Math.cos(angle) * orbitR;
       bn.y          = sun.y + Math.sin(angle) * orbitR;
       bn.r          = planetR;
-      bn.orbitR     = orbitR;
-      bn.outerMoonR = outerMoonR;
+      bn.orbitR     = orbitR;     /* planet centre radius from sun */
+      bn.outerEdge  = outerEdge;  /* outer ring radius from sun (drawn at god view) */
+      bn.innerEdge  = innerEdge;  /* inner ring radius from sun (territory inside edge) */
+      bn.outerMoonR = outerMoonR; /* outer moon arc radius from planet centre */
       bn.parentX    = sun.x;
       bn.parentY    = sun.y;
       bn.angle      = angle;
     });
   });
-  /* 4. Place element moons — one unique orbit per moon, sequential. */
+  /* 4. Place element moons — packed on concentric arcs around the planet.
+     Up to GEO.moonsPerArc moons per arc, angularly spaced; spillover
+     moves to the next arc out. Each arc gets up to 6 moons distributed
+     evenly around 360°; arcs without a full ring still distribute their
+     moons evenly (so a 7-element block puts 6 moons on the inner ring
+     and 1 single moon on the outer ring). */
   LY.forEach(l => {
     BL[l.id].forEach(b => {
       const planet   = BLOCK_NODES_BY_ID[b.id];
       const elements = NODES.filter(n => n.block === b.id);  /* canonical code order */
       const count    = elements.length;
-      const pR       = planet.r;
+      const arcs     = GEO.moonArcCount(count);
+      /* Pre-compute how many moons sit on each arc. */
+      const perArc = new Array(arcs).fill(0);
+      for(let j=0; j<count; j++) perArc[Math.floor(j / GEO.moonsPerArc)]++;
       elements.forEach((el, i) => {
-        const orbitR = GEO.elementOrbitR(i, pR);
-        const angle  = (i / count) * Math.PI * 2 - Math.PI / 2;
-        el.x        = planet.x + Math.cos(angle) * orbitR;
-        el.y        = planet.y + Math.sin(angle) * orbitR;
+        const arcIdx     = Math.floor(i / GEO.moonsPerArc);
+        const idxInArc   = i % GEO.moonsPerArc;
+        const moonsHere  = perArc[arcIdx];
+        const radius     = GEO.moonArcR(arcIdx);
+        const angle      = (idxInArc / moonsHere) * Math.PI * 2 - Math.PI / 2;
+        el.x        = planet.x + Math.cos(angle) * radius;
+        el.y        = planet.y + Math.sin(angle) * radius;
         el.r        = GEO.moonR;
-        el.orbitR   = orbitR;
+        el.orbitR   = radius;
+        el.arcIdx   = arcIdx;
         el.parentX  = planet.x;
         el.parentY  = planet.y;
         el.angle    = angle;
@@ -1220,8 +1320,9 @@ function drawEdges(t, k, view){
 function drawOrbitRings(t, k, view){
   ctx.setLineDash([]);
 
-  /* ── Block orbit rings — one per planet, centred on its sun ──
-     Always visible. They are the layer's structural fingerprint. */
+  /* ── Block territory rings — outer edge of each block's annular
+     region, centred on its sun. Always visible — these are the
+     structural fingerprint of each layer at god view. */
   ctx.lineWidth = 0.6 / k;
   LY.forEach(l => {
     const sun  = LAYER_NODES_BY_ID[l.id];
@@ -1229,32 +1330,33 @@ function drawOrbitRings(t, k, view){
     const blocks = BL[l.id];
     for(let i=0; i<blocks.length; i++){
       const bn = BLOCK_NODES_BY_ID[blocks[i].id];
-      ctx.strokeStyle = ha(lcol, 0.16);
+      ctx.strokeStyle = ha(lcol, 0.18);
       ctx.beginPath();
-      ctx.arc(sun.x, sun.y, bn.orbitR, 0, Math.PI * 2);
+      ctx.arc(sun.x, sun.y, bn.outerEdge, 0, Math.PI * 2);
       ctx.stroke();
     }
   });
 
-  /* ── Moon orbit rings — one per moon, centred on its planet ──
-     Fade in between k=0.9 and k=1.8 so god-view stays clean. */
-  const moonRingAlpha = ramp(k, 0.9, 1.8) * 0.13;
+  /* ── Moon arcs — one ring per concentric arc, centred on its planet
+     (NOT one per moon). They appear once the user zooms in enough that
+     the moon system has real screen presence. */
+  const moonRingAlpha = ramp(k, 1.0, 2.0) * 0.18;
   if(moonRingAlpha > 0.005){
     ctx.lineWidth = 0.4 / k;
     LY.forEach(l => {
       const lcol = layerColor(l.id);
       BL[l.id].forEach(b => {
         const planet = BLOCK_NODES_BY_ID[b.id];
-        /* viewport cull on the outermost ring */
+        const arcs   = GEO.moonArcCount(b.count);
+        if(arcs <= 0) return;
         const maxR = planet.outerMoonR;
         if(planet.x + maxR < view.minX || planet.x - maxR > view.maxX ||
            planet.y + maxR < view.minY || planet.y - maxR > view.maxY) return;
-        const elements = NODES.filter(n => n.block === b.id);
-        for(let i=0; i<elements.length; i++){
-          const orbitR = GEO.elementOrbitR(i, planet.r);
+        for(let j=0; j<arcs; j++){
+          const r = GEO.moonArcR(j);
           ctx.strokeStyle = ha(lcol, moonRingAlpha);
           ctx.beginPath();
-          ctx.arc(planet.x, planet.y, orbitR, 0, Math.PI * 2);
+          ctx.arc(planet.x, planet.y, r, 0, Math.PI * 2);
           ctx.stroke();
         }
       });
@@ -1292,11 +1394,15 @@ function drawNodes(t, k, view){
   /* gentle size boost at god view so element dots remain readable. */
   const sizeBoost = k < 0.95 ? 1.45 : (k < 1.6 ? 1.2 : 1.0);
 
-  /* Progressive disclosure multipliers. Calibrated to the orrery's
-     actual world scale: the four systems fit on screen at roughly
-     k≈0.20–0.30, so planets must be substantially visible by then. */
-  const planetAlpha = ramp(k, 0.15, 0.35);
-  const moonAlpha   = ramp(k, 1.40, 2.20);
+  /* Progressive disclosure:
+       At max zoom-out (k≈0.1–0.3), the canvas shows just suns + block
+         territory rings (planetAlpha=0). Each block IS its outer ring.
+       From k≈0.3 to ~0.6 the planet dot emerges in the middle of its
+         ring — "exposing the planet". This range covers the typical
+         fit zoom on most window sizes, so users see planets by default.
+       From k≈1.2 to ~2.0, moons spread around each planet. */
+  const planetAlpha = ramp(k, 0.30, 0.60);
+  const moonAlpha   = ramp(k, 1.20, 2.00);
 
   /* ── 1. ELEMENT NODES (bottom) ── only when moonAlpha is non-trivial */
   if(moonAlpha > 0.01){
@@ -1512,9 +1618,10 @@ function drawLabels(t, k){
      k≈0.6 onward, so block names are useful much sooner than before. */
   /* Orrery: block labels appear earlier — planet structure is legible
      from further out because every block sits on a clear orbital ring. */
-  /* Block (planet) labels fade in alongside the planets themselves. */
-  const _planetAlpha = ramp(k, 0.15, 0.35);
-  const blockOp = ramp(k, 0.25, 0.55) * _planetAlpha * Math.min(1, 0.4 + density*0.7);
+  /* Block (planet) labels appear at moderate zoom. Planets themselves
+     are always visible, so the labels can start fading in around k≈0.2x
+     and be fully visible by k≈0.5x (the natural fit zoom). */
+  const blockOp = ramp(k, 0.20, 0.50) * Math.min(1, 0.4 + density*0.7);
   if(blockOp > 0.04){
     const blockSize = k < 2.0 ? 11 : (k < 3.0 ? 12 : 12);
     /* render order: closer to origin first (so center labels claim space) */
@@ -1741,9 +1848,12 @@ function pickNode(sx, sy){
   const [wx, wy] = screenToWorld(sx, sy);
   const k = transform.k;
   const minScreenHit = 7;
-  /* Respect progressive disclosure: don't pick what the user can't see. */
-  const planetAlpha = ramp(k, 0.15, 0.35);
-  const moonAlpha   = ramp(k, 1.40, 2.20);
+  /* Respect progressive disclosure: don't pick what the user can't see.
+     Block-territory rings are pickable via their label (handled by
+     pickLabel); the planet DOT only becomes a node-picker target once
+     it has visually emerged. */
+  const planetAlpha = ramp(k, 0.30, 0.60);
+  const moonAlpha   = ramp(k, 1.20, 2.00);
   /* iterate elements first (least priority), then blocks, then layers,
      so layer hits naturally override blocks override elements when
      overlapping. */
@@ -1751,7 +1861,6 @@ function pickNode(sx, sy){
   const pools = [NODES, BLOCK_NODES, LAYER_NODES];
   for(let p=0; p<pools.length; p++){
     const pool = pools[p];
-    /* Skip whole pool if its population is currently invisible. */
     if(pool === NODES        && moonAlpha   < 0.1) continue;
     if(pool === BLOCK_NODES  && planetAlpha < 0.1) continue;
     for(let i=0; i<pool.length; i++){
