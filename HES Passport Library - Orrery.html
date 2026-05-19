@@ -11,14 +11,18 @@
 :root{
   --vellum-1:#EBEEF2;
   --vellum-2:#E3DED8;
-  --carbon:#18160F;
+  --carbon:#0f2340;
   --dust:#7B7869;
-  --core:#3C91D6;       --core-dark:#1D3D82;
-  --derived:#2EA397;    --derived-dark:#2A6348;
-  --quantum:#CC5023;    --quantum-dark:#B84020;
-  --emotional:#9A49B8;  --emotional-dark:#5E3080;
-  --hairline: rgba(24,22,15,0.14);
-  --hairline-strong: rgba(24,22,15,0.22);
+  /* Layer palette — set dynamically by applyPalette(). The values below
+     are placeholders; on load applyPalette(2) overrides them with the
+     "Earth" palette. Keep these in sync with PALETTES[2] so there is no
+     visual flash before the JS runs. */
+  --core:#65778c;       --core-dark:#384252;       --core-tint:#e4e7eb;
+  --derived:#a8806c;    --derived-dark:#5c463b;    --derived-tint:#ebe8e6;
+  --quantum:#ccb576;    --quantum-dark:#706341;    --quantum-tint:#ebe6d8;
+  --emotional:#7dada0;  --emotional-dark:#456058;  --emotional-tint:#d8ebe6;
+  --hairline: rgba(15,35,64,0.14);
+  --hairline-strong: rgba(15,35,64,0.22);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grotesk',sans-serif;color:var(--carbon)}
@@ -192,6 +196,47 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
   right:calc(32px + min(520px, 46vw));
 }
 #minimap canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:pointer}
+
+/* ── palette switcher ──────────────────────────────────────────
+   Temporary demo control. Lives in the centre of the topbar so it
+   sits above both the Explorer canvas and the Tree view, never
+   collides with the existing controls cluster (left: lockup,
+   right: view-switch/search/filter), and is reachable in both
+   views without duplication. Each button is a small strip
+   carrying the four layer colours as dots plus a text label, so
+   the palette is identifiable both visually and by name. The
+   active palette is bordered with the carbon ink colour;
+   inactive palettes sit at low contrast. */
+#palette-switcher{
+  position:absolute;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  z-index:31;
+  display:flex;gap:6px;
+  background:rgba(246,244,238,0.85);backdrop-filter:blur(6px);
+  border:0.5px solid var(--hairline);
+  border-radius:2px;padding:3px;
+}
+.pal-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  background:transparent;border:0.5px solid transparent;border-radius:2px;
+  padding:5px 9px;cursor:pointer;
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;
+  text-transform:uppercase;color:var(--dust);
+  transition:background 0.15s,color 0.15s,border-color 0.15s,opacity 0.15s;
+  opacity:0.62;
+}
+.pal-btn:hover{color:var(--carbon);opacity:0.92}
+.pal-btn.active{
+  opacity:1;color:var(--carbon);
+  border-color:var(--hairline-strong);
+  background:rgba(255,255,255,0.55);
+}
+.pal-dots{display:inline-flex;gap:3px}
+.pal-dots span{
+  width:7px;height:7px;border-radius:50%;
+  box-shadow:0 0 0 0.5px rgba(15,35,64,0.18) inset;
+}
+.pal-label{font:inherit;color:inherit}
 #minimap .mm-tag{
   position:absolute;top:6px;left:8px;
   font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;
@@ -443,10 +488,10 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
   padding:3px 8px;border-radius:2px;border:0.5px solid currentColor;
   white-space:nowrap;
 }
-.mml-1{color:#1D3D82;background:rgba(29,61,130,0.08)}
-.mml-2{color:#2A6348;background:rgba(42,99,72,0.08)}
-.mml-3{color:#B84020;background:rgba(184,64,32,0.08)}
-.mml-4{color:#5E3080;background:rgba(94,48,128,0.08)}
+.mml-1{color:var(--core-dark);background:var(--core-tint)}
+.mml-2{color:var(--derived-dark);background:var(--derived-tint)}
+.mml-3{color:var(--quantum-dark);background:var(--quantum-tint)}
+.mml-4{color:var(--emotional-dark);background:var(--emotional-tint)}
 .mml-5{color:#7B7869;background:rgba(123,120,105,0.08)}
 .tree-el-arrow{color:var(--dust);font-family:'Space Mono',monospace;font-size:12px}
 .tree-el-meta-bar{
@@ -570,7 +615,7 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
         </g>
       </g>
     </g>
-    <text x="600" y="60" text-anchor="middle" font-family="DM Mono, monospace" font-size="22" letter-spacing="6" fill="#18160F">HES / PASSPORT LIBRARY · ORRERY</text>
+    <text x="600" y="60" text-anchor="middle" font-family="DM Mono, monospace" font-size="22" letter-spacing="6" fill="#0f2340">HES / PASSPORT LIBRARY · ORRERY</text>
   </svg>
 </template>
 
@@ -583,6 +628,26 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
       <div class="wm">
         HES<span class="sep">/</span><span class="lab">LIBRARY</span>
       </div>
+    </div>
+    <div id="palette-switcher" role="radiogroup" aria-label="Colour palette">
+      <button class="pal-btn" type="button" data-pal="0" role="radio" aria-checked="false" aria-label="Palette Spec">
+        <span class="pal-dots" aria-hidden="true">
+          <span style="background:#1565c0"></span><span style="background:#43a047"></span><span style="background:#ff8f00"></span><span style="background:#ab47bc"></span>
+        </span>
+        <span class="pal-label">Spec</span>
+      </button>
+      <button class="pal-btn" type="button" data-pal="1" role="radio" aria-checked="false" aria-label="Palette Bright">
+        <span class="pal-dots" aria-hidden="true">
+          <span style="background:#00b4e0"></span><span style="background:#00b88d"></span><span style="background:#fa7a2b"></span><span style="background:#9163e0"></span>
+        </span>
+        <span class="pal-label">Bright</span>
+      </button>
+      <button class="pal-btn active" type="button" data-pal="2" role="radio" aria-checked="true" aria-label="Palette Earth">
+        <span class="pal-dots" aria-hidden="true">
+          <span style="background:#65778c"></span><span style="background:#a8806c"></span><span style="background:#ccb576"></span><span style="background:#7dada0"></span>
+        </span>
+        <span class="pal-label">Earth</span>
+      </button>
     </div>
     <div class="controls">
       <div class="viewswitch" role="tablist" aria-label="View mode">
@@ -619,10 +684,10 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
 
   <div id="legend" aria-hidden="true">
     <div class="lg-title"><span>Layers</span><span>elements</span></div>
-    <div class="lg-row" id="lg-core"><div class="lg-dot" style="background:#3C91D6"></div><div class="lg-label">Core</div><div class="lg-meta">106</div></div>
-    <div class="lg-row" id="lg-derived"><div class="lg-dot" style="background:#2EA397"></div><div class="lg-label">Derived</div><div class="lg-meta">154</div></div>
-    <div class="lg-row" id="lg-quantum"><div class="lg-dot" style="background:#CC5023"></div><div class="lg-label">Quantum</div><div class="lg-meta">40</div></div>
-    <div class="lg-row" id="lg-emotional"><div class="lg-dot" style="background:#9A49B8"></div><div class="lg-label">Emotional</div><div class="lg-meta">43</div></div>
+    <div class="lg-row" id="lg-core"><div class="lg-dot" style="background:#65778c"></div><div class="lg-label">Core</div><div class="lg-meta">106</div></div>
+    <div class="lg-row" id="lg-derived"><div class="lg-dot" style="background:#a8806c"></div><div class="lg-label">Derived</div><div class="lg-meta">154</div></div>
+    <div class="lg-row" id="lg-quantum"><div class="lg-dot" style="background:#ccb576"></div><div class="lg-label">Quantum</div><div class="lg-meta">40</div></div>
+    <div class="lg-row" id="lg-emotional"><div class="lg-dot" style="background:#7dada0"></div><div class="lg-label">Emotional</div><div class="lg-meta">43</div></div>
   </div>
 
   <div id="zoom-controls" aria-label="Zoom controls">
@@ -737,14 +802,17 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
 })();
 
 /* ── DATA MODEL (unchanged from God View v1) ───────────────────────── */
+/* Layer definitions. stroke / tint / dark are set dynamically by
+   applyPalette() on init — the values here are Earth defaults so the
+   canvas matches the default palette button before any JS runs. */
 const LY=[
-  {id:'core',     label:'Core',     tag:'foundational, stable', count:106, stroke:'#3C91D6', dark:'#1D3D82',
+  {id:'core',     label:'Core',     tag:'foundational, stable', count:106, stroke:'#65778c', tint:'#e4e7eb', dark:'#384252',
    desc:'The foundational layer. Stable, well-evidenced capacities that underlie all higher cognition — attention, memory, executive control, sensory and motor systems. These elements change slowly and are measurable across the lifespan.'},
-  {id:'derived',  label:'Derived',  tag:'grown from core',      count:154, stroke:'#2EA397', dark:'#2A6348',
+  {id:'derived',  label:'Derived',  tag:'grown from core',      count:154, stroke:'#a8806c', tint:'#ebe8e6', dark:'#5c463b',
    desc:'Capacities that grow out of the core layer through experience and culture — cognitive styles, communication, decision-making, identity, belief. They are plastic, shaped by environment, and form the bulk of individual character.'},
-  {id:'quantum',  label:'Quantum',  tag:'volatile, rupture',    count:40,  stroke:'#CC5023', dark:'#B84020',
+  {id:'quantum',  label:'Quantum',  tag:'volatile, rupture',    count:40,  stroke:'#ccb576', tint:'#ebe6d8', dark:'#706341',
    desc:'Discontinuous states that interrupt ordinary function: freeze, collapse, overwhelm, dissociation, panic, shame loops. They are rupture rather than gradient — short-lived but consequential, and often misread as the layers beneath them.'},
-  {id:'emotional',label:'Emotional',tag:'rare, shifting',       count:43,  stroke:'#9A49B8', dark:'#5E3080',
+  {id:'emotional',label:'Emotional',tag:'rare, shifting',       count:43,  stroke:'#7dada0', tint:'#d8ebe6', dark:'#456058',
    desc:'The capacity to hold and manipulate emotional information across time — the workbench of conscious affect. Underpins reasoning about meaning, comprehension of others, and learning from felt experience.'},
 ];
 const BL={
@@ -1128,7 +1196,8 @@ function recomputeBounds(){
 
 /* ── DEFAULTS — hardcoded production constants ──────────────────────── */
 const TW = {
-  palette: ["#3C91D6", "#2EA397", "#CC5023", "#9A49B8"],
+  /* Default palette is "Earth" (PALETTES[2]); applyPalette() will sync. */
+  palette: ["#65778c", "#a8806c", "#ccb576", "#7dada0"],
   linkStrength: 0.32,
   linkDistance: 62,
   repelStrength: 50,
@@ -1592,7 +1661,7 @@ function drawLabels(t, k){
       roundRect(ctx, sx - bgW/2, groupTop, bgW, groupH, 5);
       ctx.fill();
       ctx.restore();
-      ctx.strokeStyle = ha('#18160F', 0.08 * layerOp);
+      ctx.strokeStyle = ha('#0f2340', 0.08 * layerOp);
       ctx.lineWidth = 0.5;
       roundRect(ctx, sx - bgW/2, groupTop, bgW, groupH, 5);
       ctx.stroke();
@@ -1603,7 +1672,7 @@ function drawLabels(t, k){
       ctx.fillText(tagText, sx, tagY);
 
       ctx.font = `700 ${layerSize}px 'Space Grotesk', sans-serif`;
-      ctx.fillStyle = ha('#18160F', layerOp);
+      ctx.fillStyle = ha('#0f2340', layerOp);
       ctx.fillText(l.label, sx, nameY);
 
       ctx.font = `400 ${cSize}px 'Space Mono', monospace`;
@@ -1688,7 +1757,7 @@ function drawLabels(t, k){
       roundRect(ctx, sx - groupW/2, groupTop, groupW, groupH, 4);
       ctx.fill();
       ctx.restore();
-      ctx.strokeStyle = ha('#18160F', 0.06 * blockOp);
+      ctx.strokeStyle = ha('#0f2340', 0.06 * blockOp);
       ctx.lineWidth = 0.5;
       roundRect(ctx, sx - groupW/2, groupTop, groupW, groupH, 4);
       ctx.stroke();
@@ -1703,7 +1772,7 @@ function drawLabels(t, k){
 
       /* name */
       ctx.font = `500 ${blockSize}px 'Space Grotesk', sans-serif`;
-      ctx.fillStyle = ha('#18160F', blockOp);
+      ctx.fillStyle = ha('#0f2340', blockOp);
       if(twoLine){
         ctx.fillText(l1, sx, labelY + blockSize*0.2);
         ctx.fillText(l2, sx, labelY + blockSize*1.3);
@@ -1741,7 +1810,7 @@ function drawLabels(t, k){
         const ny = sy + n.r*transform.k + 9;
         if(tryPlace(sx, ny, w+6, codeSize+4, 3, 2)){
           ctx.textAlign='center'; ctx.textBaseline='middle';
-          ctx.fillStyle = ha('#18160F', codeOp * op);
+          ctx.fillStyle = ha('#0f2340', codeOp * op);
           ctx.fillText(n.code, sx, ny);
         }
       }
@@ -1819,7 +1888,7 @@ function drawMinimap(){
   const br = transform.invert([W,H]);
   const rx = tl[0]*s + offX, ry = tl[1]*s + offY;
   const rw = (br[0]-tl[0])*s, rh = (br[1]-tl[1])*s;
-  mmCtx.strokeStyle = '#18160F';
+  mmCtx.strokeStyle = '#0f2340';
   mmCtx.lineWidth = 1.25;
   mmCtx.strokeRect(rx, ry, rw, rh);
   mmCtx.fillStyle = 'rgba(24,22,15,0.06)';
@@ -2302,6 +2371,7 @@ function _showPanel(stripeLayer){
 }
 
 function openLayerCard(l){
+  _lastOpenCall = ()=>openLayerCard(l);
   selectedNode = null;
   _showPanel(l);
   const blocks = BL[l.id];
@@ -2312,7 +2382,7 @@ function openLayerCard(l){
      </div>
      <h1 class="pp-title">${l.label}</h1>
      <div class="pp-badges">
-       <span class="pp-badge" style="background:${ha(l.stroke,0.12)};color:${l.dark}">${l.tag}</span>
+       <span class="pp-badge" style="background:${l.tint};color:${l.dark}">${l.tag}</span>
      </div>
 
      <div class="pp-lbl"><span>Layer description</span></div>
@@ -2334,12 +2404,13 @@ function openLayerCard(l){
 }
 
 function openBlockCard(b){
+  _lastOpenCall = ()=>openBlockCard(b);
   selectedNode = null;
   const lid = BLOCK_LAYER[b.id];
   const l = LY_BY_ID[lid];
   _showPanel(l);
   const elementsInBlock = NODES.filter(n => n.block === b.id);
-  const layerPill = `background:${ha(l.stroke,0.12)};color:${l.dark}`;
+  const layerPill = `background:${l.tint};color:${l.dark}`;
   const html =
     `<div class="pp-eyebrow">
        <span>${b.id}</span><span class="pp-dot"></span>
@@ -2377,13 +2448,14 @@ function openBlockCard(b){
 }
 
 function openPassport(d){
+  _lastOpenCall = ()=>openPassport(d);
   selectedNode = d;
   pushRecent(d.code);
   const l = LY_BY_ID[d.layer];
   _showPanel(l);
-  const mmlHex = ha(l.stroke, 0.12);
+  const mmlHex = l.tint;
   const mmlTxt = l.dark;
-  const layerPill = `background:${ha(l.stroke,0.12)};color:${l.dark}`;
+  const layerPill = `background:${l.tint};color:${l.dark}`;
   const block = BL_BY_ID[d.block];
   const html =
     `<div class="pp-eyebrow">
@@ -2439,6 +2511,7 @@ function closePassport(){
   const p = document.getElementById('panel');
   p.classList.remove('open'); p.setAttribute('aria-hidden','true');
   selectedNode = null;
+  _lastOpenCall = null;
 }
 document.getElementById('pp-close').addEventListener('click', closePassport);
 
@@ -2470,22 +2543,106 @@ document.querySelectorAll('.viewswitch button').forEach(b=>{
   });
 });
 
-/* ── TWEAKS PANEL ────────────────────────────────────────────────────── */
-function applyPalette(){
-  const [c,d,q,e] = TW.palette;
-  LY[0].stroke=c; LY[1].stroke=d; LY[2].stroke=q; LY[3].stroke=e;
-  ['core','derived','quantum','emotional'].forEach((k,i)=>{
-    const dot=document.querySelector(`#lg-${k} .lg-dot`);
-    if(dot) dot.style.background = TW.palette[i];
+/* ── PALETTES ────────────────────────────────────────────────────────
+   Three named colour palettes. Each entry pairs a primary (used for
+   node fill/stroke and strong UI accents) with a tint (used for
+   backgrounds, badge fills, faded states). The "dark" colour used as
+   readable text on a tint background is derived from the primary at
+   render time — see _darkenHex().                                       */
+const PALETTES = [
+  { name:'Spec',   colors:[
+    {primary:'#1565c0', tint:'#e4e7eb'},
+    {primary:'#43a047', tint:'#ebe8e6'},
+    {primary:'#ff8f00', tint:'#ebe2d8'},
+    {primary:'#ab47bc', tint:'#e8d8eb'}
+  ]},
+  { name:'Bright', colors:[
+    {primary:'#00b4e0', tint:'#d8e4eb'},
+    {primary:'#00b88d', tint:'#d8ebe6'},
+    {primary:'#fa7a2b', tint:'#ebddd8'},
+    {primary:'#9163e0', tint:'#e7d8eb'}
+  ]},
+  { name:'Earth',  colors:[
+    {primary:'#65778c', tint:'#e4e7eb'},
+    {primary:'#a8806c', tint:'#ebe8e6'},
+    {primary:'#ccb576', tint:'#ebe6d8'},
+    {primary:'#7dada0', tint:'#d8ebe6'}
+  ]}
+];
+let currentPalette = 2; /* default: Earth */
+
+/* Darken a primary hex to produce a readable text colour on the tint
+   background. Factor ~0.55 matches the relative depth of the original
+   stroke→dark mapping closely enough for body-text contrast. */
+function _darkenHex(hex, f=0.55){
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  const dr=Math.round(r*f), dg=Math.round(g*f), db=Math.round(b*f);
+  return '#' + [dr,dg,db].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+
+/* Remember the last opened passport / layer / block card so that a
+   palette switch can re-render its inline-styled colour accents
+   (stripe, badges) without the user having to close + reopen it. */
+let _lastOpenCall = null;
+
+/* ── TWEAKS PANEL ──────────────────────────────────────────────────────
+   applyPalette() is called both at boot and on every palette button
+   click. It mutates LY[*].stroke/tint/dark in place — the render loop
+   reads from those fields each frame, so the canvas picks up the new
+   colours on the next animation tick without any simulation restart,
+   layout recompute, or zoom reset. */
+function applyPalette(idx){
+  if(typeof idx === 'number') currentPalette = idx;
+  const pal = PALETTES[currentPalette];
+  const keys = ['core','derived','quantum','emotional'];
+  const root = document.documentElement;
+  pal.colors.forEach((c, i)=>{
+    const dark = _darkenHex(c.primary, 0.55);
+    LY[i].stroke = c.primary;
+    LY[i].tint   = c.tint;
+    LY[i].dark   = dark;
+    root.style.setProperty(`--${keys[i]}`,       c.primary);
+    root.style.setProperty(`--${keys[i]}-tint`,  c.tint);
+    root.style.setProperty(`--${keys[i]}-dark`,  dark);
+    const dot = document.querySelector(`#lg-${keys[i]} .lg-dot`);
+    if(dot) dot.style.background = c.primary;
   });
-  document.documentElement.style.setProperty('--core',c);
-  document.documentElement.style.setProperty('--derived',d);
-  document.documentElement.style.setProperty('--quantum',q);
-  document.documentElement.style.setProperty('--emotional',e);
+  /* Keep TW.palette in sync — it's referenced in a couple of other
+     places (legacy compatibility). */
+  TW.palette = pal.colors.map(c => c.primary);
+
+  /* Update the switcher button states. */
+  document.querySelectorAll('#palette-switcher .pal-btn').forEach((b,i)=>{
+    const on = (i === currentPalette);
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-checked', on ? 'true' : 'false');
+  });
+
+  /* Tree view rows carry inline-style layer accents — refresh them if
+     the tree DOM has been built. Calling them when hidden is harmless.*/
+  if(typeof renderTreeLayerCol === 'function' && document.getElementById('tree-layer-list')){
+    renderTreeLayerCol();
+    renderTreeBlockCol();
+    renderTreeElementCol();
+  }
+
+  /* Re-render currently open passport / layer / block card so its
+     stripe + badge colours pick up the new palette. */
+  if(_lastOpenCall){ try{ _lastOpenCall(); } catch(_){} }
 }
 function applyLegendVis(){ document.getElementById('legend').style.display = TW.showLegend? 'flex':'none'; }
 function applyMinimapVis(){ document.getElementById('minimap').style.display = TW.showMinimap? 'block':'none'; }
 function applyAll(){ applyPalette(); applyLegendVis(); applyMinimapVis(); refreshForces(); }
+
+/* Wire up palette switcher buttons. Each click swaps the four layer
+   colours; the render loop redraws the canvas on the next frame with
+   no simulation restart, no zoom reset, no layout recompute. */
+document.querySelectorAll('#palette-switcher .pal-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const idx = parseInt(btn.dataset.pal, 10);
+    if(!Number.isNaN(idx)) applyPalette(idx);
+  });
+});
 
 /* tweaks panel removed in Passport Library build — TW constants are now
    hardcoded above. Keeping `refreshForces` for internal use only. */
