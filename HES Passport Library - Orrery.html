@@ -13,10 +13,9 @@
   --vellum-2:#E3DED8;
   --carbon:#0f2340;
   --dust:#7B7869;
-  /* Layer palette — set dynamically by applyPalette(). The values below
-     are placeholders; on load applyPalette(2) overrides them with the
-     "Earth" palette. Keep these in sync with PALETTES[2] so there is no
-     visual flash before the JS runs. */
+  /* Layer palette — Earth values, hardcoded. These are the permanent
+     production colours; mirror them in LY[].stroke/tint/dark so canvas
+     and CSS stay in sync. */
   --core:#65778c;       --core-dark:#384252;       --core-tint:#e4e7eb;
   --derived:#a8806c;    --derived-dark:#5c463b;    --derived-tint:#ebe8e6;
   --quantum:#ccb576;    --quantum-dark:#706341;    --quantum-tint:#ebe6d8;
@@ -197,43 +196,6 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
 }
 #minimap canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:pointer}
 
-/* ── palette switcher ──────────────────────────────────────────
-   Temporary demo control. Lives inside the .controls cluster
-   immediately to the left of the Explorer/Tree viewswitch, so the
-   two move together as the topbar reflows — no centred element
-   to collide with the right-hand controls when the viewport
-   narrows. Each button is a small strip carrying the four layer
-   colours as dots plus a text label, so the palette is
-   identifiable both visually and by name. The active palette is
-   bordered with the carbon ink colour; inactive palettes sit at
-   low contrast. */
-#palette-switcher{
-  display:flex;gap:4px;
-  background:rgba(246,244,238,0.85);backdrop-filter:blur(6px);
-  border:0.5px solid var(--hairline);
-  border-radius:2px;padding:3px;
-}
-.pal-btn{
-  display:inline-flex;align-items:center;gap:8px;
-  background:transparent;border:0.5px solid transparent;border-radius:2px;
-  padding:5px 9px;cursor:pointer;
-  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;
-  text-transform:uppercase;color:var(--dust);
-  transition:background 0.15s,color 0.15s,border-color 0.15s,opacity 0.15s;
-  opacity:0.62;
-}
-.pal-btn:hover{color:var(--carbon);opacity:0.92}
-.pal-btn.active{
-  opacity:1;color:var(--carbon);
-  border-color:var(--hairline-strong);
-  background:rgba(255,255,255,0.55);
-}
-.pal-dots{display:inline-flex;gap:3px}
-.pal-dots span{
-  width:7px;height:7px;border-radius:50%;
-  box-shadow:0 0 0 0.5px rgba(15,35,64,0.18) inset;
-}
-.pal-label{font:inherit;color:inherit}
 #minimap .mm-tag{
   position:absolute;top:6px;left:8px;
   font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;
@@ -627,26 +589,6 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
       </div>
     </div>
     <div class="controls">
-      <div id="palette-switcher" role="radiogroup" aria-label="Colour palette">
-        <button class="pal-btn" type="button" data-pal="0" role="radio" aria-checked="false" aria-label="Palette Spec">
-          <span class="pal-dots" aria-hidden="true">
-            <span style="background:#1565c0"></span><span style="background:#43a047"></span><span style="background:#ff8f00"></span><span style="background:#ab47bc"></span>
-          </span>
-          <span class="pal-label">Spec</span>
-        </button>
-        <button class="pal-btn" type="button" data-pal="1" role="radio" aria-checked="false" aria-label="Palette Bright">
-          <span class="pal-dots" aria-hidden="true">
-            <span style="background:#00b4e0"></span><span style="background:#00b88d"></span><span style="background:#fa7a2b"></span><span style="background:#9163e0"></span>
-          </span>
-          <span class="pal-label">Bright</span>
-        </button>
-        <button class="pal-btn active" type="button" data-pal="2" role="radio" aria-checked="true" aria-label="Palette Earth">
-          <span class="pal-dots" aria-hidden="true">
-            <span style="background:#65778c"></span><span style="background:#a8806c"></span><span style="background:#ccb576"></span><span style="background:#7dada0"></span>
-          </span>
-          <span class="pal-label">Earth</span>
-        </button>
-      </div>
       <div class="viewswitch" role="tablist" aria-label="View mode">
         <button id="btn-explorer" aria-pressed="true">Explorer</button>
         <button id="btn-tree"     aria-pressed="false">Tree</button>
@@ -799,9 +741,9 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
 })();
 
 /* ── DATA MODEL (unchanged from God View v1) ───────────────────────── */
-/* Layer definitions. stroke / tint / dark are set dynamically by
-   applyPalette() on init — the values here are Earth defaults so the
-   canvas matches the default palette button before any JS runs. */
+/* Layer definitions. stroke / tint / dark are the hardcoded Earth
+   palette values — the production look. Keep these in sync with the
+   CSS :root variables. */
 const LY=[
   {id:'core',     label:'Core',     tag:'foundational, stable', count:106, stroke:'#65778c', tint:'#e4e7eb', dark:'#384252',
    desc:'The foundational layer. Stable, well-evidenced capacities that underlie all higher cognition — attention, memory, executive control, sensory and motor systems. These elements change slowly and are measurable across the lifespan.'},
@@ -933,33 +875,64 @@ const NODES_BY_CODE = Object.fromEntries(NODES.map(n=>[n.code,n]));
 
 /* ── ORRERY GEOMETRY ────────────────────────────────────────────────
    Each layer is a sun. Each block has a circular TERRITORY around the
-   sun — an annular ring whose outer edge is the visible orbit ring at
-   god view. The planet sits at the MIDDLE of the annular ring, and its
-   moons cluster around the planet on a small number of compact arcs
-   (≤6 moons per arc). At max zoom-out the user sees just suns + the
-   block-territory outer rings; as the user zooms in, the planets in
-   the middle of each annulus come into focus, and finally the moons
-   spread around each planet.                                          */
+   sun — an annular ring with the visible orbit ring drawn at the
+   planet's orbital radius. The planet sits ON that ring, and its
+   moons cluster around the planet on a small number of compact arcs.
+   At max zoom-out the user sees just suns + the block orbit rings; as
+   the user zooms in, the planets emerge on those rings, and finally
+   the moons spread around each planet.
+
+   Block radius is no longer uniform: each block planet's size scales
+   with its element count so larger blocks read as bigger planets.   */
+const _BLOCKS_FLAT = Object.values(BL).flat();
+const _BLOCK_COUNTS = _BLOCKS_FLAT.map(b => b.count);
+const minBlockCount = Math.min(..._BLOCK_COUNTS);
+const maxBlockCount = Math.max(..._BLOCK_COUNTS);
+/* blockRadius: smallest planet ≈ 5 (clearly larger than a moon = 3),
+   largest ≈ 13 (clearly smaller than a sun = 20). */
+function blockRadius(b){
+  if(maxBlockCount === minBlockCount) return 5;
+  return 5 + ((b.count - minBlockCount) / (maxBlockCount - minBlockCount)) * 8;
+}
+
 const GEO = {
   sunR: 20,                /* layer node radius */
-  planetR: 5,              /* uniform — Figma reference uses uniform small dots */
+  planetR: 5,              /* legacy fallback only — block sizes come from blockRadius(b) */
   moonR: 3,                /* element node radius */
-  moonsPerArc: 6,          /* moons per concentric arc inside a block */
-  moonOrbitStep: 5,        /* px between consecutive moon arcs */
+  moonOrbitStep: 9,        /* px between consecutive moon arcs */
   minMoonClearance: 5,     /* gap from planet surface to innermost moon arc */
   sunClearance: 8,         /* gap from sun surface to innermost block territory */
   interOrbitGap: 3,        /* gap between adjacent block territories */
   systemGutter: 110,       /* min clearance between adjacent layer systems */
-  /* Number of moon arcs for a block with n elements (1, 6→1, 7→2, …). */
-  moonArcCount: (n) => (n <= 0 ? 0 : Math.ceil(n / GEO.moonsPerArc)),
-  /* Outermost moon arc radius for a block with n elements (from planet centre). */
-  outerMoonR: (n) => {
-    const arcs = GEO.moonArcCount(n);
-    if(arcs <= 0) return GEO.planetR;
-    return GEO.planetR + GEO.minMoonClearance + (arcs - 1) * GEO.moonOrbitStep;
+  /* How many moons fit on a moon-arc of radius r (around a planet),
+     given GEO.moonR and a minimum inter-moon arc gap. */
+  moonsPerShell: (r) => {
+    const MIN_MOON_GAP = 5;
+    const cap = Math.floor((2 * Math.PI * r) / (GEO.moonR * 2 + MIN_MOON_GAP));
+    return Math.max(1, cap);
   },
-  /* Radius of the j-th moon arc (0-indexed). */
-  moonArcR: (j) => GEO.planetR + GEO.minMoonClearance + j * GEO.moonOrbitStep,
+  /* Number of moon arcs needed to hold n moons around a planet whose
+     outer surface sits at planetR.  Greedy fill: each successive arc
+     takes as many moons as moonsPerShell(arcRadius) allows. */
+  moonArcCount: (n, planetR) => {
+    if(n <= 0) return 0;
+    let remaining = n, j = 0;
+    while(remaining > 0){
+      const r = GEO.moonArcR(j, planetR);
+      const cap = GEO.moonsPerShell(r);
+      remaining -= cap;
+      j++;
+    }
+    return j;
+  },
+  /* Outermost moon arc radius for a block with n elements (from planet centre). */
+  outerMoonR: (n, planetR=GEO.planetR) => {
+    const arcs = GEO.moonArcCount(n, planetR);
+    if(arcs <= 0) return planetR;
+    return GEO.moonArcR(arcs - 1, planetR);
+  },
+  /* Radius of the j-th moon arc (0-indexed) around a planet of radius planetR. */
+  moonArcR: (j, planetR=GEO.planetR) => planetR + GEO.minMoonClearance + j * GEO.moonOrbitStep,
 };
 
 const LAYER_NODES = LY.map(l => ({
@@ -985,7 +958,7 @@ const BLOCK_NODES = Object.values(BL).flat().map(b => {
     blockId: b.id,
     blockName: b.name,
     count: b.count,
-    r: GEO.planetR,
+    r: blockRadius(b),
     x: 0, y: 0,           /* set by computeOrreryPositions() */
     vx: 0, vy: 0,
   };
@@ -995,46 +968,80 @@ const BLOCK_NODES_BY_ID = Object.fromEntries(BLOCK_NODES.map(bn => [bn.blockId, 
 /* ── ORRERY POSITION COMPUTATION ─────────────────────────────────────
    Pure geometry, runs once. After this returns, every node has its
    final x/y, r, orbitR, and parent coords. No simulation is ever
-   created. The packing is sequential:
-     • Per layer, BD01 sits on the innermost block orbit
-       (sunR + sunClearance); each subsequent block sits one
-       blockOrbitStep further out — a fixed-pitch nested ring set.
-     • Per block, the first element sits on the innermost moon orbit
-       (planet edge + minMoonClearance); each subsequent element is
-       moonOrbitStep px further out.
-   Sun positions are derived from each layer's outermost block orbit so
-   no two systems ever overlap regardless of block count.            */
+   created.
+
+   Rutherford shell packing: blocks no longer sit each on its own
+   ring. Instead, blocks are assigned to concentric SHELLS, and
+   multiple blocks share one shell when their circles fit on it
+   without overlapping. This keeps the whole system more compact and
+   reads as an atom rather than a fanned-out spectrum.
+
+   Per block, the first element sits on the innermost moon orbit
+   (planet edge + minMoonClearance); each subsequent moon arc is
+   moonOrbitStep px further out. Both block-on-shell angles and
+   moon-on-arc angles are seeded-randomised so the layout looks
+   organic, then a short repulsion pass fixes any bunching.        */
+const MIN_BLOCK_GAP = 8;   /* min angular gap (px) between block circles on the same shell */
+
 function computeBlockOrbits(blocks){
-  /* Each block has an annular territory around the sun whose inner edge
-     starts at `cursor`, whose width is 2·outerMoonR (so the planet's
-     full moon system fits inside), and whose outer edge becomes the
-     visible ring at god view.
-       cursor                            (= inner edge of block i)
-         + outerMoonR_i                  (= planet centre orbit)
-         + outerMoonR_i                  (= outer edge of block i)
-         + interOrbitGap                 (= breathing room → next cursor) */
+  /* Greedy shell assignment, largest blocks first so the inner shells
+     hold the biggest planets. Each shell can hold as many blocks as
+     fit at that radius without their circles touching, given the
+     largest block circle on the shell and a small angular gap.   */
+  const sized = blocks.map(b => ({
+    block: b,
+    radius: blockRadius(b),
+    outerMoonR: GEO.outerMoonR(b.count, blockRadius(b)),
+  }));
+  /* Sort by descending block radius for greedy fill. */
+  const remaining = sized.slice().sort((a,b) => b.radius - a.radius);
+
+  const shells = [];        /* each shell: { radius, members:[sized] } */
+  /* Start the first shell so the largest planet just clears the sun. */
+  let shellRadius = GEO.sunR + GEO.sunClearance + (remaining[0] ? remaining[0].radius : 5);
+
+  while(remaining.length > 0){
+    const members = [];
+    /* maxBlockR is the dominant block radius for capacity / spacing
+       math — we let smaller blocks "join" the shell only if there is
+       room, but we always size capacity off the dominant member.  */
+    const maxBlockR = remaining[0].radius;
+    const capacity = Math.max(1, Math.floor(
+      (2 * Math.PI * shellRadius) / (2 * maxBlockR + MIN_BLOCK_GAP)
+    ));
+    for(let i=0; i<capacity && remaining.length>0; i++){
+      members.push(remaining.shift());
+    }
+    shells.push({ radius: shellRadius, members, maxBlockR });
+
+    if(remaining.length > 0){
+      /* Advance the cursor past this shell's moons AND past the next
+         shell's planet circle, leaving an inter-orbit gap. */
+      const maxMoonExtent = members.reduce((m, s) => Math.max(m, s.outerMoonR), 0);
+      const nextMaxR = remaining[0].radius;
+      shellRadius = shellRadius + maxBlockR + maxMoonExtent + GEO.interOrbitGap + nextMaxR;
+    }
+  }
+
+  /* Flatten into an orbits[] array keyed by blockId, plus measure the
+     full system extent for sun placement. */
   const orbits = [];
-  let cursor = GEO.sunR + GEO.sunClearance;
-  blocks.forEach((b) => {
-    const outerR    = GEO.outerMoonR(b.count);
-    const innerEdge = cursor;
-    const planetOrbit = cursor + outerR;
-    const outerEdge   = planetOrbit + outerR;
-    orbits.push({
-      blockId:    b.id,
-      orbitR:     planetOrbit,   /* planet sits here (middle of annulus) */
-      innerEdge,                  /* inside boundary of block territory */
-      outerEdge,                  /* visible territory ring at god view */
-      outerMoonR: outerR,         /* used for moon-ring culling */
-      planetR:    GEO.planetR,
+  let totalSystemR = GEO.sunR;
+  shells.forEach(shell => {
+    const memberMaxMoon = shell.members.reduce((m, s) => Math.max(m, s.outerMoonR), 0);
+    shell.members.forEach(s => {
+      orbits.push({
+        blockId:    s.block.id,
+        orbitR:     shell.radius,
+        planetR:    s.radius,
+        outerMoonR: s.outerMoonR,
+      });
     });
-    cursor = outerEdge + GEO.interOrbitGap;
+    const shellExtent = shell.radius + shell.maxBlockR + memberMaxMoon + 6;
+    if(shellExtent > totalSystemR) totalSystemR = shellExtent;
   });
-  /* System extent = outer edge of outermost block + tiny halo. */
-  const totalSystemR = orbits.length
-    ? orbits[orbits.length - 1].outerEdge + 6
-    : GEO.sunR;
-  return { orbits, totalSystemR };
+
+  return { orbits, shells, totalSystemR };
 }
 
 /* Organic, Figma-derived sun positions.
@@ -1071,14 +1078,50 @@ function computeSunPositions(systemRadii){
   return out;
 }
 
+/* Repulsion pass for nodes sharing a single circular orbit. After
+   random jitter, two nodes on the same ring may end up too close;
+   we run a small number of iterations of pairwise angular nudges to
+   restore at least `minArcGap` radians of separation between any
+   two nodes. minArcGap is keyed off the largest node radius and the
+   ring radius so the result is geometry-consistent.
+
+   `items` is an array of objects with .angle and .nodeR (in world
+   units). orbitR is the ring radius. mutates items[].angle.       */
+function repulseOnRing(items, orbitR, iterations=3){
+  if(items.length < 2 || orbitR <= 0) return;
+  for(let it=0; it<iterations; it++){
+    for(let i=0; i<items.length; i++){
+      for(let j=i+1; j<items.length; j++){
+        const a = items[i], b = items[j];
+        let d = b.angle - a.angle;
+        /* wrap to [-π, π] */
+        while(d >  Math.PI) d -= Math.PI*2;
+        while(d < -Math.PI) d += Math.PI*2;
+        const sign = d >= 0 ? 1 : -1;
+        const sep  = Math.abs(d);
+        const rMax = Math.max(a.nodeR, b.nodeR);
+        /* arc-gap requirement: minimum chord must clear 2*rMax + small pad */
+        const minArcGap = (2 * rMax + 2) / orbitR;
+        if(sep < minArcGap){
+          const fix = (minArcGap - sep) / 2;
+          a.angle -= sign * fix;
+          b.angle += sign * fix;
+        }
+      }
+    }
+  }
+}
+
 function computeOrreryPositions(){
   /* 1. Compute per-layer block orbital packing and total system radii. */
   const layerOrbits = {};
+  const layerShells = {};
   const systemRadii = {};
   LY.forEach(l => {
-    const blocks = BL[l.id];                  /* canonical BD01…BDN order */
-    const { orbits, totalSystemR } = computeBlockOrbits(blocks);
+    const blocks = BL[l.id];                  /* canonical order */
+    const { orbits, shells, totalSystemR } = computeBlockOrbits(blocks);
     layerOrbits[l.id]  = orbits;
+    layerShells[l.id]  = shells;
     systemRadii[l.id]  = totalSystemR;
   });
   /* 2. Place layer suns based on measured system extents. */
@@ -1090,58 +1133,121 @@ function computeOrreryPositions(){
     ln.r = GEO.sunR;
     ln.systemR = systemRadii[ln.layer];
   });
-  /* 3. Place block planets at the MIDDLE of their annular territory. */
+  /* 3. Place block planets on their assigned shell with jitter +
+     repulsion. Each shell gets a random angular offset so adjacent
+     layers don't all start their inner planet at "12 o'clock". */
   LY.forEach(l => {
-    const sun     = LAYER_NODES_BY_ID[l.id];
-    const blocks  = BL[l.id];
-    const orbits  = layerOrbits[l.id];
-    const n       = blocks.length;
-    blocks.forEach((b, i) => {
-      const { orbitR, planetR, outerMoonR, outerEdge, innerEdge } = orbits[i];
-      const angle = (i / n) * Math.PI * 2 - Math.PI / 2; /* sequential, start at top */
-      const bn = BLOCK_NODES_BY_ID[b.id];
-      bn.x          = sun.x + Math.cos(angle) * orbitR;
-      bn.y          = sun.y + Math.sin(angle) * orbitR;
-      bn.r          = planetR;
-      bn.orbitR     = orbitR;     /* planet centre radius from sun */
-      bn.outerEdge  = outerEdge;  /* outer ring radius from sun (drawn at god view) */
-      bn.innerEdge  = innerEdge;  /* inner ring radius from sun (territory inside edge) */
-      bn.outerMoonR = outerMoonR; /* outer moon arc radius from planet centre */
-      bn.parentX    = sun.x;
-      bn.parentY    = sun.y;
-      bn.angle      = angle;
+    const sun    = LAYER_NODES_BY_ID[l.id];
+    const shells = layerShells[l.id];
+    shells.forEach(shell => {
+      const shellAngleOffset = (Math.random() * Math.PI * 2);
+      const n = shell.members.length;
+      const maxJitterScale = 0.6;
+      /* Build a placement record per member; mutate the BLOCK_NODES
+         after repulsion is finished. */
+      const placed = shell.members.map((s, i) => {
+        const base = (i / n) * Math.PI * 2 + shellAngleOffset;
+        const jitter = (Math.random() - 0.5) * maxJitterScale * (2 * Math.PI / n);
+        return {
+          block: s.block,
+          radius: s.radius,
+          outerMoonR: s.outerMoonR,
+          angle: base + jitter,
+          nodeR: s.radius,
+        };
+      });
+      repulseOnRing(placed, shell.radius, 3);
+      placed.forEach(p => {
+        const bn = BLOCK_NODES_BY_ID[p.block.id];
+        bn.x          = sun.x + Math.cos(p.angle) * shell.radius;
+        bn.y          = sun.y + Math.sin(p.angle) * shell.radius;
+        bn.r          = p.radius;
+        bn.orbitR     = shell.radius;        /* planet sits ON this ring */
+        bn.outerMoonR = p.outerMoonR;
+        bn.parentX    = sun.x;
+        bn.parentY    = sun.y;
+        bn.angle      = p.angle;
+      });
     });
   });
   /* 4. Place element moons — packed on concentric arcs around the planet.
-     Up to GEO.moonsPerArc moons per arc, angularly spaced; spillover
-     moves to the next arc out. Each arc gets up to 6 moons distributed
-     evenly around 360°; arcs without a full ring still distribute their
-     moons evenly (so a 7-element block puts 6 moons on the inner ring
-     and 1 single moon on the outer ring). */
+     The number of moons per arc is computed dynamically from the arc
+     radius (via GEO.moonsPerShell) — moons are NOT capped at a fixed
+     count, so larger arcs hold more moons. Each arc is angle-jittered
+     and repulsed; a final post-layout pass bumps any still-overlapping
+     moon to the next arc out. */
   LY.forEach(l => {
     BL[l.id].forEach(b => {
       const planet   = BLOCK_NODES_BY_ID[b.id];
-      const elements = NODES.filter(n => n.block === b.id);  /* canonical code order */
+      const elements = NODES.filter(n => n.block === b.id);
       const count    = elements.length;
-      const arcs     = GEO.moonArcCount(count);
-      /* Pre-compute how many moons sit on each arc. */
-      const perArc = new Array(arcs).fill(0);
-      for(let j=0; j<count; j++) perArc[Math.floor(j / GEO.moonsPerArc)]++;
-      elements.forEach((el, i) => {
-        const arcIdx     = Math.floor(i / GEO.moonsPerArc);
-        const idxInArc   = i % GEO.moonsPerArc;
-        const moonsHere  = perArc[arcIdx];
-        const radius     = GEO.moonArcR(arcIdx);
-        const angle      = (idxInArc / moonsHere) * Math.PI * 2 - Math.PI / 2;
-        el.x        = planet.x + Math.cos(angle) * radius;
-        el.y        = planet.y + Math.sin(angle) * radius;
-        el.r        = GEO.moonR;
-        el.orbitR   = radius;
-        el.arcIdx   = arcIdx;
-        el.parentX  = planet.x;
-        el.parentY  = planet.y;
-        el.angle    = angle;
+      if(count === 0) return;
+
+      /* Bucket elements into arcs greedily by capacity at each arc radius. */
+      const arcs = [];   /* each: { radius, members:[el] } */
+      let remaining = elements.slice();
+      let j = 0;
+      while(remaining.length > 0){
+        const r = GEO.moonArcR(j, planet.r);
+        const cap = GEO.moonsPerShell(r);
+        const take = remaining.splice(0, cap);
+        arcs.push({ radius: r, members: take, arcIdx: j });
+        j++;
+      }
+
+      arcs.forEach(arc => {
+        const n = arc.members.length;
+        const arcAngleOffset = Math.random() * Math.PI * 2;
+        const placed = arc.members.map((el, i) => {
+          const base = (i / n) * Math.PI * 2 + arcAngleOffset;
+          const jitter = (Math.random() - 0.5) * 0.4 * (2 * Math.PI / n);
+          return { el, angle: base + jitter, nodeR: GEO.moonR };
+        });
+        repulseOnRing(placed, arc.radius, 3);
+        placed.forEach(p => {
+          p.el.x        = planet.x + Math.cos(p.angle) * arc.radius;
+          p.el.y        = planet.y + Math.sin(p.angle) * arc.radius;
+          p.el.r        = GEO.moonR;
+          p.el.orbitR   = arc.radius;
+          p.el.arcIdx   = arc.arcIdx;
+          p.el.parentX  = planet.x;
+          p.el.parentY  = planet.y;
+          p.el.angle    = p.angle;
+        });
       });
+
+      /* Post-layout overlap fix: scan moons around this planet and, if
+         any two are closer than 2·moonR + 3 px, push the OUTER one to
+         the next arc. O(n²) with n ≤ ~13, negligible. */
+      const moons = elements.slice();
+      const overlapDist = GEO.moonR * 2 + 3;
+      for(let pass=0; pass<3; pass++){
+        let moved = false;
+        for(let i=0; i<moons.length; i++){
+          for(let k=i+1; k<moons.length; k++){
+            const a = moons[i], c = moons[k];
+            const dx = c.x - a.x, dy = c.y - a.y;
+            const d = Math.hypot(dx, dy);
+            if(d < overlapDist){
+              /* outer = the one with greater orbitR (or, if tied, c) */
+              const outer = (c.orbitR >= a.orbitR) ? c : a;
+              outer.arcIdx = (outer.arcIdx || 0) + 1;
+              const newR = GEO.moonArcR(outer.arcIdx, planet.r);
+              outer.orbitR = newR;
+              outer.x = planet.x + Math.cos(outer.angle) * newR;
+              outer.y = planet.y + Math.sin(outer.angle) * newR;
+              moved = true;
+            }
+          }
+        }
+        if(!moved) break;
+      }
+
+      /* Update planet.outerMoonR in case overlap-pass pushed a moon
+         further out than the originally allocated arcs. */
+      let maxArcR = planet.outerMoonR || 0;
+      moons.forEach(m => { if(m.orbitR > maxArcR) maxArcR = m.orbitR; });
+      planet.outerMoonR = maxArcR;
     });
   });
 }
@@ -1193,7 +1299,7 @@ function recomputeBounds(){
 
 /* ── DEFAULTS — hardcoded production constants ──────────────────────── */
 const TW = {
-  /* Default palette is "Earth" (PALETTES[2]); applyPalette() will sync. */
+  /* Hardcoded Earth palette — matches LY[].stroke. */
   palette: ["#65778c", "#a8806c", "#ccb576", "#7dada0"],
   linkStrength: 0.32,
   linkDistance: 62,
@@ -1386,40 +1492,53 @@ function drawEdges(t, k, view){
 function drawOrbitRings(t, k, view){
   ctx.setLineDash([]);
 
-  /* ── Block territory rings — outer edge of each block's annular
-     region, centred on its sun. Always visible — these are the
-     structural fingerprint of each layer at god view. */
+  /* ── Block orbit rings — the ring on which each block planet sits,
+     centred on its sun. Drawn at the planet's actual orbit radius
+     (NOT the outer edge of the annular territory), so the planet
+     reads as sitting ON the ring rather than floating inside an
+     annulus. Dashed and faint so the rings recede into the
+     scaffolding. Dash lengths are divided by k so the pattern stays
+     visually consistent across zoom levels. */
   ctx.lineWidth = 0.6 / k;
+  /* Deduplicate per layer: blocks on the same shell share a ring. */
   LY.forEach(l => {
     const sun  = LAYER_NODES_BY_ID[l.id];
     const lcol = layerColor(l.id);
-    const blocks = BL[l.id];
-    for(let i=0; i<blocks.length; i++){
-      const bn = BLOCK_NODES_BY_ID[blocks[i].id];
-      ctx.strokeStyle = ha(lcol, 0.18);
+    const seenR = new Set();
+    BL[l.id].forEach(b => {
+      const bn = BLOCK_NODES_BY_ID[b.id];
+      /* Bucket to 0.1 px so floating-point shells coalesce. */
+      const key = Math.round(bn.orbitR * 10);
+      if(seenR.has(key)) return;
+      seenR.add(key);
+      ctx.setLineDash([4 / k, 6 / k]);
+      ctx.strokeStyle = ha(lcol, 0.15);
       ctx.beginPath();
-      ctx.arc(sun.x, sun.y, bn.outerEdge, 0, Math.PI * 2);
+      ctx.arc(sun.x, sun.y, bn.orbitR, 0, Math.PI * 2);
       ctx.stroke();
-    }
+    });
   });
+  ctx.setLineDash([]);
 
   /* ── Moon arcs — one ring per concentric arc, centred on its planet
      (NOT one per moon). They appear once the user zooms in enough that
-     the moon system has real screen presence. */
-  const moonRingAlpha = ramp(k, 1.0, 2.0) * 0.18;
+     the moon system has real screen presence. Dashed + slightly
+     softer than the block rings. */
+  const moonRingAlpha = ramp(k, 1.0, 2.0) * 0.14;
   if(moonRingAlpha > 0.005){
     ctx.lineWidth = 0.4 / k;
     LY.forEach(l => {
       const lcol = layerColor(l.id);
       BL[l.id].forEach(b => {
         const planet = BLOCK_NODES_BY_ID[b.id];
-        const arcs   = GEO.moonArcCount(b.count);
+        const arcs   = GEO.moonArcCount(b.count, planet.r);
         if(arcs <= 0) return;
-        const maxR = planet.outerMoonR;
+        const maxR = planet.outerMoonR || GEO.moonArcR(arcs - 1, planet.r);
         if(planet.x + maxR < view.minX || planet.x - maxR > view.maxX ||
            planet.y + maxR < view.minY || planet.y - maxR > view.maxY) return;
+        ctx.setLineDash([3 / k, 5 / k]);
         for(let j=0; j<arcs; j++){
-          const r = GEO.moonArcR(j);
+          const r = GEO.moonArcR(j, planet.r);
           ctx.strokeStyle = ha(lcol, moonRingAlpha);
           ctx.beginPath();
           ctx.arc(planet.x, planet.y, r, 0, Math.PI * 2);
@@ -1427,6 +1546,7 @@ function drawOrbitRings(t, k, view){
         }
       });
     });
+    ctx.setLineDash([]);
   }
 }
 
@@ -1524,6 +1644,21 @@ function drawNodes(t, k, view){
     if(ln.x < view.minX || ln.x > view.maxX || ln.y < view.minY || ln.y > view.maxY) continue;
     const lcol  = layerColor(ln.layer);
     const isHov = (hoveredNode === ln);
+
+    /* soft halo — drawn first, behind everything. Uses canvas blur
+       filter; only 4 nodes per frame, GPU-composited. The blur radius
+       is divided by k so the halo softness reads the same across zoom
+       levels. ctx.filter is reset IMMEDIATELY to avoid bleeding into
+       any subsequent draw call. */
+    const haloR = ln.r * 2.8;
+    ctx.save();
+    ctx.filter = `blur(${Math.ceil(ln.r * 0.9 / k)}px)`;
+    ctx.fillStyle = ha(lcol, 0.18);
+    ctx.beginPath();
+    ctx.arc(ln.x, ln.y, haloR, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+    ctx.filter = 'none';
 
     /* outer disc */
     ctx.fillStyle = ha(lcol, 0.15);
@@ -1687,9 +1822,15 @@ function drawLabels(t, k){
   /* Block (planet) labels appear at moderate zoom. Planets themselves
      are always visible, so the labels can start fading in around k≈0.2x
      and be fully visible by k≈0.5x (the natural fit zoom). */
-  const blockOp = ramp(k, 0.20, 0.50) * Math.min(1, 0.4 + density*0.7);
-  if(blockOp > 0.04){
+  /* Split into two fades: the code pill comes in early (k ≈ 0.2→0.5),
+     the full block NAME only appears once the user has zoomed in
+     past the natural fit (k ≈ 0.5→0.8). Below k=0.5 we only render
+     the code pill, so god view stays calm. */
+  const blockCodeOp = ramp(k, 0.20, 0.50) * Math.min(1, 0.4 + density*0.7);
+  const blockNameOp = ramp(k, 0.50, 0.80) * blockCodeOp;
+  if(blockCodeOp > 0.04){
     const blockSize = k < 2.0 ? 11 : (k < 3.0 ? 12 : 12);
+    const showName = (blockNameOp > 0.05);
     /* render order: closer to origin first (so center labels claim space) */
     const blocks = Object.values(BL).flat().slice().sort((a,b)=>{
       const ba = BLOCK_NODES_BY_ID[a.id], bb = BLOCK_NODES_BY_ID[b.id];
@@ -1703,7 +1844,7 @@ function drawLabels(t, k){
       const [nx, ny] = worldToScreen(bn.x, bn.y);
       const nodeRadiusPx = bn.r * k;
       const sx = nx;
-      /* sy is the code-pill area center; the name sits below */
+      /* sy is the code-pill area center; the name (if shown) sits below */
       const sy = ny - (nodeRadiusPx + 18 + 4);
       if(sx < -100 || sx > W+100 || sy < -60 || sy > H+60) return;
 
@@ -1716,23 +1857,28 @@ function drawLabels(t, k){
       ctx.font = `500 9.5px 'DM Mono', monospace`;
       const codeW = measureText(b.id, ctx.font);
 
-      /* measure name (possibly two-line) */
-      ctx.font = `500 ${blockSize}px 'Space Grotesk', sans-serif`;
-      const nameW = measureText(b.name, ctx.font);
-      const twoLine = nameW > 220;
+      /* measure name (possibly two-line) — only when we'll draw it */
+      let nameW = 0, twoLine = false;
       let l1='', l2='', l1W=0, l2W=0;
-      if(twoLine){
-        const words = b.name.split(' ');
-        const mid = Math.ceil(words.length/2);
-        l1 = words.slice(0,mid).join(' '); l2 = words.slice(mid).join(' ');
-        l1W = measureText(l1, ctx.font); l2W = measureText(l2, ctx.font);
+      if(showName){
+        ctx.font = `500 ${blockSize}px 'Space Grotesk', sans-serif`;
+        nameW = measureText(b.name, ctx.font);
+        twoLine = nameW > 220;
+        if(twoLine){
+          const words = b.name.split(' ');
+          const mid = Math.ceil(words.length/2);
+          l1 = words.slice(0,mid).join(' '); l2 = words.slice(mid).join(' ');
+          l1W = measureText(l1, ctx.font); l2W = measureText(l2, ctx.font);
+        }
       }
 
-      /* atomic group bounds: code pill on top, name(s) below */
-      const widthForName = twoLine ? Math.max(l1W, l2W) : nameW;
+      /* atomic group bounds: code pill always sized; name only when shown */
+      const widthForName = showName ? (twoLine ? Math.max(l1W, l2W) : nameW) : 0;
       const groupW = Math.max(codeW + 14, widthForName) + 14;
       const groupTop = labelY - 18;
-      const groupBot = twoLine ? labelY + blockSize*1.85 + 4 : labelY + blockSize + 6;
+      const groupBot = showName
+        ? (twoLine ? labelY + blockSize*1.85 + 4 : labelY + blockSize + 6)
+        : labelY + 2;  /* code-only: keep group height tight */
       const groupH = groupBot - groupTop;
       const groupCy = (groupTop + groupBot) / 2;
 
@@ -1745,36 +1891,39 @@ function drawLabels(t, k){
         id: b.id,
       });
 
-      /* frosted backdrop (lighter than layer label backdrops) */
+      /* frosted backdrop (lighter than layer label backdrops). Belongs
+         to the whole label group, so it uses blockCodeOp. */
       ctx.save();
       ctx.shadowColor = 'rgba(24,22,15,0.04)';
       ctx.shadowBlur = 6;
       ctx.shadowOffsetY = 1;
-      ctx.fillStyle = ha('#F6F4EE', 0.58 * blockOp);
+      ctx.fillStyle = ha('#F6F4EE', 0.58 * blockCodeOp);
       roundRect(ctx, sx - groupW/2, groupTop, groupW, groupH, 4);
       ctx.fill();
       ctx.restore();
-      ctx.strokeStyle = ha('#0f2340', 0.06 * blockOp);
+      ctx.strokeStyle = ha('#0f2340', 0.06 * blockCodeOp);
       ctx.lineWidth = 0.5;
       roundRect(ctx, sx - groupW/2, groupTop, groupW, groupH, 4);
       ctx.stroke();
 
       /* colored code pill on top of backdrop */
       ctx.font = `500 9.5px 'DM Mono', monospace`;
-      ctx.fillStyle = ha(lcol, 0.20 * blockOp);
+      ctx.fillStyle = ha(lcol, 0.20 * blockCodeOp);
       roundRect(ctx, sx - codeW/2 - 5, labelY - 9 - 6, codeW + 10, 12, 6);
       ctx.fill();
-      ctx.fillStyle = ha(LY_BY_ID[layerOfBlock].dark, blockOp);
+      ctx.fillStyle = ha(LY_BY_ID[layerOfBlock].dark, blockCodeOp);
       ctx.fillText(b.id, sx, labelY - 9);
 
-      /* name */
-      ctx.font = `500 ${blockSize}px 'Space Grotesk', sans-serif`;
-      ctx.fillStyle = ha('#0f2340', blockOp);
-      if(twoLine){
-        ctx.fillText(l1, sx, labelY + blockSize*0.2);
-        ctx.fillText(l2, sx, labelY + blockSize*1.3);
-      } else {
-        ctx.fillText(b.name, sx, labelY + blockSize*0.6);
+      /* name (only when faded in) */
+      if(showName){
+        ctx.font = `500 ${blockSize}px 'Space Grotesk', sans-serif`;
+        ctx.fillStyle = ha('#0f2340', blockNameOp);
+        if(twoLine){
+          ctx.fillText(l1, sx, labelY + blockSize*0.2);
+          ctx.fillText(l2, sx, labelY + blockSize*1.3);
+        } else {
+          ctx.fillText(b.name, sx, labelY + blockSize*0.6);
+        }
       }
     });
   }
@@ -2540,106 +2689,27 @@ document.querySelectorAll('.viewswitch button').forEach(b=>{
   });
 });
 
-/* ── PALETTES ────────────────────────────────────────────────────────
-   Three named colour palettes. Each entry pairs a primary (used for
-   node fill/stroke and strong UI accents) with a tint (used for
-   backgrounds, badge fills, faded states). The "dark" colour used as
-   readable text on a tint background is derived from the primary at
-   render time — see _darkenHex().                                       */
-const PALETTES = [
-  { name:'Spec',   colors:[
-    {primary:'#1565c0', tint:'#e4e7eb'},
-    {primary:'#43a047', tint:'#ebe8e6'},
-    {primary:'#ff8f00', tint:'#ebe2d8'},
-    {primary:'#ab47bc', tint:'#e8d8eb'}
-  ]},
-  { name:'Bright', colors:[
-    {primary:'#00b4e0', tint:'#d8e4eb'},
-    {primary:'#00b88d', tint:'#d8ebe6'},
-    {primary:'#fa7a2b', tint:'#ebddd8'},
-    {primary:'#9163e0', tint:'#e7d8eb'}
-  ]},
-  { name:'Earth',  colors:[
-    {primary:'#65778c', tint:'#e4e7eb'},
-    {primary:'#a8806c', tint:'#ebe8e6'},
-    {primary:'#ccb576', tint:'#ebe6d8'},
-    {primary:'#7dada0', tint:'#d8ebe6'}
-  ]}
-];
-let currentPalette = 2; /* default: Earth */
-
-/* Darken a primary hex to produce a readable text colour on the tint
-   background. Factor ~0.55 matches the relative depth of the original
-   stroke→dark mapping closely enough for body-text contrast. */
-function _darkenHex(hex, f=0.55){
-  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
-  const dr=Math.round(r*f), dg=Math.round(g*f), db=Math.round(b*f);
-  return '#' + [dr,dg,db].map(v=>v.toString(16).padStart(2,'0')).join('');
-}
-
-/* Remember the last opened passport / layer / block card so that a
-   palette switch can re-render its inline-styled colour accents
-   (stripe, badges) without the user having to close + reopen it. */
+/* Remember the last opened passport / layer / block card so the
+   render loop can refresh inline-styled colour accents in place when
+   needed (kept as a hook even though the palette switcher is gone). */
 let _lastOpenCall = null;
 
-/* ── TWEAKS PANEL ──────────────────────────────────────────────────────
-   applyPalette() is called both at boot and on every palette button
-   click. It mutates LY[*].stroke/tint/dark in place — the render loop
-   reads from those fields each frame, so the canvas picks up the new
-   colours on the next animation tick without any simulation restart,
-   layout recompute, or zoom reset. */
-function applyPalette(idx){
-  if(typeof idx === 'number') currentPalette = idx;
-  const pal = PALETTES[currentPalette];
-  const keys = ['core','derived','quantum','emotional'];
-  const root = document.documentElement;
-  pal.colors.forEach((c, i)=>{
-    const dark = _darkenHex(c.primary, 0.55);
-    LY[i].stroke = c.primary;
-    LY[i].tint   = c.tint;
-    LY[i].dark   = dark;
-    root.style.setProperty(`--${keys[i]}`,       c.primary);
-    root.style.setProperty(`--${keys[i]}-tint`,  c.tint);
-    root.style.setProperty(`--${keys[i]}-dark`,  dark);
-    const dot = document.querySelector(`#lg-${keys[i]} .lg-dot`);
-    if(dot) dot.style.background = c.primary;
-  });
-  /* Keep TW.palette in sync — it's referenced in a couple of other
-     places (legacy compatibility). */
-  TW.palette = pal.colors.map(c => c.primary);
-
-  /* Update the switcher button states. */
-  document.querySelectorAll('#palette-switcher .pal-btn').forEach((b,i)=>{
-    const on = (i === currentPalette);
-    b.classList.toggle('active', on);
-    b.setAttribute('aria-checked', on ? 'true' : 'false');
-  });
-
-  /* Tree view rows carry inline-style layer accents — refresh them if
-     the tree DOM has been built. Calling them when hidden is harmless.*/
-  if(typeof renderTreeLayerCol === 'function' && document.getElementById('tree-layer-list')){
-    renderTreeLayerCol();
-    renderTreeBlockCol();
-    renderTreeElementCol();
-  }
-
-  /* Re-render currently open passport / layer / block card so its
-     stripe + badge colours pick up the new palette. */
-  if(_lastOpenCall){ try{ _lastOpenCall(); } catch(_){} }
-}
+/* ── LEGEND / MINIMAP VISIBILITY ─────────────────────────────────────
+   The Earth palette values are baked directly into LY[].stroke/tint/dark
+   and into the CSS :root variables, so there is no longer any palette
+   to "apply" at runtime. applyAll() now only handles legend + minimap
+   visibility and one initial pass to sync the legend dots with the
+   hardcoded LY stroke values. */
 function applyLegendVis(){ document.getElementById('legend').style.display = TW.showLegend? 'flex':'none'; }
 function applyMinimapVis(){ document.getElementById('minimap').style.display = TW.showMinimap? 'block':'none'; }
-function applyAll(){ applyPalette(); applyLegendVis(); applyMinimapVis(); refreshForces(); }
-
-/* Wire up palette switcher buttons. Each click swaps the four layer
-   colours; the render loop redraws the canvas on the next frame with
-   no simulation restart, no zoom reset, no layout recompute. */
-document.querySelectorAll('#palette-switcher .pal-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    const idx = parseInt(btn.dataset.pal, 10);
-    if(!Number.isNaN(idx)) applyPalette(idx);
+function syncLegendDots(){
+  const keys = ['core','derived','quantum','emotional'];
+  keys.forEach((k, i)=>{
+    const dot = document.querySelector(`#lg-${k} .lg-dot`);
+    if(dot) dot.style.background = LY[i].stroke;
   });
-});
+}
+function applyAll(){ syncLegendDots(); applyLegendVis(); applyMinimapVis(); refreshForces(); }
 
 /* tweaks panel removed in Passport Library build — TW constants are now
    hardcoded above. Keeping `refreshForces` for internal use only. */
