@@ -997,8 +997,13 @@ function computeBlockOrbits(blocks){
   const remaining = sized.slice().sort((a,b) => b.radius - a.radius);
 
   const shells = [];        /* each shell: { radius, members:[sized] } */
-  /* Start the first shell so the largest planet just clears the sun. */
-  let shellRadius = GEO.sunR + GEO.sunClearance + (remaining[0] ? remaining[0].radius : 5);
+  /* Start the first shell so the largest planet's INWARD-FACING moon
+     ring clears the sun by sunClearance. The planet centre therefore
+     sits at sunR + sunClearance + outerMoonR + planetR. Without this
+     correction, large planets close to the sun would have their inner
+     moons rendered inside the sun disc. */
+  let shellRadius = GEO.sunR + GEO.sunClearance +
+    (remaining[0] ? remaining[0].outerMoonR + remaining[0].radius : 5);
 
   while(remaining.length > 0){
     const members = [];
@@ -1006,8 +1011,12 @@ function computeBlockOrbits(blocks){
        math — we let smaller blocks "join" the shell only if there is
        room, but we always size capacity off the dominant member.  */
     const maxBlockR = remaining[0].radius;
+    /* Slot width is the full moon-system diameter (NOT just the planet
+       diameter) plus interOrbitGap, so adjacent planets on the same
+       shell have their moon systems clear of each other. */
+    const maxMoonRForShell = remaining[0].outerMoonR;
     const capacity = Math.min(4, Math.max(1, Math.floor(
-      (2 * Math.PI * shellRadius) / (2 * maxBlockR + MIN_BLOCK_GAP)
+      (2 * Math.PI * shellRadius) / (2 * maxMoonRForShell + GEO.interOrbitGap)
     )));
     for(let i=0; i<capacity && remaining.length>0; i++){
       members.push(remaining.shift());
@@ -1345,6 +1354,8 @@ window.addEventListener('resize', ()=>{ resize(); fitToWorld(false); });
 let transform = d3.zoomIdentity;
 let hoveredNode = null;
 let selectedNode = null;
+let selectedLayerId = null;  /* set only when the layer card is open */
+let selectedBlockId = null;  /* set only when the block card is open */
 let mouseX = -999, mouseY = -999;
 
 const zoom = d3.zoom()
@@ -1512,7 +1523,7 @@ function drawOrbitRings(t, k, view){
       if(seenR.has(key)) return;
       seenR.add(key);
       ctx.setLineDash([4 / k, 6 / k]);
-      ctx.strokeStyle = ha(lcol, 0.18);
+      ctx.strokeStyle = ha(lcol, 0.35);
       ctx.beginPath();
       ctx.arc(sun.x, sun.y, bn.orbitR, 0, Math.PI * 2);
       ctx.stroke();
@@ -1524,7 +1535,7 @@ function drawOrbitRings(t, k, view){
      (NOT one per moon). They appear once the user zooms in enough that
      the moon system has real screen presence. Dashed + slightly
      softer than the block rings. */
-  const moonRingAlpha = ramp(k, 1.0, 2.0) * 0.18;
+  const moonRingAlpha = ramp(k, 1.0, 2.0) * 0.32;
   if(moonRingAlpha > 0.005){
     ctx.lineWidth = 0.4 / k;
     LY.forEach(l => {
@@ -1626,15 +1637,26 @@ function drawNodes(t, k, view){
       if(bn.x < view.minX || bn.x > view.maxX || bn.y < view.minY || bn.y > view.maxY) continue;
       const lcol  = layerColor(bn.layer);
       const isHov = (hoveredNode === bn);
+      const isSel = (selectedBlockId === bn.blockId);
 
-      ctx.fillStyle = ha(lcol, 0.22 * planetAlpha);
+      ctx.fillStyle = ha(lcol, (isSel ? 0.35 : 0.22) * planetAlpha);
       ctx.beginPath();
       ctx.arc(bn.x, bn.y, bn.r, 0, Math.PI*2);
       ctx.fill();
 
-      ctx.strokeStyle = ha(lcol, (isHov ? 1.0 : 0.75) * planetAlpha);
-      ctx.lineWidth = (isHov ? 2 : 1.5) / k;
+      ctx.strokeStyle = ha(lcol, (isHov || isSel ? 1.0 : 0.75) * planetAlpha);
+      ctx.lineWidth = (isHov || isSel ? 2 : 1.5) / k;
       ctx.stroke();
+
+      /* selected: outer ring at a comfortable gap so the planet reads
+         as picked even when its name label is offscreen. */
+      if(isSel){
+        ctx.strokeStyle = ha(lcol, 0.85 * planetAlpha);
+        ctx.lineWidth = 1.5 / k;
+        ctx.beginPath();
+        ctx.arc(bn.x, bn.y, bn.r + 5/k, 0, Math.PI*2);
+        ctx.stroke();
+      }
     }
   }
 
@@ -1660,11 +1682,12 @@ function drawNodes(t, k, view){
     ctx.arc(ln.x, ln.y, haloR, 0, Math.PI * 2);
     ctx.fill();
 
-    /* Outer disc — hover/selected only. Default state is just halo +
-       inner dot, so the layer reads as a star rather than a target.
-       selectedNode points at an element when a passport is open, so
-       we also accept any selected node that shares this layer. */
-    const isSelected = selectedNode && selectedNode.layer === ln.layer;
+    /* Outer disc — hover only or when the layer's own card is open.
+       Default state is just halo + inner dot, so the layer reads as a
+       star rather than a target. selectedLayerId is set ONLY by
+       openLayerCard, so opening a child passport or block card no
+       longer "highlights" this sun. */
+    const isSelected = (selectedLayerId === ln.layer);
     if(isHov || isSelected){
       ctx.fillStyle = ha(lcol, 0.15);
       ctx.beginPath();
@@ -2524,6 +2547,8 @@ function _showPanel(stripeLayer){
 function openLayerCard(l){
   _lastOpenCall = ()=>openLayerCard(l);
   selectedNode = null;
+  selectedLayerId = l.id;
+  selectedBlockId = null;
   _showPanel(l);
   const blocks = BL[l.id];
   const html =
@@ -2557,6 +2582,8 @@ function openLayerCard(l){
 function openBlockCard(b){
   _lastOpenCall = ()=>openBlockCard(b);
   selectedNode = null;
+  selectedLayerId = null;
+  selectedBlockId = b.id;
   const lid = BLOCK_LAYER[b.id];
   const l = LY_BY_ID[lid];
   _showPanel(l);
@@ -2601,6 +2628,8 @@ function openBlockCard(b){
 function openPassport(d){
   _lastOpenCall = ()=>openPassport(d);
   selectedNode = d;
+  selectedLayerId = null;
+  selectedBlockId = null;
   pushRecent(d.code);
   const l = LY_BY_ID[d.layer];
   _showPanel(l);
@@ -2662,6 +2691,8 @@ function closePassport(){
   const p = document.getElementById('panel');
   p.classList.remove('open'); p.setAttribute('aria-hidden','true');
   selectedNode = null;
+  selectedLayerId = null;
+  selectedBlockId = null;
   _lastOpenCall = null;
 }
 document.getElementById('pp-close').addEventListener('click', closePassport);
