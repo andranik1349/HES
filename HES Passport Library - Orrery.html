@@ -198,20 +198,17 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
 #minimap canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:pointer}
 
 /* ── palette switcher ──────────────────────────────────────────
-   Temporary demo control. Lives in the centre of the topbar so it
-   sits above both the Explorer canvas and the Tree view, never
-   collides with the existing controls cluster (left: lockup,
-   right: view-switch/search/filter), and is reachable in both
-   views without duplication. Each button is a small strip
-   carrying the four layer colours as dots plus a text label, so
-   the palette is identifiable both visually and by name. The
-   active palette is bordered with the carbon ink colour;
-   inactive palettes sit at low contrast. */
+   Temporary demo control. Lives inside the .controls cluster
+   immediately to the left of the Explorer/Tree viewswitch, so the
+   two move together as the topbar reflows — no centred element
+   to collide with the right-hand controls when the viewport
+   narrows. Each button is a small strip carrying the four layer
+   colours as dots plus a text label, so the palette is
+   identifiable both visually and by name. The active palette is
+   bordered with the carbon ink colour; inactive palettes sit at
+   low contrast. */
 #palette-switcher{
-  position:absolute;
-  top:50%;left:50%;transform:translate(-50%,-50%);
-  z-index:31;
-  display:flex;gap:6px;
+  display:flex;gap:4px;
   background:rgba(246,244,238,0.85);backdrop-filter:blur(6px);
   border:0.5px solid var(--hairline);
   border-radius:2px;padding:3px;
@@ -629,27 +626,27 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
         HES<span class="sep">/</span><span class="lab">LIBRARY</span>
       </div>
     </div>
-    <div id="palette-switcher" role="radiogroup" aria-label="Colour palette">
-      <button class="pal-btn" type="button" data-pal="0" role="radio" aria-checked="false" aria-label="Palette Spec">
-        <span class="pal-dots" aria-hidden="true">
-          <span style="background:#1565c0"></span><span style="background:#43a047"></span><span style="background:#ff8f00"></span><span style="background:#ab47bc"></span>
-        </span>
-        <span class="pal-label">Spec</span>
-      </button>
-      <button class="pal-btn" type="button" data-pal="1" role="radio" aria-checked="false" aria-label="Palette Bright">
-        <span class="pal-dots" aria-hidden="true">
-          <span style="background:#00b4e0"></span><span style="background:#00b88d"></span><span style="background:#fa7a2b"></span><span style="background:#9163e0"></span>
-        </span>
-        <span class="pal-label">Bright</span>
-      </button>
-      <button class="pal-btn active" type="button" data-pal="2" role="radio" aria-checked="true" aria-label="Palette Earth">
-        <span class="pal-dots" aria-hidden="true">
-          <span style="background:#65778c"></span><span style="background:#a8806c"></span><span style="background:#ccb576"></span><span style="background:#7dada0"></span>
-        </span>
-        <span class="pal-label">Earth</span>
-      </button>
-    </div>
     <div class="controls">
+      <div id="palette-switcher" role="radiogroup" aria-label="Colour palette">
+        <button class="pal-btn" type="button" data-pal="0" role="radio" aria-checked="false" aria-label="Palette Spec">
+          <span class="pal-dots" aria-hidden="true">
+            <span style="background:#1565c0"></span><span style="background:#43a047"></span><span style="background:#ff8f00"></span><span style="background:#ab47bc"></span>
+          </span>
+          <span class="pal-label">Spec</span>
+        </button>
+        <button class="pal-btn" type="button" data-pal="1" role="radio" aria-checked="false" aria-label="Palette Bright">
+          <span class="pal-dots" aria-hidden="true">
+            <span style="background:#00b4e0"></span><span style="background:#00b88d"></span><span style="background:#fa7a2b"></span><span style="background:#9163e0"></span>
+          </span>
+          <span class="pal-label">Bright</span>
+        </button>
+        <button class="pal-btn active" type="button" data-pal="2" role="radio" aria-checked="true" aria-label="Palette Earth">
+          <span class="pal-dots" aria-hidden="true">
+            <span style="background:#65778c"></span><span style="background:#a8806c"></span><span style="background:#ccb576"></span><span style="background:#7dada0"></span>
+          </span>
+          <span class="pal-label">Earth</span>
+        </button>
+      </div>
       <div class="viewswitch" role="tablist" aria-label="View mode">
         <button id="btn-explorer" aria-pressed="true">Explorer</button>
         <button id="btn-tree"     aria-pressed="false">Tree</button>
