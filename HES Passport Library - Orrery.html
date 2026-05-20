@@ -903,13 +903,13 @@ const GEO = {
   minMoonClearance: 5,     /* gap from planet surface to innermost moon arc */
   sunClearance: 8,         /* gap from sun surface to innermost block territory */
   interOrbitGap: 3,        /* gap between adjacent block territories */
-  systemGutter: 110,       /* min clearance between adjacent layer systems */
+  systemGutter: 50,        /* min clearance between adjacent layer systems */
   /* How many moons fit on a moon-arc of radius r (around a planet),
      given GEO.moonR and a minimum inter-moon arc gap. */
   moonsPerShell: (r) => {
     const MIN_MOON_GAP = 5;
     const cap = Math.floor((2 * Math.PI * r) / (GEO.moonR * 2 + MIN_MOON_GAP));
-    return Math.max(1, cap);
+    return Math.min(4, Math.max(1, cap));
   },
   /* Number of moon arcs needed to hold n moons around a planet whose
      outer surface sits at planetR.  Greedy fill: each successive arc
@@ -1006,9 +1006,9 @@ function computeBlockOrbits(blocks){
        math — we let smaller blocks "join" the shell only if there is
        room, but we always size capacity off the dominant member.  */
     const maxBlockR = remaining[0].radius;
-    const capacity = Math.max(1, Math.floor(
+    const capacity = Math.min(4, Math.max(1, Math.floor(
       (2 * Math.PI * shellRadius) / (2 * maxBlockR + MIN_BLOCK_GAP)
-    ));
+    )));
     for(let i=0; i<capacity && remaining.length>0; i++){
       members.push(remaining.shift());
     }
@@ -1052,10 +1052,10 @@ function computeBlockOrbits(blocks){
    each other given the actual measured system radii.                */
 function computeSunPositions(systemRadii){
   const proposed = {
-    core:      { x: -330, y: -210 },
-    derived:   { x:  240, y: -210 },
-    quantum:   { x:  -80, y:  230 },
-    emotional: { x:  340, y:  210 },
+    core:      { x: -230, y: -140 },
+    derived:   { x:  170, y: -140 },
+    quantum:   { x:  -55, y:  155 },
+    emotional: { x:  235, y:  140 },
   };
   const pairs = [
     ['core','derived'], ['core','quantum'], ['core','emotional'],
@@ -1512,7 +1512,7 @@ function drawOrbitRings(t, k, view){
       if(seenR.has(key)) return;
       seenR.add(key);
       ctx.setLineDash([4 / k, 6 / k]);
-      ctx.strokeStyle = ha(lcol, 0.15);
+      ctx.strokeStyle = ha(lcol, 0.18);
       ctx.beginPath();
       ctx.arc(sun.x, sun.y, bn.orbitR, 0, Math.PI * 2);
       ctx.stroke();
@@ -1524,7 +1524,7 @@ function drawOrbitRings(t, k, view){
      (NOT one per moon). They appear once the user zooms in enough that
      the moon system has real screen presence. Dashed + slightly
      softer than the block rings. */
-  const moonRingAlpha = ramp(k, 1.0, 2.0) * 0.14;
+  const moonRingAlpha = ramp(k, 1.0, 2.0) * 0.18;
   if(moonRingAlpha > 0.005){
     ctx.lineWidth = 0.4 / k;
     LY.forEach(l => {
@@ -1645,32 +1645,37 @@ function drawNodes(t, k, view){
     const lcol  = layerColor(ln.layer);
     const isHov = (hoveredNode === ln);
 
-    /* soft halo — drawn first, behind everything. Uses canvas blur
-       filter; only 4 nodes per frame, GPU-composited. The blur radius
-       is divided by k so the halo softness reads the same across zoom
-       levels. ctx.filter is reset IMMEDIATELY to avoid bleeding into
-       any subsequent draw call. */
-    const haloR = ln.r * 2.8;
-    ctx.save();
-    ctx.filter = `blur(${Math.ceil(ln.r * 0.9 / k)}px)`;
-    ctx.fillStyle = ha(lcol, 0.18);
+    /* Radial gradient halo — center opaque, edge transparent. Extends
+       to the outermost block orbit so the glow fills the whole system
+       at god view. createRadialGradient uses world coordinates, so it
+       scales automatically with the canvas transform — no ctx.filter
+       gymnastics, no save/restore needed. */
+    const haloR = ln.systemR || (ln.r * 8);
+    const grad = ctx.createRadialGradient(ln.x, ln.y, 0, ln.x, ln.y, haloR);
+    grad.addColorStop(0,   ha(lcol, 0.28));
+    grad.addColorStop(0.3, ha(lcol, 0.10));
+    grad.addColorStop(1.0, ha(lcol, 0.00));
+    ctx.fillStyle = grad;
     ctx.beginPath();
-    ctx.arc(ln.x, ln.y, haloR, 0, Math.PI*2);
-    ctx.fill();
-    ctx.restore();
-    ctx.filter = 'none';
-
-    /* outer disc */
-    ctx.fillStyle = ha(lcol, 0.15);
-    ctx.beginPath();
-    ctx.arc(ln.x, ln.y, ln.r, 0, Math.PI*2);
+    ctx.arc(ln.x, ln.y, haloR, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.strokeStyle = ha(lcol, isHov ? 1 : 0.90);
-    ctx.lineWidth = (isHov ? 2.5 : 2) / k;
-    ctx.stroke();
+    /* Outer disc — hover/selected only. Default state is just halo +
+       inner dot, so the layer reads as a star rather than a target.
+       selectedNode points at an element when a passport is open, so
+       we also accept any selected node that shares this layer. */
+    const isSelected = selectedNode && selectedNode.layer === ln.layer;
+    if(isHov || isSelected){
+      ctx.fillStyle = ha(lcol, 0.15);
+      ctx.beginPath();
+      ctx.arc(ln.x, ln.y, ln.r, 0, Math.PI*2);
+      ctx.fill();
+      ctx.strokeStyle = ha(lcol, 1.0);
+      ctx.lineWidth = (isHov ? 2.5 : 2) / k;
+      ctx.stroke();
+    }
 
-    /* inner dot */
+    /* inner dot — always */
     ctx.fillStyle = lcol;
     ctx.beginPath();
     ctx.arc(ln.x, ln.y, 6, 0, Math.PI*2);
