@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HES Design System — Reference Sheet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="typography.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="layout.css">
+  <style>
+    /* Reference sheet layout — not reused elsewhere */
+    body { background: var(--vellum-2); padding: 0; }
+
+    .ds-shell { display: flex; min-height: 100vh; }
+
+    /* Fixed left index */
+    .ds-index {
+      position: fixed; top: 0; left: 0; bottom: 0; width: 200px;
+      background: var(--carbon); padding: 32px 0;
+      overflow-y: auto; z-index: 10;
+    }
+    .ds-index-title {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(235,238,242,0.4); padding: 0 24px 16px;
+      border-bottom: 0.5px solid rgba(235,238,242,0.1);
+      margin-bottom: 8px;
+    }
+    .ds-index a {
+      display: block; padding: 7px 24px;
+      font-family: 'Space Mono', monospace; font-size: 11px;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: rgba(235,238,242,0.55); text-decoration: none;
+      transition: color 0.15s;
+    }
+    .ds-index a:hover { color: rgba(235,238,242,0.95); }
+
+    /* Main content */
+    .ds-main { margin-left: 200px; padding: 56px 64px; max-width: 1100px; }
+
+    .ds-section { margin-bottom: 80px; padding-top: 24px; }
+
+    .ds-section-header {
+      display: flex; align-items: baseline; gap: 20px;
+      border-bottom: 0.5px solid var(--hairline-strong);
+      padding-bottom: 16px; margin-bottom: 40px;
+    }
+    .ds-section-num {
+      font-family: 'Space Mono', monospace; font-size: 11px;
+      letter-spacing: 0.16em; text-transform: uppercase; color: var(--dust);
+    }
+    .ds-section-title {
+      font-family: 'Space Grotesk', sans-serif; font-weight: 600;
+      font-size: 18px; color: var(--carbon);
+    }
+
+    .ds-row { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; align-items: flex-start; }
+
+    .ds-label {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--dust); margin-bottom: 8px;
+    }
+    .ds-item { display: flex; flex-direction: column; }
+
+    .ds-value {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      color: var(--dust); margin-top: 6px; letter-spacing: 0.04em;
+    }
+
+    /* Subsection heading */
+    .ds-sub {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--dust); margin: 32px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 0.5px solid var(--hairline);
+    }
+    .ds-sub:first-of-type { margin-top: 0; }
+
+    /* Color swatches */
+    .swatch {
+      width: 120px; height: 80px;
+      border-radius: 0;
+      flex-shrink: 0;
+    }
+    .swatch-sm { width: 80px; height: 60px; }
+    .swatch-xs { width: 80px; height: 40px; display: flex; align-items: center; justify-content: center; font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.06em; }
+
+    .swatch-vellum-1   { background: var(--vellum-1); border: 0.5px solid var(--hairline-strong); }
+    .swatch-vellum-2   { background: var(--vellum-2); border: 0.5px solid var(--hairline-strong); }
+    .swatch-bg-page    { background: var(--bg-page); }
+    .swatch-bg-card    { background: var(--bg-card); border: 0.5px solid var(--hairline-strong); }
+    .swatch-bg-elevated { background: var(--bg-elevated); border: 0.5px solid var(--hairline-strong); }
+    .swatch-library    { background: var(--library-surface); }
+    .swatch-carbon     { background: var(--carbon); width: 180px; }
+    .swatch-dust       { background: var(--dust); }
+    .swatch-hairline   { background: #fff; border: 0.5px solid var(--hairline-strong); position: relative; overflow: hidden; }
+    .swatch-hairline::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--hairline); }
+    .swatch-hairline-strong { background: #fff; border: 0.5px solid var(--hairline-strong); position: relative; overflow: hidden; }
+    .swatch-hairline-strong::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--hairline-strong); }
+
+    /* Layer groups */
+    .layer-group { display: flex; flex-direction: column; gap: 8px; }
+    .layer-group-label {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      font-weight: 700; margin-bottom: 4px;
+    }
+    .layer-swatches { display: flex; gap: 8px; }
+
+    /* Spacing bar */
+    .spacing-row { display: flex; align-items: center; gap: 16px; margin-bottom: 10px; }
+    .spacing-bar { height: 2px; background: var(--carbon); }
+    .spacing-token { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--dust); min-width: 80px; }
+
+    /* Type specimen items */
+    .type-specimen { margin-bottom: 32px; }
+    .type-specimen-label {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--dust); margin-bottom: 8px;
+      padding-bottom: 6px; border-bottom: 0.5px solid var(--hairline);
+    }
+
+    /* Type comparison */
+    .type-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 32px; }
+    .type-compare-col { padding: 24px; background: var(--bg-card); border: 0.5px solid var(--hairline-strong); }
+    .type-compare-label { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dust); margin-bottom: 16px; }
+
+    /* On-dark button demo */
+    .btn-dark-demo {
+      background: var(--carbon); padding: 24px 28px; display: flex; gap: 16px; align-items: center;
+    }
+
+    /* Passport preview card */
+    .pp-preview { max-width: 560px; }
+
+    /* Layer color on card border */
+    .card-layer { border-left: 3px solid var(--core); }
+
+    /* Form column */
+    .form-col { max-width: 400px; display: flex; flex-direction: column; gap: 20px; }
+
+    /* No-print border helper */
+    .border-box { border: 0.5px solid var(--hairline); padding: 24px; }
+  </style>
+</head>
+<body>
+
+<div class="ds-shell">
+
+  <!-- Fixed left index -->
+  <nav class="ds-index" aria-label="Design system sections">
+    <div class="ds-index-title">Design System</div>
+    <a href="#colors">01 Colors</a>
+    <a href="#typography">02 Typography</a>
+    <a href="#layer-badges">03 Layer Badges</a>
+    <a href="#mml-badges">04 MML Badges</a>
+    <a href="#buttons">05 Buttons</a>
+    <a href="#cards">06 Cards</a>
+    <a href="#forms">07 Forms</a>
+    <a href="#accordion">08 Accordion</a>
+    <a href="#callouts">09 Callouts</a>
+    <a href="#passport">10 Passport Components</a>
+    <a href="#spacing">11 Spacing</a>
+  </nav>
+
+  <main class="ds-main">
+
+    <!-- ══════════════════════════════════════════════════════════
+         01 COLORS
+    ══════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="colors">
+      <div class="ds-section-header">
+        <span class="ds-section-num">01</span>
+        <span class="ds-section-title">Colors</span>
+      </div>
+
+      <!-- Surfaces & Backgrounds -->
+      <div class="ds-sub">Surfaces &amp; Backgrounds</div>
+      <div class="ds-row">
+        <div class="ds-item">
+          <div class="swatch swatch-vellum-1"></div>
+          <div class="ds-value">--vellum-1</div>
+          <div class="ds-value">#EBEEF2</div>
+        </div>
+        <div class="ds-item">
+          <div class="swatch swatch-vellum-2"></div>
+          <div class="ds-value">--vellum-2</div>
+          <div class="ds-value">#E3DED8</div>
+        </div>
+        <div class="ds-item">
+          <div class="swatch swatch-bg-page"></div>
+          <div class="ds-value">--bg-page</div>
+          <div class="ds-value">#dad4cc</div>
+        </div>
+        <div class="ds-item">
+          <div class="swatch swatch-bg-card"></div>
+          <div class="ds-value">--bg-card</div>
+          <div class="ds-value">rgba(246,244,238,.85)</div>
+        </div>
+        <div class="ds-item">
+          <div class="swatch swatch-bg-elevated"></div>
+          <div class="ds-value">--bg-elevated</div>
+          <div class="ds-value">rgba(255,255,255,.55)</div>
+        </div>
+        <div class="ds-item">
+          <div class="swatch swatch-library"></div>
+          <div class="ds-value">--library-surface</div>
+          <div class="ds-value">gradient 160°</div>
+        </div>
+      </div>
+
+      <!-- Ink Scale -->
+      <div class="ds-sub">Ink Scale</div>
+      <div class="ds-row">
+        <div class="ds-item">
+          <div class="swatch swatch-carbon"></div>
+          <div class="ds-value">--carbon · primary</div>
+          <div class="ds-value">#18160F</div>
+        </div>
+        <div class="ds-item">
+          <div class="swatch swatch-dust"></div>
+          <div class="ds-value">--dust · secondary</div>
+          <div class="ds-value">#7B7869</div>
+        </div>
+        <div class="ds-item">
+          <div class="swatch swatch-hairline"></div>
+          <div class="ds-value">--hairline</div>
+          <div class="ds-value">rgba(24,22,15,.14)</div>
+        </div>
+        <div class="ds-item">
+          <div class="swatch swatch-hairline-strong"></div>
+          <div class="ds-value">--hairline-strong</div>
+          <div class="ds-value">rgba(24,22,15,.22)</div>
+        </div>
+      </div>
+
+      <!-- Layer Palette — Earth -->
+      <div class="ds-sub">Layer Palette — Earth</div>
+      <div class="ds-row" style="gap:32px">
+        <!-- Core -->
+        <div class="layer-group">
+          <div class="layer-group-label" style="color:var(--core)">Core</div>
+          <div class="layer-swatches">
+            <div class="ds-item">
+              <div class="swatch swatch-sm" style="background:var(--core)"></div>
+              <div class="ds-value">--core</div>
+              <div class="ds-value">#65778c</div>
+            </div>
+            <div class="ds-item">
+              <div class="swatch swatch-sm" style="background:var(--core-tint); border:0.5px solid var(--hairline)"></div>
+              <div class="ds-value">--core-tint</div>
+              <div class="ds-value">#e4e7eb</div>
+            </div>
+            <div class="ds-item">
+              <div class="swatch swatch-sm" style="background:var(--core-dark)"></div>
+              <div class="ds-value">--core-dark</div>
+              <div class="ds-value">#384252</div>
+            </div>
+          </div>
+        </div>
+        <!-- Derived -->
+        <div class="layer-group">
+          <div class="layer-group-label" style="color:var(--derived)">Derived</div>
+          <div class="layer-swatches">
+            <div class="ds-item">
+              <div class="swatch swatch-sm" style="background:var(--derived)"></div>
+              <div class="ds-value">--derived</div>
+              <div class="ds-value">#a8806c</div>
+            </div>
+            <div class="ds-item">
+              <div class="swatch swatch-sm" style="background:var(--derived-tint); border:0.5px solid var(--hairline)"></div>
+              <div class="ds-value">--derived-tint</div>
+              <div class="ds-value">#ebe8e6</div>
+            </div>
+            <div class="ds-item">
+              <div class="swatch swatch-sm" style="background:var(--derived-dark)"></div>
+              <div class="ds-value">--derived-dark</div>
+              <div class="ds-value">#5c463b</div>
+            </div>
+          </div>
+        </div>
+        <!-- Quantum -->
+        <div class="layer-group">
+          <div class="layer-group-label" style="color:var(--quantum-dark)">Quantum</div>
+          <div class="layer-swatches">
+            <div class="ds-item">
+              <div class="swatch swatch-sm" style="background:var(--quantum)"></div>
+              <div class="ds-value">--quantum</div>
+              <div class="ds-value">#ccb576</div>
+            </div>
+            <div class="ds-item">
+              <div class="swatch swatch-sm" style="background:var(--quantum-tint); border:0.5px solid var(--hairline)"></div>
+              <div class="ds-value">--quantum-tint</div>
+              <div class="ds-value">#ebe6d8</div>
+            </div>
+            <div class="ds-item">
+              <div class="swatch swatch-sm" style="background:var(--quantum-dark)"></div>
+              <div class="ds-value">--quantum-dark</div>
+              <div class="ds-value">#706341</div>
+            </div>
+          </div>
+        </div>
+        <!-- Emotional -->
+        <div class="layer-group">
+          <div class="layer-group-label" style="color:var(--emotional-dark)">Emotional</div>
+          <div class="layer-swatches">
+            <div class="ds-item">
+              <div class="swatch swatch-sm" style="background:var(--emotional)"></div>
+              <div class="ds-value">--emotional</div>
+              <div class="ds-value">#7dada0</div>
+            </div>
+            <div class="ds-item">
+              <div class="swatch swatch-sm" style="background:var(--emotional-tint); border:0.5px solid var(--hairline)"></div>
+              <div class="ds-value">--emotional-tint</div>
+              <div class="ds-value">#d8ebe6</div>
+            </div>
+            <div class="ds-item">
+              <div class="swatch swatch-sm" style="background:var(--emotional-dark)"></div>
+              <div class="ds-value">--emotional-dark</div>
+              <div class="ds-value">#456058</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MML Palette -->
+      <div class="ds-sub">MML Palette</div>
+      <div class="ds-row">
+        <div class="ds-item">
+          <div class="swatch-xs" style="background:var(--mml-1-bg);color:var(--mml-1-color);width:80px;height:40px">MML-1</div>
+          <div class="ds-value">--mml-1-bg/color</div>
+        </div>
+        <div class="ds-item">
+          <div class="swatch-xs" style="background:var(--mml-2-bg);color:var(--mml-2-color);width:80px;height:40px">MML-2</div>
+          <div class="ds-value">--mml-2-bg/color</div>
+        </div>
+        <div class="ds-item">
+          <div class="swatch-xs" style="background:var(--mml-3-bg);color:var(--mml-3-color);width:80px;height:40px">MML-3</div>
+          <div class="ds-value">--mml-3-bg/color</div>
+        </div>
+        <div class="ds-item">
+          <div class="swatch-xs" style="background:var(--mml-4-bg);color:var(--mml-4-color);width:80px;height:40px">MML-4</div>
+          <div class="ds-value">--mml-4-bg/color</div>
+        </div>
+        <div class="ds-item">
+          <div class="swatch-xs" style="background:var(--mml-5-bg);color:var(--mml-5-color);width:80px;height:40px;border:0.5px solid var(--hairline)">MML-5</div>
+          <div class="ds-value">--mml-5-bg/color</div>
+        </div>
+      </div>
+
+      <!-- CTA Colors -->
+      <div class="ds-sub">CTA Colors</div>
+      <div class="ds-row">
+        <div class="ds-item">
+          <div class="swatch" style="background:var(--cta-bg)"></div>
+          <div class="ds-value">--cta-bg</div>
+          <div class="ds-value">= var(--carbon)</div>
+        </div>
+        <div class="ds-item">
+          <div class="swatch" style="background:var(--cta-bg-hover)"></div>
+          <div class="ds-value">--cta-bg-hover</div>
+          <div class="ds-value">#2C2A23</div>
+        </div>
+        <div class="ds-item">
+          <div class="swatch" style="background:var(--carbon); display:flex; align-items:center; justify-content:center">
+            <span style="color:var(--cta-text);font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.08em">text</span>
+          </div>
+          <div class="ds-value">--cta-text</div>
+          <div class="ds-value">= var(--vellum-1)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         02 TYPOGRAPHY
+    ══════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="typography">
+      <div class="ds-section-header">
+        <span class="ds-section-num">02</span>
+        <span class="ds-section-title">Typography</span>
+      </div>
+
+      <div class="type-specimen">
+        <div class="type-specimen-label">.t-display — Space Grotesk 700 · clamp(36–64px) · lh 1.04</div>
+        <div class="t-display">Human Elements System</div>
+      </div>
+
+      <div class="type-specimen">
+        <div class="type-specimen-label">.t-title-lg — Space Grotesk 700 · clamp(24–42px) · lh 1.1</div>
+        <div class="t-title-lg">Passport Library</div>
+      </div>
+
+      <div class="type-specimen">
+        <div class="type-specimen-label">.t-title-sm — Space Grotesk 500 · 20px · lh 1.3</div>
+        <div class="t-title-sm">Framework Boundaries</div>
+      </div>
+
+      <div class="type-specimen">
+        <div class="type-specimen-label">.t-body — Literata 400 · 17px · lh 1.7 · editorial</div>
+        <div class="t-body">The capacity to hold and manipulate information in mind over short periods — the workbench of conscious thought. Underpins reasoning, comprehension, and the integration of incoming information with stored knowledge.</div>
+      </div>
+
+      <div class="type-specimen">
+        <div class="type-specimen-label">.t-ui — Space Grotesk 400 · 15px · lh 1.55 · interface</div>
+        <div class="t-ui">343 structured elements across 4 layers, each defined, measured, and versioned.</div>
+      </div>
+
+      <div class="type-specimen">
+        <div class="type-specimen-label">.t-mono — Space Mono 400 · 13px · ls 0.02em</div>
+        <div class="t-mono">C003 · Working Memory Capacity · MML-1 · Core · B03</div>
+      </div>
+
+      <div class="type-specimen">
+        <div class="type-specimen-label">.t-micro — Space Mono 500 · 10px · 0.16em · uppercase</div>
+        <div class="t-micro">Section label · Space Mono · Uppercase · 10px · 0.16em tracking</div>
+      </div>
+
+      <!-- Prose container -->
+      <div class="ds-sub" style="margin-top:48px">Prose Container (.prose — max-width 680px)</div>
+      <div class="prose">
+        <h2>Working Memory and Cognitive Load</h2>
+        <h3>Definition</h3>
+        <p>The capacity to hold and manipulate information in mind over short periods — the workbench of conscious thought. Underpins reasoning, comprehension, and the integration of incoming information with stored knowledge.</p>
+        <p>This element sits at the intersection of attention and long-term memory retrieval, acting as a bottleneck through which environmental inputs must pass before consolidation.</p>
+      </div>
+
+      <!-- Type comparison panel -->
+      <div class="ds-sub" style="margin-top:48px">Typographic Split — Editorial vs Interface</div>
+      <div class="type-compare">
+        <div class="type-compare-col">
+          <div class="type-compare-label">Editorial (Literata) — .t-body</div>
+          <p class="t-body">The capacity to hold and manipulate information in mind over short periods — the workbench of conscious thought.</p>
+        </div>
+        <div class="type-compare-col">
+          <div class="type-compare-label">Interface (Space Grotesk) — .t-ui</div>
+          <p class="t-ui">The capacity to hold and manipulate information in mind over short periods — the workbench of conscious thought.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         03 LAYER BADGES
+    ══════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="layer-badges">
+      <div class="ds-section-header">
+        <span class="ds-section-num">03</span>
+        <span class="ds-section-title">Layer Badges</span>
+      </div>
+
+      <div class="ds-row" style="background:#fff;padding:24px;border:0.5px solid var(--hairline-strong)">
+        <div class="ds-item">
+          <span class="badge-layer badge-layer-core">Core</span>
+          <div class="ds-value">.badge-layer-core</div>
+        </div>
+        <div class="ds-item">
+          <span class="badge-layer badge-layer-derived">Derived</span>
+          <div class="ds-value">.badge-layer-derived</div>
+        </div>
+        <div class="ds-item">
+          <span class="badge-layer badge-layer-quantum">Quantum</span>
+          <div class="ds-value">.badge-layer-quantum</div>
+        </div>
+        <div class="ds-item">
+          <span class="badge-layer badge-layer-emotional">Emotional</span>
+          <div class="ds-value">.badge-layer-emotional</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         04 MML BADGES
+    ══════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="mml-badges">
+      <div class="ds-section-header">
+        <span class="ds-section-num">04</span>
+        <span class="ds-section-title">MML Badges</span>
+      </div>
+
+      <div class="ds-row">
+        <div class="ds-item">
+          <span class="mml-badge mml-1">MML-1 · Established</span>
+          <div class="ds-value">.mml-badge .mml-1</div>
+        </div>
+        <div class="ds-item">
+          <span class="mml-badge mml-2">MML-2 · Validated</span>
+          <div class="ds-value">.mml-badge .mml-2</div>
+        </div>
+        <div class="ds-item">
+          <span class="mml-badge mml-3">MML-3 · Emerging</span>
+          <div class="ds-value">.mml-badge .mml-3</div>
+        </div>
+        <div class="ds-item">
+          <span class="mml-badge mml-4">MML-4 · Theoretical</span>
+          <div class="ds-value">.mml-badge .mml-4</div>
+        </div>
+        <div class="ds-item">
+          <span class="mml-badge mml-5">MML-5 · Speculative</span>
+          <div class="ds-value">.mml-badge .mml-5</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         05 BUTTONS
+    ══════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="buttons">
+      <div class="ds-section-header">
+        <span class="ds-section-num">05</span>
+        <span class="ds-section-title">Buttons</span>
+      </div>
+
+      <!-- Row 1: sizes -->
+      <div class="ds-label">Sizes</div>
+      <div class="ds-row" style="margin-bottom:24px; align-items:center">
+        <div class="ds-item">
+          <button class="btn btn-primary btn-sm">Small</button>
+          <div class="ds-value">.btn-primary .btn-sm</div>
+        </div>
+        <div class="ds-item">
+          <button class="btn btn-primary">Default</button>
+          <div class="ds-value">.btn-primary</div>
+        </div>
+        <div class="ds-item">
+          <button class="btn btn-primary btn-lg">Large</button>
+          <div class="ds-value">.btn-primary .btn-lg</div>
+        </div>
+      </div>
+
+      <!-- Row 2: variants -->
+      <div class="ds-label">Variants</div>
+      <div class="ds-row" style="margin-bottom:24px; align-items:center">
+        <div class="ds-item">
+          <button class="btn btn-primary">Primary</button>
+          <div class="ds-value">.btn-primary</div>
+        </div>
+        <div class="ds-item">
+          <button class="btn btn-ghost">Ghost</button>
+          <div class="ds-value">.btn-ghost</div>
+        </div>
+        <div class="ds-item">
+          <button class="btn btn-ghost btn-sm">Ghost Small</button>
+          <div class="ds-value">.btn-ghost .btn-sm</div>
+        </div>
+      </div>
+
+      <!-- Row 3: on dark surface -->
+      <div class="ds-label">On Dark Surface</div>
+      <div class="btn-dark-demo" style="margin-bottom:8px">
+        <button class="btn btn-primary">Primary</button>
+        <button class="btn btn-ghost" style="border-color:rgba(235,238,242,0.3);color:var(--vellum-1)">Ghost</button>
+      </div>
+      <div class="ds-value" style="margin-bottom:0">Verify contrast on dark surfaces (background: var(--carbon))</div>
+
+      <div class="ds-value" style="margin-top:24px">All border-radius: 0. Intentional — strict academic aesthetic.</div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         06 CARDS
+    ══════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="cards">
+      <div class="ds-section-header">
+        <span class="ds-section-num">06</span>
+        <span class="ds-section-title">Cards</span>
+      </div>
+
+      <div class="ds-row" style="margin-bottom:32px">
+        <!-- Default card -->
+        <div class="ds-item" style="flex:1;min-width:240px">
+          <div class="card">
+            <div class="ds-label">Section</div>
+            <div class="t-ui" style="margin-bottom:8px">The capacity to maintain structured representations across distributed cognitive systems.</div>
+            <div class="t-mono">C003 · Core · MML-1</div>
+          </div>
+          <div class="ds-value" style="margin-top:8px">.card (default)</div>
+        </div>
+
+        <!-- Elevated card -->
+        <div class="ds-item" style="flex:1;min-width:240px">
+          <div class="card card-elevated">
+            <div class="ds-label">Section</div>
+            <div class="t-ui" style="margin-bottom:8px">The capacity to maintain structured representations across distributed cognitive systems.</div>
+            <div class="t-mono">C003 · Core · MML-1</div>
+          </div>
+          <div class="ds-value" style="margin-top:8px">.card.card-elevated (with shadow)</div>
+        </div>
+
+        <!-- Small card -->
+        <div class="ds-item" style="flex:1;min-width:240px">
+          <div class="card card-sm">
+            <div class="ds-label">Section</div>
+            <div class="t-ui" style="margin-bottom:8px">The capacity to maintain structured representations across distributed cognitive systems.</div>
+            <div class="t-mono">C003 · Core · MML-1</div>
+          </div>
+          <div class="ds-value" style="margin-top:8px">.card.card-sm (compact)</div>
+        </div>
+      </div>
+
+      <!-- Passport-style layer card -->
+      <div class="ds-label">Passport-style layer card (full width)</div>
+      <div class="card" style="border-left: 3px solid var(--core)">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span class="t-mono" style="background:var(--core-tint);color:var(--core-dark);padding:3px 10px;border-radius:2px;border:0.5px solid var(--core)">C003</span>
+          <span class="t-title-sm" style="flex:1">Working Memory Capacity</span>
+          <span class="mml-badge mml-1">MML-1 · Established</span>
+          <span class="badge-layer badge-layer-core">Core</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         07 FORMS
+    ══════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="forms">
+      <div class="ds-section-header">
+        <span class="ds-section-num">07</span>
+        <span class="ds-section-title">Forms</span>
+      </div>
+
+      <div class="form-col">
+        <div>
+          <label class="field-label" for="demo-text">Text Input</label>
+          <input class="input" id="demo-text" type="text" placeholder="e.g. Working Memory Capacity">
+        </div>
+        <div>
+          <label class="field-label" for="demo-focused">Focused State</label>
+          <input class="input" id="demo-focused" type="text" placeholder="Focused input"
+            style="border-color:var(--carbon);background:rgba(255,255,255,0.4)">
+        </div>
+        <div>
+          <label class="field-label" for="demo-select">Select / Dropdown</label>
+          <select class="input select" id="demo-select">
+            <option>All Layers</option>
+            <option>Core</option>
+            <option>Derived</option>
+            <option>Quantum</option>
+            <option>Emotional</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label" for="demo-textarea">Textarea</label>
+          <textarea class="input textarea" id="demo-textarea" placeholder="Enter a description…"></textarea>
+        </div>
+        <button class="btn btn-primary" type="button">Submit</button>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         08 ACCORDION
+    ══════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="accordion">
+      <div class="ds-section-header">
+        <span class="ds-section-num">08</span>
+        <span class="ds-section-title">Accordion</span>
+      </div>
+
+      <div style="max-width:640px">
+        <div class="accordion-item open">
+          <button class="accordion-trigger">
+            What is the Human Elements System?
+            <span class="accordion-icon">▾</span>
+          </button>
+          <div class="accordion-body">
+            <p class="t-ui">The Human Elements System (HES) is a structured psychological framework organising human cognitive and emotional traits into 343 discrete elements across four layers: Core, Derived, Quantum, and Emotional. Each element is defined, measured, and assigned a Maturity/Measurability Level (MML).</p>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger">
+            How are elements classified?
+            <span class="accordion-icon">▾</span>
+          </button>
+          <div class="accordion-body">
+            <p class="t-ui">Elements are classified by layer (Core, Derived, Quantum, Emotional), block (their functional grouping within the layer), and MML — a five-point scale from Established (MML-1) to Speculative (MML-5).</p>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger">
+            What does MML mean?
+            <span class="accordion-icon">▾</span>
+          </button>
+          <div class="accordion-body">
+            <p class="t-ui">MML stands for Maturity/Measurability Level. It indicates the degree to which an element has been empirically validated. MML-1 elements are robustly established; MML-5 elements are speculative and may yet be refined or reclassified.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         09 CALLOUTS
+    ══════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="callouts">
+      <div class="ds-section-header">
+        <span class="ds-section-num">09</span>
+        <span class="ds-section-title">Callouts &amp; Dividers</span>
+      </div>
+
+      <div style="max-width:640px;display:flex;flex-direction:column;gap:16px">
+        <div class="callout">
+          <div class="ds-label" style="margin-bottom:6px">.callout — default</div>
+          <p class="t-ui">This element has strong cross-layer dependencies. Consider reviewing its Emotional counterparts before making assessments.</p>
+        </div>
+
+        <div class="callout callout-amber">
+          <div class="ds-label" style="margin-bottom:6px;color:var(--quantum-dark)">.callout-amber — warning / note</div>
+          <p style="font-family:'Space Grotesk',sans-serif;font-size:15px;line-height:1.55">MML-3 classification is pending peer review. Treat empirical claims cautiously until validated.</p>
+        </div>
+      </div>
+
+      <div class="ds-sub" style="margin-top:48px">Dividers</div>
+      <div style="max-width:640px">
+        <div class="ds-label" style="margin-bottom:8px">.divider</div>
+        <hr class="divider" style="margin:16px 0">
+        <div class="ds-label" style="margin-bottom:8px">.divider-strong</div>
+        <hr class="divider divider-strong" style="margin:16px 0">
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         10 PASSPORT COMPONENTS
+    ══════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="passport">
+      <div class="ds-section-header">
+        <span class="ds-section-num">10</span>
+        <span class="ds-section-title">Passport Components</span>
+      </div>
+
+      <div class="ds-label">C003 — Working Memory Capacity (condensed above-fold card)</div>
+
+      <!-- Passport preview as card -->
+      <div class="card pp-preview" style="background: linear-gradient(180deg, var(--vellum-1) 0%, var(--vellum-2) 100%);">
+        <!-- Color stripe -->
+        <div class="stripe" style="display:flex;height:8px;width:100%;margin:-32px -32px 28px;width:calc(100% + 64px)">
+          <span style="flex:1;background:var(--core)"></span>
+          <span style="flex:1;background:var(--derived)"></span>
+          <span style="flex:1;background:var(--quantum)"></span>
+          <span style="flex:1;background:var(--emotional)"></span>
+        </div>
+
+        <div class="pp-eyebrow">
+          <span class="pp-dot"></span>
+          C003 · Core Layer · Block B03
+        </div>
+
+        <div class="pp-title">Working Memory Capacity</div>
+
+        <div class="pp-badges">
+          <span class="pp-badge badge-layer-core">Core</span>
+          <span class="pp-badge" style="background:rgba(24,22,15,0.07);color:var(--carbon)">B03 · Executive Control</span>
+          <span class="mml-badge mml-1">MML-1 · Established</span>
+        </div>
+
+        <div class="t-micro" style="margin-bottom:16px">Last updated · v4.2 · 2024-11-01 · 8 nearest neighbors</div>
+
+        <div class="pp-lbl">Definition</div>
+        <div class="pp-body">
+          The capacity to hold and manipulate information in mind over short periods — the workbench of conscious thought. Underpins reasoning, comprehension, and the integration of incoming information with stored knowledge.
+        </div>
+
+        <div class="pp-lbl">Spectrum Poles</div>
+        <div class="pp-poles">
+          <div class="pp-pole">
+            <div class="pl">Low pole</div>
+            <div class="pv">Limited concurrent storage; information fades rapidly under cognitive load</div>
+          </div>
+          <div class="pp-pole">
+            <div class="pl">High pole</div>
+            <div class="pv">Expanded concurrent storage; sustains complex multi-step reasoning sequences</div>
+          </div>
+        </div>
+
+        <hr class="pp-rule">
+
+        <div class="pp-lbl">Nearest Neighbors</div>
+        <div class="pp-nbrs">
+          <button class="pp-nbr">C001<span class="nb-name">Attentional Capacity</span></button>
+          <button class="pp-nbr">C004<span class="nb-name">Cognitive Flexibility</span></button>
+          <button class="pp-nbr">C011<span class="nb-name">Processing Speed</span></button>
+          <button class="pp-nbr">D007<span class="nb-name">Pattern Recognition</span></button>
+          <button class="pp-nbr">D012<span class="nb-name">Abstract Reasoning</span></button>
+        </div>
+
+        <div class="pp-meta">
+          <span>HES v4.2</span>
+          <span>hestable.com/library/C003</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         11 SPACING
+    ══════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="spacing">
+      <div class="ds-section-header">
+        <span class="ds-section-num">11</span>
+        <span class="ds-section-title">Spacing Scale</span>
+      </div>
+
+      <div style="max-width:600px">
+        <div class="spacing-row">
+          <div class="spacing-token">--space-1 · 4px</div>
+          <div class="spacing-bar" style="width:4px"></div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-token">--space-2 · 8px</div>
+          <div class="spacing-bar" style="width:8px"></div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-token">--space-3 · 12px</div>
+          <div class="spacing-bar" style="width:12px"></div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-token">--space-4 · 16px</div>
+          <div class="spacing-bar" style="width:16px"></div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-token">--space-5 · 24px</div>
+          <div class="spacing-bar" style="width:24px"></div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-token">--space-6 · 32px</div>
+          <div class="spacing-bar" style="width:32px"></div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-token">--space-7 · 48px</div>
+          <div class="spacing-bar" style="width:48px"></div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-token">--space-8 · 64px</div>
+          <div class="spacing-bar" style="width:64px"></div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-token">--space-9 · 96px</div>
+          <div class="spacing-bar" style="width:96px"></div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-token">--space-10 · 128px</div>
+          <div class="spacing-bar" style="width:128px"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="prototype.js"></script>
+</body>
+</html>

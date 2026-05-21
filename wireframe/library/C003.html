@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Working Memory Capacity — HES Passport C003</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../tokens.css">
+  <link rel="stylesheet" href="../typography.css">
+  <link rel="stylesheet" href="../components.css">
+  <link rel="stylesheet" href="../layout.css">
+
+  <style>
+    /* ── Breadcrumb ────────────────────────────────────────────────── */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-4) 0 var(--space-5);
+    }
+    .breadcrumb-link {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--dust);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .breadcrumb-link:hover { color: var(--carbon); }
+    .breadcrumb-sep {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--hairline-strong);
+    }
+    .breadcrumb-current {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--carbon);
+    }
+
+    /* ── Passport page specifics ─────────────────────────────────── */
+    .passport-header { padding: var(--space-7) 0 var(--space-6); }
+    .passport-code-pill {
+      display: inline-block;
+      font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 0.04em;
+      padding: 4px 10px; border-radius: 0;
+      background: var(--core-tint); color: var(--core-dark);
+      border: 0.5px solid var(--core);
+      margin-bottom: var(--space-4);
+    }
+    .passport-field { margin-bottom: var(--space-6); }
+    .passport-field .section-label { margin-bottom: var(--space-3); }
+
+    /* Badge row */
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-2);
+      margin-top: var(--space-4);
+      margin-bottom: var(--space-3);
+    }
+
+    /* Block badge — Space Mono pill */
+    .block-badge {
+      display: inline-block;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      border: 0.5px solid var(--hairline-strong);
+      background: rgba(24,22,15,0.04);
+      color: var(--dust);
+      text-decoration: none;
+      transition: color 0.15s, background 0.15s, border-color 0.15s;
+    }
+    .block-badge:hover {
+      color: var(--carbon);
+      border-color: var(--carbon);
+      background: rgba(24,22,15,0.07);
+    }
+
+    /* Meta row */
+    .passport-meta {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.10em;
+      color: var(--dust);
+      margin-top: var(--space-3);
+    }
+
+    /* MML tooltip */
+    .mml-info { cursor: help; font-size: 11px; color: var(--dust); margin-left: 6px; position: relative; }
+    .mml-info .tooltip-text {
+      display: none;
+      position: absolute;
+      left: 50%; transform: translateX(-50%);
+      bottom: calc(100% + 6px);
+      width: 280px;
+      background: var(--carbon);
+      color: var(--vellum-1);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      line-height: 1.5;
+      padding: var(--space-3) var(--space-4);
+      border-radius: 0;
+      z-index: var(--z-tooltip);
+      white-space: normal;
+    }
+    .mml-info:hover .tooltip-text { display: block; }
+
+    /* Trainability/Modifiability dots */
+    .level-dots { display: flex; gap: 6px; margin-top: var(--space-3); }
+    .level-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--hairline-strong);
+    }
+    .level-dot.filled { background: var(--carbon); }
+
+    /* Trainability / Modifiability values */
+    .level-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 28px;
+      font-weight: 500;
+      color: var(--carbon);
+      line-height: 1.1;
+      margin-bottom: var(--space-2);
+    }
+    .level-subtext {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      color: var(--dust);
+      line-height: 1.5;
+    }
+
+    /* Section label with inline meta */
+    .section-label-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding-bottom: var(--space-3);
+      border-bottom: 0.5px solid var(--hairline);
+      margin-bottom: var(--space-5);
+    }
+    .section-label-inline {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--dust);
+    }
+    .section-label-attr {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      color: var(--dust);
+      opacity: 0.7;
+    }
+
+    /* Measure prefix icon */
+    .measure-prefix {
+      font-family: 'Space Grotesk', sans-serif;
+      color: var(--dust);
+      margin-right: var(--space-2);
+      font-size: 14px;
+    }
+
+    /* Citation block */
+    .citation-block {
+      background: var(--vellum-2);
+      border: 0.5px solid var(--hairline-strong);
+      border-radius: 0;
+      padding: var(--space-5);
+    }
+    .citation-apa {
+      font-family: 'Literata', Georgia, serif;
+      font-size: 14px; line-height: 1.6; color: var(--carbon);
+      margin-bottom: var(--space-4);
+    }
+    .citation-bibtex {
+      font-family: 'Space Mono', monospace; font-size: 12px;
+      line-height: 1.6; color: var(--carbon);
+      background: rgba(24,22,15,0.04); padding: var(--space-4);
+      border-radius: 0; overflow-x: auto;
+      white-space: pre; margin-bottom: var(--space-4);
+    }
+    .citation-actions {
+      display: flex;
+      gap: var(--space-3);
+    }
+
+    /* Prev/Next nav */
+    .passport-prevnext {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: var(--space-5) 0;
+      border-top: 0.5px solid var(--hairline);
+      margin-top: var(--space-7);
+    }
+    .passport-prevnext a {
+      font-family: 'Space Mono', monospace; font-size: 11px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--dust); text-decoration: none;
+      transition: color 0.15s;
+    }
+    .passport-prevnext a:hover { color: var(--carbon); }
+
+    /* Passport disclaimer */
+    .passport-disclaimer {
+      text-align: center; padding: var(--space-5) 0;
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.12em; color: var(--dust);
+      border-top: 0.5px solid var(--hairline);
+    }
+
+    /* Pole card left border */
+    .pole-card {
+      border-left: 2px solid var(--core);
+    }
+
+    /* Mid-reference card border */
+    .midref-card {
+      border-left: 2px solid var(--dust);
+    }
+
+    /* Neighbors intro text */
+    .nbr-intro {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      color: var(--dust);
+      margin-bottom: var(--space-4);
+    }
+
+    /* Nearest neighbors section label override */
+    .nbr-section-label {
+      margin-bottom: var(--space-3);
+    }
+  </style>
+</head>
+<body class="page-library">
+
+  <!-- ── Topbar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <div class="lockup">
+      <div class="mark" aria-hidden="true"></div>
+      <a href="../index.html" class="wm">
+        HES<span class="sep">/</span><span class="lab">LIBRARY</span>
+      </a>
+    </div>
+
+    <nav class="nav-primary" aria-label="Primary navigation">
+      <a href="../about.html"         class="nav-link">About</a>
+      <a href="index.html"            class="nav-link active">Library</a>
+      <a href="../book.html"          class="nav-link">Book</a>
+      <a href="../blog/index.html"    class="nav-link">Blog</a>
+      <a href="../research.html"      class="nav-link">Research</a>
+      <a href="../contribute.html"    class="nav-link">Contribute</a>
+    </nav>
+
+    <div class="nav-right">
+      <a href="../contact.html" class="nav-link">Contact</a>
+
+      <div class="nav-more">
+        <button class="nav-more-btn nav-link"
+                aria-haspopup="true"
+                aria-expanded="false"
+                id="more-btn">
+          More <span class="nav-arrow">▾</span>
+        </button>
+        <div class="nav-more-menu" role="menu" id="more-menu">
+          <a href="../faq.html"            class="nav-more-item" role="menuitem">FAQ</a>
+          <a href="../glossary.html"       class="nav-more-item" role="menuitem">Glossary</a>
+          <a href="../press.html"          class="nav-more-item" role="menuitem">Press</a>
+          <a href="../changelog.html"      class="nav-more-item" role="menuitem">Changelog</a>
+          <div class="nav-more-divider"></div>
+          <a href="../community.html"      class="nav-more-item nav-more-item--placeholder" role="menuitem">Community <span class="nav-soon">Soon</span></a>
+          <a href="../hes-philosophy.html" class="nav-more-item nav-more-item--placeholder" role="menuitem">HES Philosophy <span class="nav-soon">Soon</span></a>
+          <a href="../hes-test.html"       class="nav-more-item nav-more-item--placeholder" role="menuitem">HES-TEST <span class="nav-soon">Soon</span></a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Page body ────────────────────────────────────────────────── -->
+  <div class="page-body">
+    <div class="container-narrow">
+
+      <!-- ── Breadcrumb ─────────────────────────────────────────── -->
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html" class="breadcrumb-link">Home</a>
+        <span class="breadcrumb-sep" aria-hidden="true">›</span>
+        <a href="index.html" class="breadcrumb-link">Library</a>
+        <span class="breadcrumb-sep" aria-hidden="true">›</span>
+        <span class="breadcrumb-current">Working Memory Capacity</span>
+      </nav>
+
+      <!-- ── Passport header — above the fold ───────────────────── -->
+      <div class="passport-header">
+
+        <div class="passport-code-pill">C003</div>
+
+        <h1 class="t-title-lg">Working Memory Capacity</h1>
+
+        <div class="badge-row">
+          <!-- Layer badge -->
+          <span class="badge-layer badge-layer-core">Core</span>
+
+          <!-- Block badge -->
+          <a href="index.html?block=B03" class="block-badge">B03 · Executive Function</a>
+
+          <!-- MML badge with tooltip -->
+          <span style="display:inline-flex;align-items:center;">
+            <span class="mml-badge mml-1">MML-1 · Established</span>
+            <span class="mml-info" aria-label="MML-1 definition">ⓘ
+              <span class="tooltip-text">MML-1: Measurement infrastructure exists. Multiple independent validation studies with consistent results.</span>
+            </span>
+          </span>
+        </div>
+
+        <div class="passport-meta">
+          Version 1.3.2 · Last revised March 2024 · Core layer
+        </div>
+
+      </div><!-- /passport-header -->
+
+      <!-- ── Definition ────────────────────────────────────────── -->
+      <div class="passport-field">
+        <div class="section-label-row">
+          <span class="section-label-inline">Definition</span>
+          <span class="section-label-attr">— Baddeley &amp; related</span>
+        </div>
+        <p class="t-body">
+          The capacity to hold and manipulate information in mind over short periods —
+          the workbench of conscious thought. Underpins reasoning, comprehension,
+          and the integration of incoming information with stored knowledge.
+          Working memory is distinct from short-term memory in that it involves
+          active processing rather than passive storage.
+        </p>
+      </div>
+
+      <!-- ── Poles ─────────────────────────────────────────────── -->
+      <div class="passport-field">
+        <div class="section-label">Poles</div>
+        <div class="grid-2">
+
+          <!-- Low pole -->
+          <div class="card card-sm pole-card">
+            <div class="t-micro" style="margin-bottom:var(--space-3);">Low Pole</div>
+            <p class="t-ui" style="font-size:14px;line-height:1.6;">
+              Difficulty maintaining active representations under normal cognitive load;
+              information fades before it can be used or integrated. Associated with
+              challenges in multi-step reasoning, reading comprehension, and instruction-following.
+            </p>
+          </div>
+
+          <!-- High pole -->
+          <div class="card card-sm pole-card">
+            <div class="t-micro" style="margin-bottom:var(--space-3);">High Pole</div>
+            <p class="t-ui" style="font-size:14px;line-height:1.6;">
+              Sustained manipulation of multiple information streams under high load;
+              flexible recombination and integration even when task demands compete.
+              Associated with advantages in fluid reasoning, complex planning, and novel problem-solving.
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Mid-reference ─────────────────────────────────────── -->
+      <div class="passport-field">
+        <div class="section-label">Mid-reference</div>
+        <div class="card card-sm midref-card">
+          <p class="t-ui" style="font-size:14px;line-height:1.6;">
+            Functional working memory under typical everyday demands; occasional
+            lapses under high load or distraction. The statistically typical range
+            for adults in non-clinical populations.
+          </p>
+        </div>
+      </div>
+
+      <!-- ── Measure ───────────────────────────────────────────── -->
+      <div class="passport-field">
+        <div class="section-label">Measure</div>
+        <p class="t-ui" style="font-size:14px;line-height:1.6;">
+          <span class="measure-prefix">◈</span>
+          Capacity (number of items maintainable), accuracy under load,
+          and decay rate under distraction. Standardised tasks include
+          N-back variants, reading span, and operation span procedures.
+        </p>
+      </div>
+
+      <hr class="divider">
+
+      <!-- ── Trainability + Modifiability ──────────────────────── -->
+      <div class="grid-2" style="margin-bottom:var(--space-7);">
+
+        <!-- Trainability -->
+        <div>
+          <div class="section-label">Trainability</div>
+          <div class="level-value">Mid</div>
+          <div class="level-subtext">Can be improved through deliberate practice, though gains are modest and task-specific.</div>
+          <div class="level-dots">
+            <div class="level-dot filled"></div>
+            <div class="level-dot filled"></div>
+            <div class="level-dot"></div>
+          </div>
+        </div>
+
+        <!-- Modifiability -->
+        <div>
+          <div class="section-label">Modifiability</div>
+          <div class="level-value">High</div>
+          <div class="level-subtext">Responsive to a range of interventions including environmental change, therapy, and life events.</div>
+          <div class="level-dots">
+            <div class="level-dot filled"></div>
+            <div class="level-dot filled"></div>
+            <div class="level-dot filled"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Nearest Neighbors ─────────────────────────────────── -->
+      <div class="passport-field">
+        <div class="section-label nbr-section-label">Nearest Neighbors</div>
+        <p class="nbr-intro">Elements with the closest theoretical and empirical relationships to Working Memory Capacity.</p>
+        <div class="pp-nbrs">
+          <a href="C006.html" class="pp-nbr">C006<span class="nb-name">Inhibitory Control</span></a>
+          <a href="C007.html" class="pp-nbr">C007<span class="nb-name">Cognitive Flexibility</span></a>
+          <a href="C009.html" class="pp-nbr">C009<span class="nb-name">Planning Capacity</span></a>
+          <a href="D012.html" class="pp-nbr">D012<span class="nb-name">Cognitive Load Sensitivity</span></a>
+          <a href="D044.html" class="pp-nbr">D044<span class="nb-name">Working Self-Concept</span></a>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- ── Notes ─────────────────────────────────────────────── -->
+      <div class="passport-field">
+        <div class="section-label">Notes</div>
+        <p class="t-body">
+          Baddeley &amp; Hitch (1974) multi-component model remains the dominant
+          theoretical framework. Central executive, phonological loop, and
+          visuospatial sketchpad are treated as sub-components rather than
+          separate elements in this framework.
+        </p>
+      </div>
+
+      <!-- ── Citation block ─────────────────────────────────────── -->
+      <div class="passport-field">
+        <div class="section-label">How to cite this passport</div>
+        <div class="citation-block">
+
+          <div class="citation-apa">
+            Oganesian, A. (2024). Working Memory Capacity [HES Passport C003, v1.3.2].
+            hestable.com. https://hestable.com/library/C003
+          </div>
+
+          <pre class="citation-bibtex">@misc{hes_C003,
+  author       = {Oganesian, Areg},
+  title        = {Working Memory Capacity},
+  year         = {2024},
+  note         = {HES Passport C003, v1.3.2},
+  howpublished = {\url{https://hestable.com/library/C003}}
+}</pre>
+
+          <div class="citation-actions">
+            <button class="btn btn-ghost btn-sm">Copy APA</button>
+            <button class="btn btn-ghost btn-sm">Copy BibTeX</button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Prev / Next navigation ─────────────────────────────── -->
+      <nav class="passport-prevnext" aria-label="Adjacent passports">
+        <a href="C002.html">← C002 · Previous</a>
+        <a href="C004.html">C004 · Next →</a>
+      </nav>
+
+      <!-- ── Scope disclaimer ──────────────────────────────────── -->
+      <div class="passport-disclaimer" role="note">
+        HES is not a clinical tool. It does not replace professional psychological, psychiatric, or medical assessment. This passport is a reference document only.
+      </div>
+
+    </div><!-- /container-narrow -->
+  </div><!-- /page-body -->
+
+  <!-- ── Footer ────────────────────────────────────────────────── -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+
+        <div>
+          <div class="footer-col-label">Explore</div>
+          <a href="index.html"          class="footer-link">Passport Library</a>
+          <a href="index.html"          class="footer-link">The Four Layers</a>
+          <a href="../book.html"        class="footer-link">The Book</a>
+          <a href="../about.html"       class="footer-link">About HES</a>
+          <a href="../research.html"    class="footer-link">MML Framework</a>
+        </div>
+
+        <div>
+          <div class="footer-col-label">Learn</div>
+          <a href="../faq.html"         class="footer-link">FAQ</a>
+          <a href="../glossary.html"    class="footer-link">Glossary</a>
+          <a href="../changelog.html"   class="footer-link">Changelog</a>
+          <a href="../blog/index.html"  class="footer-link">Blog</a>
+          <a href="../research.html"    class="footer-link">Research</a>
+        </div>
+
+        <div>
+          <div class="footer-col-label">Connect</div>
+          <a href="../contact.html"     class="footer-link">Contact</a>
+          <a href="../contribute.html"  class="footer-link">Contribute</a>
+          <a href="../contribute.html"  class="footer-link">HES Lingua</a>
+          <a href="../community.html"   class="footer-link">Community</a>
+          <a href="../press.html"       class="footer-link">Press</a>
+        </div>
+
+      </div>
+
+      <div class="footer-legal">
+        <div class="footer-legal-links">
+          <a href="../privacy.html"    class="footer-legal-link">Privacy Policy</a>
+          <a href="../terms.html"      class="footer-legal-link">Terms of Use</a>
+          <a href="../disclaimer.html" class="footer-legal-link">Disclaimer</a>
+        </div>
+        <div class="footer-version">Core v1.3.2 · Derived v1.2.4 · Quantum v2.2 · Emotional v2.0</div>
+        <div class="footer-disclaimer">HES is not a clinical tool. It does not replace professional psychological, psychiatric, or medical assessment.</div>
+      </div>
+
+    </div>
+  </footer>
+
+  <script>
+    /* ── More dropdown toggle ───────────────────────────────────── */
+    const moreBtn  = document.getElementById('more-btn');
+    const moreMenu = document.getElementById('more-menu');
+    if (moreBtn && moreMenu) {
+      moreBtn.addEventListener('click', () => {
+        const open = moreMenu.classList.toggle('open');
+        moreBtn.setAttribute('aria-expanded', open);
+      });
+      document.addEventListener('click', e => {
+        if (!moreBtn.contains(e.target) && !moreMenu.contains(e.target)) {
+          moreMenu.classList.remove('open');
+          moreBtn.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>

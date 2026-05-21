@@ -1,0 +1,90 @@
+/* ── PROTOTYPE SCAFFOLDING ─────────────────────────────────────────
+   layout.css is prototype-only. Do not port to production.
+   Production layout will be implemented in the chosen framework
+   (Next.js / Astro / etc.) as proper layout components.
+   ─────────────────────────────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  min-height: 100%;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  color: var(--carbon);
+  background: var(--vellum-2);
+}
+
+/* Page wrapper — editorial pages (white bg) */
+.page-editorial {
+  background: #ffffff;
+  min-height: 100vh;
+}
+
+/* Page wrapper — library pages (vellum gradient bg) */
+.page-library {
+  background: var(--library-surface);
+  min-height: 100vh;
+}
+
+/* Content container */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+.container-narrow {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+.container-wide {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+/* Page body — below fixed topbar */
+.page-body {
+  padding-top: 64px; /* topbar height */
+}
+
+/* Section spacing */
+.section    { padding: var(--space-9) 0; }
+.section-sm { padding: var(--space-7) 0; }
+
+/* Grid utilities */
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-5); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-5); }
+
+@media (max-width: 768px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+}
+
+/* Flex utilities */
+.flex         { display: flex; }
+.flex-center  { display: flex; align-items: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
+.gap-5 { gap: var(--space-5); }
+.gap-6 { gap: var(--space-6); }
+
+/* Spacing utilities */
+.mt-4 { margin-top: var(--space-4); }
+.mt-5 { margin-top: var(--space-5); }
+.mt-6 { margin-top: var(--space-6); }
+.mt-7 { margin-top: var(--space-7); }
+
+.mb-4 { margin-bottom: var(--space-4); }
+.mb-5 { margin-bottom: var(--space-5); }
+.mb-6 { margin-bottom: var(--space-6); }
+.mb-7 { margin-bottom: var(--space-7); }

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — HES</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="typography.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="layout.css">
+
+  <style>
+    .page-header {
+      background: var(--library-surface);
+      padding: var(--space-8) 0 var(--space-7);
+      border-bottom: 0.5px solid var(--hairline-strong);
+    }
+    .page-header-eyebrow {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--dust);
+      margin-bottom: var(--space-3);
+    }
+    .page-header-subtitle {
+      font-family: 'Space Grotesk', sans-serif; font-size: 17px;
+      color: var(--dust); margin-top: var(--space-3); line-height: 1.5;
+    }
+
+    .contact-section {
+      padding: var(--space-8) 0 var(--space-10);
+    }
+
+    /* Two-column contact layout */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: var(--space-8);
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .contact-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Form specifics */
+    .contact-form { max-width: 560px; }
+    .form-field { margin-bottom: var(--space-5); }
+    .required-mark { color: var(--dust); margin-left: 3px; }
+
+    /* Info panel */
+    .info-email {
+      font-family: 'Space Mono', monospace; font-size: 13px;
+      letter-spacing: 0.06em; color: var(--carbon);
+      margin-bottom: var(--space-6);
+      border-bottom: 0.5px solid var(--hairline);
+      padding-bottom: var(--space-5);
+    }
+    .info-email a {
+      color: var(--carbon); text-decoration: none;
+      border-bottom: 0.5px solid var(--hairline-strong);
+      padding-bottom: 1px; transition: border-color 0.15s;
+    }
+    .info-email a:hover { border-color: var(--carbon); }
+
+    .social-link {
+      display: block;
+      font-family: 'Space Mono', monospace; font-size: 11px;
+      letter-spacing: 0.10em; text-transform: uppercase;
+      color: var(--dust); text-decoration: none;
+      padding: var(--space-3) 0;
+      border-bottom: 0.5px solid var(--hairline);
+      transition: color 0.15s;
+    }
+    .social-link:first-of-type { border-top: 0.5px solid var(--hairline); }
+    .social-link:hover { color: var(--carbon); }
+    .social-link-arrow { margin-right: 8px; }
+  </style>
+</head>
+<body class="page-editorial">
+
+  <!-- ── Topbar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <div class="lockup">
+      <div class="mark" aria-hidden="true"></div>
+      <a href="index.html" class="wm">HES<span class="sep">/</span><span class="lab">LIBRARY</span></a>
+    </div>
+    <nav class="nav-primary" aria-label="Primary navigation">
+      <a href="about.html"         class="nav-link">About</a>
+      <a href="library/index.html" class="nav-link">Library</a>
+      <a href="book.html"          class="nav-link">Book</a>
+      <a href="blog/index.html"    class="nav-link">Blog</a>
+      <a href="research.html"      class="nav-link">Research</a>
+      <a href="contribute.html"    class="nav-link">Contribute</a>
+    </nav>
+    <div class="nav-right">
+      <a href="contact.html" class="nav-link active">Contact</a>
+      <div class="nav-more">
+        <button class="nav-more-btn nav-link" aria-haspopup="true" aria-expanded="false">More <span class="nav-arrow">▾</span></button>
+        <div class="nav-more-menu" role="menu">
+          <a href="faq.html"            class="nav-more-item" role="menuitem">FAQ</a>
+          <a href="glossary.html"       class="nav-more-item" role="menuitem">Glossary</a>
+          <a href="press.html"          class="nav-more-item" role="menuitem">Press</a>
+          <a href="changelog.html"      class="nav-more-item" role="menuitem">Changelog</a>
+          <div class="nav-more-divider"></div>
+          <a href="community.html"      class="nav-more-item nav-more-item--placeholder" role="menuitem">Community <span class="nav-soon">Soon</span></a>
+          <a href="hes-philosophy.html" class="nav-more-item nav-more-item--placeholder" role="menuitem">HES Philosophy <span class="nav-soon">Soon</span></a>
+          <a href="hes-test.html"       class="nav-more-item nav-more-item--placeholder" role="menuitem">HES-TEST <span class="nav-soon">Soon</span></a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-body" id="main-content">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div class="container-narrow">
+        <div class="page-header-eyebrow">Get in touch</div>
+        <h1 class="t-title-lg">Contact</h1>
+        <p class="page-header-subtitle">Get in touch with the author.</p>
+      </div>
+    </div>
+
+    <!-- ── Contact section ───────────────────────────────────────── -->
+    <div class="contact-section">
+      <div class="container">
+        <div class="contact-grid">
+
+          <!-- Left: form -->
+          <div class="contact-form">
+            <form action="#" method="post" novalidate>
+
+              <div class="form-field">
+                <label class="field-label" for="contact-name">Name <span class="required-mark" aria-label="required">*</span></label>
+                <input type="text" id="contact-name" name="name" class="input" placeholder="Your name" required autocomplete="name">
+              </div>
+
+              <div class="form-field">
+                <label class="field-label" for="contact-email">Email <span class="required-mark" aria-label="required">*</span></label>
+                <input type="email" id="contact-email" name="email" class="input" placeholder="your@email.com" required autocomplete="email">
+              </div>
+
+              <div class="form-field">
+                <label class="field-label" for="contact-subject">Subject</label>
+                <select id="contact-subject" name="subject" class="input select">
+                  <option value="general">General enquiry</option>
+                  <option value="research">Research collaboration</option>
+                  <option value="translation">Translation (HES Lingua)</option>
+                  <option value="press">Press enquiry</option>
+                  <option value="feedback">Feedback</option>
+                  <option value="error">Error report</option>
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label class="field-label" for="contact-message">Message <span class="required-mark" aria-label="required">*</span></label>
+                <textarea id="contact-message" name="message" class="input textarea" placeholder="Your message (minimum 20 characters)" required minlength="20" rows="6"></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="margin-top:var(--space-3);">Send message</button>
+
+            </form>
+          </div>
+
+          <!-- Right: info panel -->
+          <div>
+            <div class="card">
+
+              <div class="info-email">
+                <div class="section-label" style="margin-bottom:var(--space-3);">Email</div>
+                <a href="mailto:hello@hestable.com">hello@hestable.com</a>
+              </div>
+
+              <div class="section-label" style="margin-bottom:var(--space-3);">Also find HES at</div>
+              <a href="#" class="social-link"><span class="social-link-arrow">↗</span> LinkedIn</a>
+              <a href="#" class="social-link"><span class="social-link-arrow">↗</span> Substack</a>
+              <a href="#" class="social-link"><span class="social-link-arrow">↗</span> ResearchGate</a>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── Footer ────────────────────────────────────────────────── -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-col-label">Explore</div>
+          <a href="library/index.html" class="footer-link">Passport Library</a>
+          <a href="library/index.html" class="footer-link">The Four Layers</a>
+          <a href="book.html"          class="footer-link">The Book</a>
+          <a href="about.html"         class="footer-link">About HES</a>
+          <a href="research.html"      class="footer-link">MML Framework</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Learn</div>
+          <a href="faq.html"           class="footer-link">FAQ</a>
+          <a href="glossary.html"      class="footer-link">Glossary</a>
+          <a href="changelog.html"     class="footer-link">Changelog</a>
+          <a href="blog/index.html"    class="footer-link">Blog</a>
+          <a href="research.html"      class="footer-link">Research</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Connect</div>
+          <a href="contact.html"       class="footer-link">Contact</a>
+          <a href="contribute.html"    class="footer-link">Contribute</a>
+          <a href="contribute.html"    class="footer-link">HES Lingua</a>
+          <a href="community.html"     class="footer-link">Community</a>
+          <a href="press.html"         class="footer-link">Press</a>
+        </div>
+      </div>
+      <div class="footer-legal">
+        <div class="footer-legal-links">
+          <a href="privacy.html"    class="footer-legal-link">Privacy Policy</a>
+          <a href="terms.html"      class="footer-legal-link">Terms of Use</a>
+          <a href="disclaimer.html" class="footer-legal-link">Disclaimer</a>
+        </div>
+        <div class="footer-version">Core v1.3.2 · Derived v1.2.4 · Quantum v2.2 · Emotional v2.0</div>
+        <div class="footer-disclaimer">HES is not a clinical tool. It does not replace professional psychological, psychiatric, or medical assessment.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="prototype.js"></script>
+</body>
+</html>

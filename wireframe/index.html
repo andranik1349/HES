@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HES — Human Elements System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="typography.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="layout.css">
+  <style>
+    /* ── Visually hidden (accessibility) ──────────────────────── */
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0);
+      white-space: nowrap; border: 0;
+    }
+
+    /* ── Hero ─────────────────────────────────────────────────── */
+    .hero {
+      min-height: calc(100vh - 64px);
+      background: var(--library-surface);
+      display: flex;
+      align-items: center;
+    }
+
+    .hero-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-8);
+      align-items: center;
+      padding: var(--space-9) 0;
+    }
+
+    .hero-eyebrow {
+      margin-bottom: var(--space-4);
+    }
+
+    .hero-sub {
+      margin-top: var(--space-4);
+      max-width: 480px;
+      color: #3c3a30;
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: var(--space-4);
+      margin-top: var(--space-6);
+      flex-wrap: wrap;
+    }
+
+    /* ── Hero layer bars (right column) ──────────────────────── */
+    .hero-layers {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .hero-layer-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-4) var(--space-5);
+      border: 0.5px solid var(--hairline-strong);
+      border-left-width: 3px;
+    }
+
+    .hlb-left {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .hlb-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--carbon);
+    }
+
+    .hlb-count {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--dust);
+    }
+
+    /* ── Disclaimer strip ────────────────────────────────────── */
+    .disclaimer-strip {
+      background: rgba(24,22,15,0.04);
+      border-top: 0.5px solid var(--hairline);
+      border-bottom: 0.5px solid var(--hairline);
+      padding: var(--space-3) 0;
+      text-align: center;
+    }
+
+    /* ── Section heading ─────────────────────────────────────── */
+    .section-heading {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: clamp(22px, 2.5vw, 32px);
+      color: var(--carbon);
+      margin-bottom: var(--space-6);
+    }
+
+    /* ── Layer cards ─────────────────────────────────────────── */
+    .layer-card {
+      border: 0.5px solid var(--hairline-strong);
+      border-left-width: 3px;
+      padding: var(--space-6);
+      transition: box-shadow 0.15s;
+    }
+
+    .layer-card:hover {
+      box-shadow: var(--shadow-card);
+    }
+
+    .layer-card-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--carbon);
+      margin-bottom: var(--space-2);
+    }
+
+    .layer-card-tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--dust);
+      margin-bottom: var(--space-3);
+    }
+
+    .layer-card-count {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--dust);
+      margin-bottom: var(--space-4);
+      padding-bottom: var(--space-4);
+      border-bottom: 0.5px solid var(--hairline);
+    }
+
+    .layer-card-desc {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      line-height: 1.65;
+      color: #3c3a30;
+      margin-bottom: var(--space-5);
+    }
+
+    .layer-card-link {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--carbon);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: gap 0.15s;
+    }
+
+    .layer-card-link:hover {
+      gap: 12px;
+    }
+
+    /* ── Blog section ────────────────────────────────────────── */
+    .section-blog {
+      background: var(--vellum-1);
+    }
+
+    .blog-card {
+      background: #ffffff;
+      border: 0.5px solid var(--hairline-strong);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .blog-thumb {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: var(--vellum-2);
+      flex-shrink: 0;
+    }
+
+    .blog-card-body {
+      padding: var(--space-5);
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .blog-date {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--dust);
+      margin-bottom: var(--space-3);
+    }
+
+    .blog-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      line-height: 1.4;
+      color: var(--carbon);
+      margin-bottom: var(--space-3);
+      flex: 1;
+    }
+
+    .blog-excerpt {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--dust);
+      margin-bottom: var(--space-4);
+    }
+
+    .blog-read-link {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--carbon);
+      text-decoration: none;
+      align-self: flex-start;
+    }
+
+    .blog-read-link:hover {
+      text-decoration: underline;
+    }
+
+    /* ── Book callout ────────────────────────────────────────── */
+    .section-book {
+      border-top: 0.5px solid var(--hairline);
+      border-bottom: 0.5px solid var(--hairline);
+    }
+
+    .book-inner {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: var(--space-8);
+      align-items: center;
+    }
+
+    .book-cover {
+      background: var(--carbon);
+      aspect-ratio: 2 / 3;
+      width: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .book-cover-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--vellum-1);
+      opacity: 0.45;
+    }
+
+    .book-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: clamp(20px, 2vw, 28px);
+      color: var(--carbon);
+      margin-bottom: var(--space-4);
+    }
+
+    .book-desc {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+      line-height: 1.65;
+      color: #3c3a30;
+      margin-bottom: var(--space-5);
+      max-width: 520px;
+    }
+
+    /* ── Newsletter ──────────────────────────────────────────── */
+    .section-newsletter {
+      background: var(--vellum-1);
+    }
+
+    .newsletter-inner {
+      max-width: 500px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .newsletter-headline {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: clamp(18px, 2vw, 24px);
+      color: var(--carbon);
+      line-height: 1.35;
+      margin-bottom: var(--space-6);
+    }
+
+    .newsletter-form {
+      display: flex;
+      gap: 0;
+    }
+
+    .newsletter-form .input {
+      flex: 1;
+      width: auto;
+      border-right: none;
+    }
+
+    .newsletter-form .input:focus {
+      border-right: none;
+    }
+
+    .newsletter-fine {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--dust);
+      margin-top: var(--space-4);
+    }
+
+    /* ── Responsive ──────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .hero-inner {
+        grid-template-columns: 1fr;
+        gap: var(--space-7);
+        padding: var(--space-8) 0;
+      }
+
+      .book-inner {
+        grid-template-columns: 140px 1fr;
+        gap: var(--space-6);
+      }
+
+      .book-cover {
+        width: 140px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .book-inner {
+        grid-template-columns: 1fr;
+      }
+
+      .book-cover {
+        width: 140px;
+      }
+
+      .newsletter-form {
+        flex-direction: column;
+        gap: var(--space-3);
+      }
+
+      .newsletter-form .input {
+        width: 100%;
+        border-right: 0.5px solid var(--hairline-strong);
+      }
+    }
+  </style>
+</head>
+<body class="page-editorial">
+
+  <!-- NAV: copied from _nav.html — root depth, no ../ prefix -->
+  <header class="topbar" role="banner">
+
+    <div class="lockup">
+      <div class="mark" aria-hidden="true"></div>
+      <a href="index.html" class="wm">
+        HES<span class="sep">/</span><span class="lab">LIBRARY</span>
+      </a>
+    </div>
+
+    <nav class="nav-primary" aria-label="Primary navigation">
+      <!-- Home page: no nav item is active -->
+      <a href="about.html"         class="nav-link">About</a>
+      <a href="library/index.html" class="nav-link">Library</a>
+      <a href="book.html"          class="nav-link">Book</a>
+      <a href="blog/index.html"    class="nav-link">Blog</a>
+      <a href="research.html"      class="nav-link">Research</a>
+      <a href="contribute.html"    class="nav-link">Contribute</a>
+    </nav>
+
+    <div class="nav-right">
+      <a href="contact.html" class="nav-link">Contact</a>
+
+      <div class="nav-more">
+        <button class="nav-more-btn nav-link"
+                aria-haspopup="true"
+                aria-expanded="false">
+          More <span class="nav-arrow">▾</span>
+        </button>
+
+        <div class="nav-more-menu" role="menu">
+          <a href="faq.html"            class="nav-more-item" role="menuitem">FAQ</a>
+          <a href="glossary.html"       class="nav-more-item" role="menuitem">Glossary</a>
+          <a href="press.html"          class="nav-more-item" role="menuitem">Press</a>
+          <a href="changelog.html"      class="nav-more-item" role="menuitem">Changelog</a>
+          <div class="nav-more-divider"></div>
+          <a href="community.html"      class="nav-more-item nav-more-item--placeholder" role="menuitem">Community <span class="nav-soon">Soon</span></a>
+          <a href="hes-philosophy.html" class="nav-more-item nav-more-item--placeholder" role="menuitem">HES Philosophy <span class="nav-soon">Soon</span></a>
+          <a href="hes-test.html"       class="nav-more-item nav-more-item--placeholder" role="menuitem">HES-TEST <span class="nav-soon">Soon</span></a>
+        </div>
+      </div>
+    </div>
+
+  </header>
+
+  <main class="page-body">
+
+    <!-- ═══════════════════════════════════════════════════════════
+         HERO
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="hero" aria-labelledby="hero-headline">
+      <div class="container">
+        <div class="hero-inner">
+
+          <!-- Left column: copy + CTAs -->
+          <div class="hero-copy">
+            <p class="t-micro hero-eyebrow">Human Elements System</p>
+            <h1 class="t-display" id="hero-headline">A structured reference framework for human psychological elements</h1>
+            <p class="t-ui hero-sub">343 constructs across 4 layers — each defined, measured, and versioned.</p>
+            <div class="hero-ctas">
+              <a href="library/index.html" class="btn btn-primary btn-lg">Explore the Library</a>
+              <a href="book.html"          class="btn btn-ghost  btn-lg">Read the Book</a>
+            </div>
+          </div>
+
+          <!-- Right column: four-layer visual representation -->
+          <div class="hero-layers" aria-hidden="true" role="presentation">
+
+            <div class="hero-layer-bar"
+                 style="border-left-color: var(--core); background: rgba(228,231,235,0.55);">
+              <div class="hlb-left">
+                <span class="hlb-name">Core</span>
+                <span class="t-micro">Hardware</span>
+              </div>
+              <span class="hlb-count">106 elements</span>
+            </div>
+
+            <div class="hero-layer-bar"
+                 style="border-left-color: var(--derived); background: rgba(235,232,230,0.55);">
+              <div class="hlb-left">
+                <span class="hlb-name">Derived</span>
+                <span class="t-micro">Software</span>
+              </div>
+              <span class="hlb-count">154 elements</span>
+            </div>
+
+            <div class="hero-layer-bar"
+                 style="border-left-color: var(--quantum); background: rgba(235,230,216,0.55);">
+              <div class="hlb-left">
+                <span class="hlb-name">Quantum</span>
+                <span class="t-micro">Crash States</span>
+              </div>
+              <span class="hlb-count">40 elements</span>
+            </div>
+
+            <div class="hero-layer-bar"
+                 style="border-left-color: var(--emotional); background: rgba(216,235,230,0.55);">
+              <div class="hlb-left">
+                <span class="hlb-name">Emotional</span>
+                <span class="t-micro">Weather</span>
+              </div>
+              <span class="hlb-count">43 elements</span>
+            </div>
+
+          </div><!-- /hero-layers -->
+
+        </div><!-- /hero-inner -->
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         DISCLAIMER STRIP
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="disclaimer-strip" role="note" aria-label="Scope disclaimer">
+      <div class="container">
+        <p class="t-micro">HES is not a personality test. Not a diagnostic tool. Not a clinical instrument.</p>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         FOUR-LAYER OVERVIEW
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="section" aria-labelledby="layers-heading">
+      <div class="container">
+        <h2 class="section-heading" id="layers-heading">The Four Layers</h2>
+        <div class="grid-2">
+
+          <!-- Core -->
+          <article class="layer-card"
+                   style="border-left-color: var(--core); background: var(--core-tint);">
+            <p class="layer-card-name">Core</p>
+            <p class="layer-card-tag">Hardware</p>
+            <p class="layer-card-count">106 elements</p>
+            <p class="layer-card-desc">Stable, foundational capacities — attention, memory, executive control. These elements underlie all higher cognition and change slowly across the lifespan.</p>
+            <a href="library/index.html?layer=core" class="layer-card-link">Explore Core →</a>
+          </article>
+
+          <!-- Derived -->
+          <article class="layer-card"
+                   style="border-left-color: var(--derived); background: var(--derived-tint);">
+            <p class="layer-card-name">Derived</p>
+            <p class="layer-card-tag">Software</p>
+            <p class="layer-card-count">154 elements</p>
+            <p class="layer-card-desc">Capacities grown from core through experience — cognitive styles, identity, communication, decision-making. Plastic and shaped by environment.</p>
+            <a href="library/index.html?layer=derived" class="layer-card-link">Explore Derived →</a>
+          </article>
+
+          <!-- Quantum -->
+          <article class="layer-card"
+                   style="border-left-color: var(--quantum); background: var(--quantum-tint);">
+            <p class="layer-card-name">Quantum</p>
+            <p class="layer-card-tag">Crash States</p>
+            <p class="layer-card-count">40 elements</p>
+            <p class="layer-card-desc">Discontinuous rupture states — freeze, collapse, overwhelm, dissociation. Short-lived but consequential, and often misread as the layers beneath them.</p>
+            <a href="library/index.html?layer=quantum" class="layer-card-link">Explore Quantum →</a>
+          </article>
+
+          <!-- Emotional -->
+          <article class="layer-card"
+                   style="border-left-color: var(--emotional); background: var(--emotional-tint);">
+            <p class="layer-card-name">Emotional</p>
+            <p class="layer-card-tag">Weather</p>
+            <p class="layer-card-count">43 elements</p>
+            <p class="layer-card-desc">The workbench of conscious affect — holding and manipulating emotional information across time. Underpins meaning-making and felt learning.</p>
+            <a href="library/index.html?layer=emotional" class="layer-card-link">Explore Emotional →</a>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         LATEST BLOG POSTS
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="section section-blog" aria-labelledby="blog-heading">
+      <div class="container">
+        <h2 class="section-heading" id="blog-heading">From the Blog</h2>
+        <div class="grid-3">
+
+          <article class="blog-card">
+            <div class="blog-thumb" role="img" aria-label="Article thumbnail placeholder"></div>
+            <div class="blog-card-body">
+              <p class="blog-date">May 2026</p>
+              <h3 class="blog-title">What MML-1 actually means — and why most frameworks don't have one</h3>
+              <p class="blog-excerpt">A close reading of what the Measurability Level scale does and doesn't claim about psychological constructs.</p>
+              <a href="blog/index.html" class="blog-read-link">Read →</a>
+            </div>
+          </article>
+
+          <article class="blog-card">
+            <div class="blog-thumb" role="img" aria-label="Article thumbnail placeholder"></div>
+            <div class="blog-card-body">
+              <p class="blog-date">April 2026</p>
+              <h3 class="blog-title">The Stop List: 10 constructs HES deliberately excludes</h3>
+              <p class="blog-excerpt">Why scope decisions matter as much as inclusions — and what didn't make the cut.</p>
+              <a href="blog/index.html" class="blog-read-link">Read →</a>
+            </div>
+          </article>
+
+          <article class="blog-card">
+            <div class="blog-thumb" role="img" aria-label="Article thumbnail placeholder"></div>
+            <div class="blog-card-body">
+              <p class="blog-date">March 2026</p>
+              <h3 class="blog-title">Nearest neighbours: how the 343 elements relate to each other</h3>
+              <p class="blog-excerpt">An introduction to the neighbour network — and what adjacency reveals about the architecture of the mind.</p>
+              <a href="blog/index.html" class="blog-read-link">Read →</a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         BOOK CALLOUT
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="section section-book" aria-labelledby="book-heading">
+      <div class="container">
+        <div class="book-inner">
+
+          <div class="book-cover" role="img" aria-label="Book cover placeholder">
+            <span class="book-cover-label">Cover</span>
+          </div>
+
+          <div class="book-text">
+            <h2 class="book-title" id="book-heading">The Human Elements System — Reference Edition</h2>
+            <p class="book-desc">A complete structured reference to all 343 elements across the four layers of human psychology — from foundational capacities to crash states. Designed for practitioners, researchers, and anyone who wants to think more precisely about the mind.</p>
+            <a href="book.html" class="btn btn-primary">Read the Book</a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         NEWSLETTER SIGNUP
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="section section-newsletter" aria-labelledby="newsletter-heading">
+      <div class="container">
+        <div class="newsletter-inner">
+          <p class="section-label">Stay updated</p>
+          <h2 class="newsletter-headline" id="newsletter-heading">
+            New passports, versioning updates, and research notes — in your inbox
+          </h2>
+          <form class="newsletter-form" action="#" method="post" novalidate>
+            <label for="newsletter-email" class="sr-only">Email address</label>
+            <input
+              class="input"
+              type="email"
+              id="newsletter-email"
+              name="email"
+              placeholder="your@email.com"
+              autocomplete="email"
+              required
+            >
+            <button type="submit" class="btn btn-primary">Subscribe</button>
+          </form>
+          <p class="newsletter-fine">No spam. Unsubscribe any time.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER: copied from _footer.html — root depth, no ../ prefix -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+
+        <div>
+          <div class="footer-col-label">Explore</div>
+          <a href="library/index.html" class="footer-link">Passport Library</a>
+          <a href="library/index.html" class="footer-link">The Four Layers</a>
+          <a href="book.html"          class="footer-link">The Book</a>
+          <a href="about.html"         class="footer-link">About HES</a>
+          <a href="research.html"      class="footer-link">MML Framework</a>
+        </div>
+
+        <div>
+          <div class="footer-col-label">Learn</div>
+          <a href="faq.html"        class="footer-link">FAQ</a>
+          <a href="glossary.html"   class="footer-link">Glossary</a>
+          <a href="changelog.html"  class="footer-link">Changelog</a>
+          <a href="blog/index.html" class="footer-link">Blog</a>
+          <a href="research.html"   class="footer-link">Research</a>
+        </div>
+
+        <div>
+          <div class="footer-col-label">Connect</div>
+          <a href="contact.html"   class="footer-link">Contact</a>
+          <a href="contribute.html" class="footer-link">Contribute</a>
+          <a href="contribute.html" class="footer-link">HES Lingua</a>
+          <a href="community.html" class="footer-link">Community</a>
+          <a href="press.html"     class="footer-link">Press</a>
+        </div>
+
+      </div>
+
+      <div class="footer-legal">
+        <div class="footer-legal-links">
+          <a href="privacy.html"    class="footer-legal-link">Privacy Policy</a>
+          <a href="terms.html"      class="footer-legal-link">Terms of Use</a>
+          <a href="disclaimer.html" class="footer-legal-link">Disclaimer</a>
+        </div>
+        <div class="footer-version">Core v1.3.2 · Derived v1.2.4 · Quantum v2.2 · Emotional v2.0</div>
+        <div class="footer-disclaimer">HES is not a clinical tool. It does not replace professional psychological, psychiatric, or medical assessment.</div>
+      </div>
+
+    </div>
+  </footer>
+
+  <script src="prototype.js"></script>
+</body>
+</html>

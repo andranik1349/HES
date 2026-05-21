@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About HES — Human Elements System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="typography.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="layout.css">
+
+  <style>
+
+    /* ── Breadcrumb ───────────────────────────────────────────────── */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      margin-bottom: var(--space-5);
+    }
+
+    .breadcrumb-link {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--dust);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .breadcrumb-link:hover { color: var(--carbon); }
+
+    .breadcrumb-sep {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--hairline-strong);
+    }
+
+    .breadcrumb-current {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--carbon);
+    }
+
+    /* ── Page Header ──────────────────────────────────────────────── */
+    .page-header {
+      background: var(--library-surface);
+      padding: var(--space-8) 0;
+      border-bottom: 0.5px solid var(--hairline-strong);
+    }
+
+    .page-header-subtitle {
+      margin-top: var(--space-3);
+      color: var(--dust);
+    }
+
+    /* ── Section wrapper ──────────────────────────────────────────── */
+    .about-section {
+      padding: var(--space-9) 0;
+      border-bottom: 0.5px solid var(--hairline);
+    }
+
+    /* ── Prose narrow container ───────────────────────────────────── */
+    .prose-wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 var(--space-6);
+    }
+
+    /* ── Four-layer mini chips ────────────────────────────────────── */
+    .layer-chips {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-3);
+      margin: var(--space-6) 0;
+    }
+
+    .layer-chip {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: var(--space-4);
+      border: 0.5px solid var(--hairline-strong);
+      border-left-width: 3px;
+      text-decoration: none;
+      transition: box-shadow 0.15s, background 0.15s;
+    }
+
+    .layer-chip:hover {
+      box-shadow: var(--shadow-card);
+      background: rgba(255,255,255,0.45);
+    }
+
+    .layer-chip-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--carbon);
+    }
+
+    .layer-chip-count {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.10em;
+      color: var(--dust);
+    }
+
+    /* ── CTA row ──────────────────────────────────────────────────── */
+    .section-cta {
+      margin-top: var(--space-7);
+      padding-top: var(--space-6);
+      border-top: 0.5px solid var(--hairline);
+    }
+
+    /* ── Author two-column ────────────────────────────────────────── */
+    .author-grid {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: var(--space-7);
+      align-items: start;
+    }
+
+    .author-photo {
+      width: 200px;
+      aspect-ratio: 1 / 1;
+      background: var(--vellum-2);
+      border: 0.5px solid var(--hairline-strong);
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .author-photo-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--dust);
+      opacity: 0.6;
+    }
+
+    .author-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 24px;
+      color: var(--carbon);
+      margin-bottom: var(--space-4);
+    }
+
+    .author-bio {
+      font-family: 'Literata', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.7;
+      color: #3c3a30;
+      margin-bottom: var(--space-5);
+    }
+
+    /* ── Author icon-links ────────────────────────────────────────── */
+    .author-links {
+      display: flex;
+      gap: var(--space-5);
+      flex-wrap: wrap;
+    }
+
+    .author-link {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--dust);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: color 0.15s;
+    }
+
+    .author-link:hover { color: var(--carbon); }
+
+    .author-link-arrow {
+      font-style: normal;
+    }
+
+    /* ── Timeline ─────────────────────────────────────────────────── */
+    .timeline-row {
+      display: flex;
+      align-items: stretch;
+      margin-top: var(--space-8);
+      border-top: 0.5px solid var(--hairline);
+      border-bottom: 0.5px solid var(--hairline);
+    }
+
+    .timeline-milestone {
+      flex: 1;
+      padding: var(--space-5) var(--space-5);
+      border-right: 0.5px solid var(--hairline);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .timeline-milestone:last-child {
+      border-right: none;
+    }
+
+    .timeline-year {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--dust);
+    }
+
+    .timeline-event {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      color: var(--carbon);
+      line-height: 1.45;
+    }
+
+    /* ── Framework Boundaries section ────────────────────────────── */
+    .boundaries-section {
+      background: rgba(24,22,15,0.02);
+      border-top: 0.5px solid var(--hairline);
+      border-bottom: 0.5px solid var(--hairline);
+      padding: var(--space-9) 0;
+    }
+
+    .boundaries-intro {
+      font-family: 'Literata', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.7;
+      color: #3c3a30;
+      margin-bottom: var(--space-8);
+      max-width: 680px;
+    }
+
+    /* ── Sub-label (below section label) ─────────────────────────── */
+    .sub-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--dust);
+      margin-bottom: var(--space-5);
+    }
+
+    /* ── Exclusion list items ─────────────────────────────────────── */
+    .exclusion-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .exclusion-item {
+      border-left: 2px solid var(--carbon);
+      padding: var(--space-4) var(--space-5);
+      padding-left: var(--space-5);
+      margin-left: var(--space-1);
+      border-bottom: 0.5px solid var(--hairline);
+    }
+
+    .exclusion-item:last-child {
+      border-bottom: none;
+    }
+
+    .exclusion-item.deferred {
+      border-left-color: var(--dust);
+    }
+
+    .exclusion-concept {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--carbon);
+      margin-bottom: var(--space-2);
+    }
+
+    .exclusion-reason {
+      font-family: 'Literata', Georgia, serif;
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--dust);
+    }
+
+    /* ── Divider between stop list and parking lot ────────────────── */
+    .boundaries-divider {
+      margin: var(--space-8) 0;
+      border: none;
+      border-top: 0.5px solid var(--hairline);
+    }
+
+    /* ── Responsive ───────────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .layer-chips {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .author-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-6);
+      }
+
+      .author-photo {
+        width: 160px;
+      }
+
+      .timeline-row {
+        flex-direction: column;
+      }
+
+      .timeline-milestone {
+        border-right: none;
+        border-bottom: 0.5px solid var(--hairline);
+        padding: var(--space-4) var(--space-4);
+      }
+
+      .timeline-milestone:last-child {
+        border-bottom: none;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .layer-chips {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .author-links {
+        flex-direction: column;
+        gap: var(--space-3);
+      }
+    }
+
+  </style>
+</head>
+
+<body class="page-editorial">
+
+  <!-- ══════════════════════════════════════════════════════════════
+       TOPBAR — nav active: About
+       ══════════════════════════════════════════════════════════════ -->
+  <header class="topbar" role="banner">
+
+    <div class="lockup">
+      <div class="mark" aria-hidden="true"></div>
+      <a href="index.html" class="wm">
+        HES<span class="sep">/</span><span class="lab">LIBRARY</span>
+      </a>
+    </div>
+
+    <nav class="nav-primary" aria-label="Primary navigation">
+      <a href="about.html"         class="nav-link active" aria-current="page">About</a>
+      <a href="library/index.html" class="nav-link">Library</a>
+      <a href="book.html"          class="nav-link">Book</a>
+      <a href="blog/index.html"    class="nav-link">Blog</a>
+      <a href="research.html"      class="nav-link">Research</a>
+      <a href="contribute.html"    class="nav-link">Contribute</a>
+    </nav>
+
+    <div class="nav-right">
+      <a href="contact.html" class="nav-link">Contact</a>
+
+      <div class="nav-more">
+        <button class="nav-more-btn nav-link"
+                aria-haspopup="true"
+                aria-expanded="false">
+          More <span class="nav-arrow">▾</span>
+        </button>
+
+        <div class="nav-more-menu" role="menu">
+          <a href="faq.html"            class="nav-more-item" role="menuitem">FAQ</a>
+          <a href="glossary.html"       class="nav-more-item" role="menuitem">Glossary</a>
+          <a href="press.html"          class="nav-more-item" role="menuitem">Press</a>
+          <a href="changelog.html"      class="nav-more-item" role="menuitem">Changelog</a>
+          <div class="nav-more-divider"></div>
+          <a href="community.html"      class="nav-more-item nav-more-item--placeholder" role="menuitem">Community <span class="nav-soon">Soon</span></a>
+          <a href="hes-philosophy.html" class="nav-more-item nav-more-item--placeholder" role="menuitem">HES Philosophy <span class="nav-soon">Soon</span></a>
+          <a href="hes-test.html"       class="nav-more-item nav-more-item--placeholder" role="menuitem">HES-TEST <span class="nav-soon">Soon</span></a>
+        </div>
+      </div>
+    </div>
+
+  </header>
+
+  <main class="page-body">
+
+    <!-- ══════════════════════════════════════════════════════════════
+         PAGE HEADER
+         ══════════════════════════════════════════════════════════════ -->
+    <section class="page-header" aria-labelledby="page-title">
+      <div class="container-narrow">
+
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="index.html" class="breadcrumb-link">Home</a>
+          <span class="breadcrumb-sep" aria-hidden="true">→</span>
+          <span class="breadcrumb-current" aria-current="page">About</span>
+        </nav>
+
+        <h1 class="t-title-lg" id="page-title">About HES</h1>
+        <p class="t-body page-header-subtitle">What this framework is, who built it, and what it deliberately excludes.</p>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SECTION 1 — ABOUT HES
+         ══════════════════════════════════════════════════════════════ -->
+    <section class="about-section" aria-labelledby="section-framework">
+      <div class="prose-wrap">
+
+        <p class="section-label" id="section-framework">01 — The Framework</p>
+
+        <div class="prose">
+
+          <h2>What HES is</h2>
+          <p>The Human Elements System is a structured reference framework for the constituent elements of human psychology. It does not explain the mind — it catalogues, defines, and versions the psychological constructs from which explanations are built. Each element is assigned a code, a layer, a measurability level, and a set of nearest neighbours within the network.</p>
+          <p>HES is designed to serve as a stable common vocabulary for practitioners, researchers, and anyone who needs to think precisely about psychological capacities. It is not a personality system, a diagnostic instrument, or a clinical tool. It is a reference architecture.</p>
+
+          <h2>The four-layer architecture</h2>
+          <p>HES organises its 343 elements across four conceptually distinct layers, each representing a different kind of psychological phenomenon. The layers are not a hierarchy of importance — they reflect differences in stability, origin, and temporal character. Core elements are biologically grounded and slow to change; Emotional elements are fast-moving and context-sensitive; Quantum elements represent discontinuous rupture states rather than traits.</p>
+          <p>Each layer has its own internal block structure, coding convention, and measurability profile. The layers interact but are not reducible to one another.</p>
+
+        </div><!-- /prose -->
+
+        <!-- Four-layer mini chips -->
+        <div class="layer-chips" role="list" aria-label="The four layers of HES">
+
+          <a href="library/index.html?layer=core" class="layer-chip"
+             style="border-left-color: var(--core); background: rgba(228,231,235,0.45);"
+             role="listitem">
+            <span class="layer-chip-name">Core</span>
+            <span class="layer-chip-count">106 elements</span>
+            <span class="t-micro" style="color: var(--core-dark); margin-top: 2px;">Hardware</span>
+          </a>
+
+          <a href="library/index.html?layer=derived" class="layer-chip"
+             style="border-left-color: var(--derived); background: rgba(235,232,230,0.45);"
+             role="listitem">
+            <span class="layer-chip-name">Derived</span>
+            <span class="layer-chip-count">154 elements</span>
+            <span class="t-micro" style="color: var(--derived-dark); margin-top: 2px;">Software</span>
+          </a>
+
+          <a href="library/index.html?layer=quantum" class="layer-chip"
+             style="border-left-color: var(--quantum); background: rgba(235,230,216,0.45);"
+             role="listitem">
+            <span class="layer-chip-name">Quantum</span>
+            <span class="layer-chip-count">40 elements</span>
+            <span class="t-micro" style="color: var(--quantum-dark); margin-top: 2px;">Crash States</span>
+          </a>
+
+          <a href="library/index.html?layer=emotional" class="layer-chip"
+             style="border-left-color: var(--emotional); background: rgba(216,235,230,0.45);"
+             role="listitem">
+            <span class="layer-chip-name">Emotional</span>
+            <span class="layer-chip-count">43 elements</span>
+            <span class="t-micro" style="color: var(--emotional-dark); margin-top: 2px;">Weather</span>
+          </a>
+
+        </div><!-- /layer-chips -->
+
+        <div class="prose">
+
+          <h2>History of the project</h2>
+          <p>HES originated in a systematic dissatisfaction with the composite constructs that dominate psychological discourse — intelligence, resilience, character — each of which bundles multiple distinct capacities together in ways that resist clean measurement. The project began as a personal cataloguing effort, with the aim of building a list of psychological elements that could actually be individually defined and assessed.</p>
+          <p>Early iterations were loose and taxonomic. Over time the project developed the Measurability Level (MML) scale as a way of rating the evidential status of each element, and the four-layer architecture as a way of distinguishing phenomena that had previously been collapsed together. The current version represents the first stable public release of the full framework.</p>
+
+        </div><!-- /prose -->
+
+        <!-- CTA -->
+        <div class="section-cta">
+          <a href="library/index.html" class="btn btn-primary">Explore the Passport Library →</a>
+        </div>
+
+      </div><!-- /prose-wrap -->
+    </section>
+
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SECTION 2 — ABOUT THE AUTHOR
+         ══════════════════════════════════════════════════════════════ -->
+    <section class="about-section" aria-labelledby="section-author">
+      <div class="prose-wrap">
+
+        <p class="section-label" id="section-author">02 — The Author</p>
+
+        <!-- Two-column: photo + bio -->
+        <div class="author-grid">
+
+          <!-- Author photo placeholder -->
+          <div class="author-photo" role="img" aria-label="Author photo placeholder">
+            <span class="author-photo-label">Photo</span>
+          </div>
+
+          <!-- Bio text -->
+          <div class="author-bio-col">
+
+            <h2 class="author-name">Areg Oganesian</h2>
+
+            <p class="author-bio">Areg Oganesian is an independent researcher and practitioner working at the intersection of psychological measurement, cognitive science, and applied frameworks for human development. His work focuses on the problem of construct validity — specifically, on how psychological concepts are defined, measured, and misused. Over two decades of clinical and research practice led him to conclude that the field lacked a shared reference architecture for individual psychological elements: a catalogue rigorous enough to distinguish constructs that are genuinely separable from those that are composites of more basic phenomena. The Human Elements System is his attempt to build that architecture from first principles, applying a consistent measurability standard across all 343 elements in the framework.</p>
+
+            <!-- Icon-links: Email · LinkedIn · ResearchGate -->
+            <div class="author-links" role="list" aria-label="Author contact links">
+              <a href="contact.html" class="author-link" role="listitem">
+                <span class="author-link-arrow">↗</span> Email
+              </a>
+              <a href="#" class="author-link" role="listitem">
+                <span class="author-link-arrow">↗</span> LinkedIn
+              </a>
+              <a href="#" class="author-link" role="listitem">
+                <span class="author-link-arrow">↗</span> ResearchGate
+              </a>
+            </div>
+
+          </div><!-- /author-bio-col -->
+
+        </div><!-- /author-grid -->
+
+        <!-- Timeline row -->
+        <div class="timeline-row" role="list" aria-label="Project milestones">
+
+          <div class="timeline-milestone" role="listitem">
+            <span class="timeline-year">2005</span>
+            <span class="timeline-event">Initial research — early cataloguing of psychological constructs</span>
+          </div>
+
+          <div class="timeline-milestone" role="listitem">
+            <span class="timeline-year">2012</span>
+            <span class="timeline-event">Framework first draft — four-layer architecture established</span>
+          </div>
+
+          <div class="timeline-milestone" role="listitem">
+            <span class="timeline-year">2019</span>
+            <span class="timeline-event">MML methodology developed — measurability scale formalised</span>
+          </div>
+
+          <div class="timeline-milestone" role="listitem">
+            <span class="timeline-year">2024</span>
+            <span class="timeline-event">hestable.com launched — first stable public release</span>
+          </div>
+
+        </div><!-- /timeline-row -->
+
+      </div><!-- /prose-wrap -->
+    </section>
+
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SECTION 3 — FRAMEWORK BOUNDARIES
+         ══════════════════════════════════════════════════════════════ -->
+    <section class="boundaries-section" aria-labelledby="section-boundaries">
+      <div class="prose-wrap">
+
+        <p class="section-label" id="section-boundaries">03 — Framework Boundaries</p>
+
+        <p class="boundaries-intro">HES defines itself as much by what it excludes as by what it includes. The Stop List contains constructs deliberately kept out; the Parking Lot contains constructs deferred for future consideration.</p>
+
+        <!-- ── STOP LIST ─────────────────────────────────────────── -->
+        <p class="sub-label">Stop List — 10 deliberate exclusions</p>
+
+        <ul class="exclusion-list" aria-label="Stop list: constructs deliberately excluded from HES">
+
+          <li class="exclusion-item">
+            <p class="exclusion-concept">Intelligence (IQ)</p>
+            <p class="exclusion-reason">Excluded as a composite rather than a constituent element. HES maps the underlying capacities from which IQ scores are derived.</p>
+          </li>
+
+          <li class="exclusion-item">
+            <p class="exclusion-concept">Personality types</p>
+            <p class="exclusion-reason">Type-based systems impose discrete categories on continuous traits. HES uses dimensional constructs only.</p>
+          </li>
+
+          <li class="exclusion-item">
+            <p class="exclusion-concept">Diagnostic categories (DSM/ICD)</p>
+            <p class="exclusion-reason">Clinical diagnoses are administrative constructs, not psychological elements. HES does not map to diagnostic criteria.</p>
+          </li>
+
+          <li class="exclusion-item">
+            <p class="exclusion-concept">Emotional intelligence (EI)</p>
+            <p class="exclusion-reason">EI is a composite of several HES elements already present in the framework. Including it as a separate construct would create redundancy.</p>
+          </li>
+
+          <li class="exclusion-item">
+            <p class="exclusion-concept">Resilience</p>
+            <p class="exclusion-reason">Currently treated as an emergent property of several Derived and Quantum elements rather than a standalone construct.</p>
+          </li>
+
+          <li class="exclusion-item">
+            <p class="exclusion-concept">Mindfulness</p>
+            <p class="exclusion-reason">A practice, not a construct. The underlying attentional and interoceptive elements are represented separately.</p>
+          </li>
+
+          <li class="exclusion-item">
+            <p class="exclusion-concept">Grit</p>
+            <p class="exclusion-reason">Correlates heavily with existing persistence and motivation elements. Insufficient construct validity to warrant separate inclusion.</p>
+          </li>
+
+          <li class="exclusion-item">
+            <p class="exclusion-concept">Character strengths (VIA)</p>
+            <p class="exclusion-reason">Values-based taxonomy with limited measurement infrastructure. May be revisited when MML criteria can be applied.</p>
+          </li>
+
+          <li class="exclusion-item">
+            <p class="exclusion-concept">Flow states</p>
+            <p class="exclusion-reason">A phenomenon rather than a stable capacity. Considered for the Quantum layer but deferred pending construct clarification.</p>
+          </li>
+
+          <li class="exclusion-item">
+            <p class="exclusion-concept">Neurodiversity categories</p>
+            <p class="exclusion-reason">Categorical labels rather than dimensional constructs. The underlying element-level differences are represented within the framework.</p>
+          </li>
+
+        </ul><!-- /stop list -->
+
+        <hr class="boundaries-divider">
+
+        <!-- ── PARKING LOT ────────────────────────────────────────── -->
+        <p class="sub-label">Parking Lot — 7 deferred constructs</p>
+
+        <ul class="exclusion-list" aria-label="Parking lot: constructs deferred for future consideration">
+
+          <li class="exclusion-item deferred">
+            <p class="exclusion-concept">Moral reasoning</p>
+            <p class="exclusion-reason">Construct boundaries unclear at this time. Strong candidate for the Derived layer pending further review.</p>
+          </li>
+
+          <li class="exclusion-item deferred">
+            <p class="exclusion-concept">Aesthetic sensitivity</p>
+            <p class="exclusion-reason">Partially represented in the Emotional layer. Full inclusion requires additional measurement work.</p>
+          </li>
+
+          <li class="exclusion-item deferred">
+            <p class="exclusion-concept">Narrative identity</p>
+            <p class="exclusion-reason">Overlaps with Identity &amp; Self block. Under consideration as a standalone element or block-level expansion.</p>
+          </li>
+
+          <li class="exclusion-item deferred">
+            <p class="exclusion-concept">Sleep quality</p>
+            <p class="exclusion-reason">Biologically grounded but MML evidence inconsistent. Under review for the Core layer.</p>
+          </li>
+
+          <li class="exclusion-item deferred">
+            <p class="exclusion-concept">Interoception accuracy</p>
+            <p class="exclusion-reason">Distinguished from interoceptive sensitivity; measurement standards not yet sufficient.</p>
+          </li>
+
+          <li class="exclusion-item deferred">
+            <p class="exclusion-concept">Cognitive reserve</p>
+            <p class="exclusion-reason">Strong theoretical case for the Core layer. Deferred pending lifespan measurement standardisation.</p>
+          </li>
+
+          <li class="exclusion-item deferred">
+            <p class="exclusion-concept">Social rhythm</p>
+            <p class="exclusion-reason">Promising construct for the Derived layer. Currently lacks sufficient independent validation studies.</p>
+          </li>
+
+        </ul><!-- /parking lot -->
+
+      </div><!-- /prose-wrap -->
+    </section>
+
+  </main>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       FOOTER — nav active: About (highlighted in footer link)
+       ══════════════════════════════════════════════════════════════ -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+
+        <div>
+          <div class="footer-col-label">Explore</div>
+          <a href="library/index.html" class="footer-link">Passport Library</a>
+          <a href="library/index.html" class="footer-link">The Four Layers</a>
+          <a href="book.html"          class="footer-link">The Book</a>
+          <a href="about.html"         class="footer-link" style="color: var(--vellum-1);">About HES</a>
+          <a href="research.html"      class="footer-link">MML Framework</a>
+        </div>
+
+        <div>
+          <div class="footer-col-label">Learn</div>
+          <a href="faq.html"        class="footer-link">FAQ</a>
+          <a href="glossary.html"   class="footer-link">Glossary</a>
+          <a href="changelog.html"  class="footer-link">Changelog</a>
+          <a href="blog/index.html" class="footer-link">Blog</a>
+          <a href="research.html"   class="footer-link">Research</a>
+        </div>
+
+        <div>
+          <div class="footer-col-label">Connect</div>
+          <a href="contact.html"    class="footer-link">Contact</a>
+          <a href="contribute.html" class="footer-link">Contribute</a>
+          <a href="contribute.html" class="footer-link">HES Lingua</a>
+          <a href="community.html"  class="footer-link">Community</a>
+          <a href="press.html"      class="footer-link">Press</a>
+        </div>
+
+      </div>
+
+      <div class="footer-legal">
+        <div class="footer-legal-links">
+          <a href="privacy.html"    class="footer-legal-link">Privacy Policy</a>
+          <a href="terms.html"      class="footer-legal-link">Terms of Use</a>
+          <a href="disclaimer.html" class="footer-legal-link">Disclaimer</a>
+        </div>
+        <div class="footer-version">Core v1.3.2 · Derived v1.2.4 · Quantum v2.2 · Emotional v2.0</div>
+        <div class="footer-disclaimer">HES is not a clinical tool. It does not replace professional psychological, psychiatric, or medical assessment.</div>
+      </div>
+
+    </div>
+  </footer>
+
+  <script src="prototype.js"></script>
+
+</body>
+</html>

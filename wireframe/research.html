@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Research — HES</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="typography.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="layout.css">
+
+  <style>
+    .page-header {
+      background: var(--library-surface);
+      padding: var(--space-8) 0 var(--space-7);
+      border-bottom: 0.5px solid var(--hairline-strong);
+    }
+    .page-header-eyebrow {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--dust);
+      margin-bottom: var(--space-3);
+    }
+    .page-header-subtitle {
+      font-family: 'Space Grotesk', sans-serif; font-size: 17px;
+      color: var(--dust); margin-top: var(--space-3); line-height: 1.5;
+    }
+
+    .content-section {
+      padding: var(--space-8) 0;
+      border-bottom: 0.5px solid var(--hairline);
+    }
+    .content-section:last-child { border-bottom: none; }
+
+    /* Section number prefix */
+    .section-num {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--dust);
+      margin-bottom: var(--space-5);
+    }
+
+    /* Publication card */
+    .pub-card {
+      margin-bottom: var(--space-5);
+    }
+    .pub-title {
+      font-family: 'Literata', Georgia, serif; font-weight: 500;
+      font-size: 17px; line-height: 1.5; color: var(--carbon);
+      margin-bottom: var(--space-2);
+    }
+    .pub-meta {
+      font-family: 'Space Mono', monospace; font-size: 11px;
+      letter-spacing: 0.06em; color: var(--dust);
+      margin-bottom: var(--space-4);
+    }
+    .pub-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+
+    /* Study entries */
+    .study-entry {
+      padding: var(--space-5) 0;
+      border-bottom: 0.5px solid var(--hairline);
+    }
+    .study-entry:last-child { border-bottom: none; }
+    .study-header {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: var(--space-5);
+      flex-wrap: wrap; margin-bottom: var(--space-3);
+    }
+    .study-title {
+      font-family: 'Space Grotesk', sans-serif; font-weight: 500;
+      font-size: 15px; color: var(--carbon);
+    }
+    .study-status-pill {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.10em; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 0; white-space: nowrap; flex-shrink: 0;
+    }
+    .study-status-ongoing {
+      background: var(--quantum-tint); color: var(--quantum-dark);
+      border: 0.5px solid var(--quantum);
+    }
+    .study-status-analysis {
+      background: var(--core-tint); color: var(--core-dark);
+      border: 0.5px solid var(--core);
+    }
+    .study-detail {
+      font-family: 'Space Mono', monospace; font-size: 11px;
+      letter-spacing: 0.06em; color: var(--dust);
+    }
+
+    /* MML table */
+    .mml-table {
+      width: 100%; border-collapse: collapse;
+      margin-bottom: var(--space-6);
+    }
+    .mml-table th {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.16em; text-transform: uppercase; color: var(--dust);
+      text-align: left; padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--hairline-strong);
+      background: transparent;
+    }
+    .mml-table td {
+      padding: var(--space-4);
+      border-bottom: 0.5px solid var(--hairline);
+      vertical-align: top;
+    }
+    .mml-table tr:last-child td { border-bottom: none; }
+    .mml-table-level {
+      font-family: 'Space Mono', monospace; font-size: 12px;
+      letter-spacing: 0.06em; color: var(--carbon); white-space: nowrap;
+    }
+    .mml-table-label { white-space: nowrap; }
+    .mml-table-desc {
+      font-family: 'Literata', Georgia, serif; font-size: 14px;
+      line-height: 1.6; color: #3c3a30;
+    }
+    .mml-row-1 td { background: rgba(100,119,140,0.05); }
+    .mml-row-2 td { background: rgba(168,128,108,0.05); }
+    .mml-row-3 td { background: rgba(204,181,118,0.05); }
+    .mml-row-4 td { background: rgba(125,173,160,0.05); }
+    .mml-row-5 td { background: rgba(123,120,105,0.04); }
+
+    /* Thesis proposals */
+    .thesis-item {
+      padding: var(--space-5) var(--space-5);
+      border-left: 2px solid var(--hairline-strong);
+      margin-bottom: var(--space-4);
+      background: rgba(235,238,242,0.4);
+    }
+    .thesis-title {
+      font-family: 'Space Grotesk', sans-serif; font-weight: 600;
+      font-size: 15px; color: var(--carbon); margin-bottom: var(--space-2);
+    }
+    .thesis-desc {
+      font-family: 'Literata', Georgia, serif; font-size: 14px;
+      line-height: 1.6; color: var(--dust);
+    }
+
+    .download-row { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-5); }
+  </style>
+</head>
+<body class="page-editorial">
+
+  <!-- ── Topbar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <div class="lockup">
+      <div class="mark" aria-hidden="true"></div>
+      <a href="index.html" class="wm">HES<span class="sep">/</span><span class="lab">LIBRARY</span></a>
+    </div>
+    <nav class="nav-primary" aria-label="Primary navigation">
+      <a href="about.html"         class="nav-link">About</a>
+      <a href="library/index.html" class="nav-link">Library</a>
+      <a href="book.html"          class="nav-link">Book</a>
+      <a href="blog/index.html"    class="nav-link">Blog</a>
+      <a href="research.html"      class="nav-link active">Research</a>
+      <a href="contribute.html"    class="nav-link">Contribute</a>
+    </nav>
+    <div class="nav-right">
+      <a href="contact.html" class="nav-link">Contact</a>
+      <div class="nav-more">
+        <button class="nav-more-btn nav-link" aria-haspopup="true" aria-expanded="false">More <span class="nav-arrow">▾</span></button>
+        <div class="nav-more-menu" role="menu">
+          <a href="faq.html"            class="nav-more-item" role="menuitem">FAQ</a>
+          <a href="glossary.html"       class="nav-more-item" role="menuitem">Glossary</a>
+          <a href="press.html"          class="nav-more-item" role="menuitem">Press</a>
+          <a href="changelog.html"      class="nav-more-item" role="menuitem">Changelog</a>
+          <div class="nav-more-divider"></div>
+          <a href="community.html"      class="nav-more-item nav-more-item--placeholder" role="menuitem">Community <span class="nav-soon">Soon</span></a>
+          <a href="hes-philosophy.html" class="nav-more-item nav-more-item--placeholder" role="menuitem">HES Philosophy <span class="nav-soon">Soon</span></a>
+          <a href="hes-test.html"       class="nav-more-item nav-more-item--placeholder" role="menuitem">HES-TEST <span class="nav-soon">Soon</span></a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-body" id="main-content">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div class="container-narrow">
+        <div class="page-header-eyebrow">Academic</div>
+        <h1 class="t-title-lg">Research</h1>
+        <p class="page-header-subtitle">Publications, validation studies, MML methodology, and thesis proposals.</p>
+      </div>
+    </div>
+
+    <!-- ── 01: Scientific Publications ───────────────────────────── -->
+    <div class="content-section">
+      <div class="container-narrow">
+        <div class="section-label">01 — Publications</div>
+
+        <!-- Publication 1 -->
+        <div class="card pub-card">
+          <p class="pub-title">
+            Measurement Maturity Levels in Psychological Constructs: A Framework for Evaluating Evidential Weight
+          </p>
+          <div class="pub-meta">Oganesian, A. · PsyArXiv, 2024 · DOI: 10.xxxx/psyarxiv.placeholder</div>
+          <div class="pub-actions">
+            <a href="#" class="btn btn-ghost btn-sm">Download PDF ↗</a>
+            <a href="#" class="btn btn-ghost btn-sm">View on PsyArXiv ↗</a>
+          </div>
+        </div>
+
+        <!-- Publication 2 -->
+        <div class="card pub-card">
+          <p class="pub-title">
+            The Human Elements System: Rationale and Structure
+          </p>
+          <div class="pub-meta">Oganesian, A. · In preparation, 2025</div>
+          <div class="pub-actions">
+            <a href="#" class="btn btn-ghost btn-sm">Notify me when published →</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── 02: Validation Studies ─────────────────────────────────── -->
+    <div class="content-section">
+      <div class="container-narrow">
+        <div class="section-label">02 — Validation Studies</div>
+
+        <div class="callout callout-amber" style="margin-bottom:var(--space-6);">
+          Two pre-registered studies currently underway. Last updated May 2026.
+        </div>
+
+        <div class="study-entry">
+          <div class="study-header">
+            <div class="study-title">HES Core Layer Convergent Validity Study</div>
+            <span class="study-status-pill study-status-ongoing">Data collection ongoing</span>
+          </div>
+          <div class="study-detail">
+            Start date: January 2026 &nbsp;·&nbsp;
+            <a href="#" style="color:var(--dust);font-family:'Space Mono',monospace;font-size:11px;">OSF pre-registration ↗</a>
+          </div>
+        </div>
+
+        <div class="study-entry">
+          <div class="study-header">
+            <div class="study-title">HES-20 Test-Retest Reliability</div>
+            <span class="study-status-pill study-status-analysis">Analysis phase</span>
+          </div>
+          <div class="study-detail">
+            Start date: March 2026 &nbsp;·&nbsp;
+            <a href="#" style="color:var(--dust);font-family:'Space Mono',monospace;font-size:11px;">OSF pre-registration ↗</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── 03: MML Framework ─────────────────────────────────────── -->
+    <div class="content-section">
+      <div class="container-narrow">
+        <div class="section-label">03 — MML Framework</div>
+
+        <table class="mml-table" aria-label="MML levels">
+          <thead>
+            <tr>
+              <th style="width:80px;">Level</th>
+              <th style="width:140px;">Label</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="mml-row-1">
+              <td><div class="mml-table-level"><span class="mml-badge mml-1">MML-1</span></div></td>
+              <td><div class="mml-table-label t-micro" style="color:var(--core-dark);">Established</div></td>
+              <td><div class="mml-table-desc">Multiple independent validation studies with consistent results. Robust measurement infrastructure exists.</div></td>
+            </tr>
+            <tr class="mml-row-2">
+              <td><div class="mml-table-level"><span class="mml-badge mml-2">MML-2</span></div></td>
+              <td><div class="mml-table-label t-micro" style="color:var(--derived-dark);">Validated</div></td>
+              <td><div class="mml-table-desc">At least one well-designed study with adequate power. Reliable measurement tools exist but cross-study replication is limited.</div></td>
+            </tr>
+            <tr class="mml-row-3">
+              <td><div class="mml-table-level"><span class="mml-badge mml-3">MML-3</span></div></td>
+              <td><div class="mml-table-label t-micro" style="color:var(--quantum-dark);">Emerging</div></td>
+              <td><div class="mml-table-desc">Preliminary evidence exists. Construct has been operationalised and initial studies conducted, but evidence base is thin.</div></td>
+            </tr>
+            <tr class="mml-row-4">
+              <td><div class="mml-table-level"><span class="mml-badge mml-4">MML-4</span></div></td>
+              <td><div class="mml-table-label t-micro" style="color:var(--emotional-dark);">Theoretical</div></td>
+              <td><div class="mml-table-desc">Construct defined and theoretically grounded; no validation studies completed. Measurement approaches proposed but untested.</div></td>
+            </tr>
+            <tr class="mml-row-5">
+              <td><div class="mml-table-level"><span class="mml-badge mml-5">MML-5</span></div></td>
+              <td><div class="mml-table-label t-micro">Speculative</div></td>
+              <td><div class="mml-table-desc">Proposed construct with theoretical basis only. Included to map the landscape; not yet suitable for applied use.</div></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <a href="#" class="btn btn-ghost">Read full MML article →</a>
+      </div>
+    </div>
+
+    <!-- ── 04: Thesis Proposals ──────────────────────────────────── -->
+    <div class="content-section">
+      <div class="container-narrow">
+        <div class="section-label">04 — Thesis Proposals</div>
+        <p class="t-ui" style="color:var(--dust);margin-bottom:var(--space-6);">
+          The following research topics are suggested for PhD or Master's thesis work using the HES framework.
+        </p>
+
+        <div class="thesis-item">
+          <div class="thesis-title">Cross-cultural validation of the HES Core layer</div>
+          <div class="thesis-desc">Does the factor structure replicate across Western and non-Western samples?</div>
+        </div>
+        <div class="thesis-item">
+          <div class="thesis-title">HES Quantum layer and clinical presentations</div>
+          <div class="thesis-desc">Are quantum state frequencies elevated in specific clinical populations?</div>
+        </div>
+        <div class="thesis-item">
+          <div class="thesis-title">MML progression over time</div>
+          <div class="thesis-desc">Longitudinal tracking of which constructs move from MML-3 to MML-2.</div>
+        </div>
+        <div class="thesis-item">
+          <div class="thesis-title">HES Derived layer in educational outcomes</div>
+          <div class="thesis-desc">Predictive validity of learning-related Derived elements.</div>
+        </div>
+        <div class="thesis-item">
+          <div class="thesis-title">Network analysis of HES nearest-neighbor relationships</div>
+          <div class="thesis-desc">Are the assigned neighbor relationships empirically supported?</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Downloads ─────────────────────────────────────────────── -->
+    <div class="content-section">
+      <div class="container-narrow">
+        <div class="section-label">Downloads</div>
+        <p class="t-ui" style="color:var(--dust);margin-bottom:var(--space-4);">Supplementary materials for research use.</p>
+        <div class="download-row">
+          <a href="#" class="btn btn-ghost">MML Criteria PDF ↓</a>
+          <a href="#" class="btn btn-ghost">Supplementary Table S1 (Excel) ↓</a>
+          <a href="#" class="btn btn-ghost">HES-20 Protocol PDF ↓</a>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── Footer ────────────────────────────────────────────────── -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-col-label">Explore</div>
+          <a href="library/index.html" class="footer-link">Passport Library</a>
+          <a href="library/index.html" class="footer-link">The Four Layers</a>
+          <a href="book.html"          class="footer-link">The Book</a>
+          <a href="about.html"         class="footer-link">About HES</a>
+          <a href="research.html"      class="footer-link">MML Framework</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Learn</div>
+          <a href="faq.html"           class="footer-link">FAQ</a>
+          <a href="glossary.html"      class="footer-link">Glossary</a>
+          <a href="changelog.html"     class="footer-link">Changelog</a>
+          <a href="blog/index.html"    class="footer-link">Blog</a>
+          <a href="research.html"      class="footer-link">Research</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Connect</div>
+          <a href="contact.html"       class="footer-link">Contact</a>
+          <a href="contribute.html"    class="footer-link">Contribute</a>
+          <a href="contribute.html"    class="footer-link">HES Lingua</a>
+          <a href="community.html"     class="footer-link">Community</a>
+          <a href="press.html"         class="footer-link">Press</a>
+        </div>
+      </div>
+      <div class="footer-legal">
+        <div class="footer-legal-links">
+          <a href="privacy.html"    class="footer-legal-link">Privacy Policy</a>
+          <a href="terms.html"      class="footer-legal-link">Terms of Use</a>
+          <a href="disclaimer.html" class="footer-legal-link">Disclaimer</a>
+        </div>
+        <div class="footer-version">Core v1.3.2 · Derived v1.2.4 · Quantum v2.2 · Emotional v2.0</div>
+        <div class="footer-disclaimer">HES is not a clinical tool. It does not replace professional psychological, psychiatric, or medical assessment.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="prototype.js"></script>
+</body>
+</html>

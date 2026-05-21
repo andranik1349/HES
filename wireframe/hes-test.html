@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HES-TEST — HES</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="typography.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="layout.css">
+
+  <style>
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .placeholder-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-8) var(--space-6);
+      min-height: calc(100vh - 64px);
+    }
+
+    .placeholder-inner {
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .placeholder-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto var(--space-6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 0.5px solid var(--hairline-strong);
+      background: var(--bg-elevated);
+    }
+
+    .placeholder-icon svg {
+      width: 32px;
+      height: 32px;
+      opacity: 0.35;
+    }
+
+    .placeholder-section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--dust);
+      margin-bottom: var(--space-4);
+    }
+
+    .placeholder-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 32px;
+      color: var(--carbon);
+      margin-bottom: var(--space-5);
+      line-height: 1.15;
+    }
+
+    .placeholder-description {
+      font-family: 'Literata', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.7;
+      color: #3c3a30;
+      margin-bottom: var(--space-5);
+    }
+
+    .placeholder-timeline {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--dust);
+      margin-bottom: var(--space-7);
+      line-height: 1.6;
+    }
+
+    .placeholder-cta-group {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-3);
+    }
+
+    @media (max-width: 480px) {
+      .placeholder-cta-group {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body class="page-editorial">
+
+  <!-- ══════════════════════════════════════════════════════════════
+       TOPBAR — nav active: none (placeholder)
+       ══════════════════════════════════════════════════════════════ -->
+  <header class="topbar" role="banner">
+    <div class="lockup">
+      <div class="mark" aria-hidden="true"></div>
+      <a href="index.html" class="wm">HES<span class="sep">/</span><span class="lab">LIBRARY</span></a>
+    </div>
+    <nav class="nav-primary" aria-label="Primary navigation">
+      <a href="about.html"         class="nav-link">About</a>
+      <a href="library/index.html" class="nav-link">Library</a>
+      <a href="book.html"          class="nav-link">Book</a>
+      <a href="blog/index.html"    class="nav-link">Blog</a>
+      <a href="research.html"      class="nav-link">Research</a>
+      <a href="contribute.html"    class="nav-link">Contribute</a>
+    </nav>
+    <div class="nav-right">
+      <a href="contact.html" class="nav-link">Contact</a>
+      <div class="nav-more">
+        <button class="nav-more-btn nav-link" aria-haspopup="true" aria-expanded="false">
+          More <span class="nav-arrow">▾</span>
+        </button>
+        <div class="nav-more-menu" role="menu">
+          <a href="faq.html"            class="nav-more-item" role="menuitem">FAQ</a>
+          <a href="glossary.html"       class="nav-more-item" role="menuitem">Glossary</a>
+          <a href="press.html"          class="nav-more-item" role="menuitem">Press</a>
+          <a href="changelog.html"      class="nav-more-item" role="menuitem">Changelog</a>
+          <div class="nav-more-divider"></div>
+          <a href="community.html"      class="nav-more-item nav-more-item--placeholder" role="menuitem">Community <span class="nav-soon">Soon</span></a>
+          <a href="hes-philosophy.html" class="nav-more-item nav-more-item--placeholder" role="menuitem">HES Philosophy <span class="nav-soon">Soon</span></a>
+          <a href="hes-test.html"       class="nav-more-item nav-more-item--placeholder active" role="menuitem" aria-current="page">HES-TEST <span class="nav-soon">Soon</span></a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       CENTERED PLACEHOLDER CONTENT
+       ══════════════════════════════════════════════════════════════ -->
+  <main class="placeholder-main" id="main-content" aria-labelledby="placeholder-title">
+
+    <div class="placeholder-inner">
+
+      <!-- Icon -->
+      <div class="placeholder-icon" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="5" y="5" width="22" height="22" rx="0" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="5" y1="12" x2="27" y2="12" stroke="currentColor" stroke-width="1"/>
+          <line x1="5" y1="19" x2="27" y2="19" stroke="currentColor" stroke-width="1"/>
+          <line x1="12" y1="5" x2="12" y2="27" stroke="currentColor" stroke-width="1"/>
+          <rect x="13" y="13" width="13" height="6" fill="currentColor" opacity="0.15"/>
+        </svg>
+      </div>
+
+      <div class="placeholder-section-label">Coming Soon</div>
+
+      <h1 class="placeholder-title" id="placeholder-title">HES-TEST</h1>
+
+      <p class="placeholder-description">Assessment tools are planned for after the validation studies are complete. HES-TEST will offer a structured self-report instrument producing an element-level profile.</p>
+
+      <p class="placeholder-timeline">Assessment tools coming after validation studies are complete.<br>Follow progress on the Blog or Substack.</p>
+
+      <div class="placeholder-cta-group">
+        <a href="blog/index.html" class="btn btn-primary">Follow on Blog →</a>
+        <a href="#" class="btn btn-ghost">Follow on Substack ↗</a>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       FOOTER
+       ══════════════════════════════════════════════════════════════ -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-col-label">Explore</div>
+          <a href="library/index.html" class="footer-link">Passport Library</a>
+          <a href="library/index.html" class="footer-link">The Four Layers</a>
+          <a href="book.html"          class="footer-link">The Book</a>
+          <a href="about.html"         class="footer-link">About HES</a>
+          <a href="research.html"      class="footer-link">MML Framework</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Learn</div>
+          <a href="faq.html"           class="footer-link">FAQ</a>
+          <a href="glossary.html"      class="footer-link">Glossary</a>
+          <a href="changelog.html"     class="footer-link">Changelog</a>
+          <a href="blog/index.html"    class="footer-link">Blog</a>
+          <a href="research.html"      class="footer-link">Research</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Connect</div>
+          <a href="contact.html"       class="footer-link">Contact</a>
+          <a href="contribute.html"    class="footer-link">Contribute</a>
+          <a href="contribute.html"    class="footer-link">HES Lingua</a>
+          <a href="community.html"     class="footer-link">Community</a>
+          <a href="press.html"         class="footer-link">Press</a>
+        </div>
+      </div>
+      <div class="footer-legal">
+        <div class="footer-legal-links">
+          <a href="privacy.html"    class="footer-legal-link">Privacy Policy</a>
+          <a href="terms.html"      class="footer-legal-link">Terms of Use</a>
+          <a href="disclaimer.html" class="footer-legal-link">Disclaimer</a>
+        </div>
+        <div class="footer-version">Core v1.3.2 · Derived v1.2.4 · Quantum v2.2 · Emotional v2.0</div>
+        <div class="footer-disclaimer">HES is not a clinical tool. It does not replace professional psychological, psychiatric, or medical assessment.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="prototype.js"></script>
+</body>
+</html>

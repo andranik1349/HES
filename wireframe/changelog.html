@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Changelog — HES</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="typography.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="layout.css">
+
+  <style>
+    .page-header {
+      background: var(--library-surface);
+      padding: var(--space-8) 0 var(--space-7);
+      border-bottom: 0.5px solid var(--hairline-strong);
+    }
+    .page-header-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--dust);
+      margin-bottom: var(--space-3);
+    }
+    .page-header-subtitle {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 17px;
+      color: var(--dust);
+      margin-top: var(--space-3);
+      line-height: 1.5;
+    }
+
+    .changelog-section {
+      padding: var(--space-8) 0 var(--space-10);
+    }
+
+    .changelog-wrap {
+      max-width: 720px;
+    }
+
+    /* ── Version pin callout ──────────────────────────────────── */
+    .callout-versions {
+      margin-bottom: var(--space-8);
+    }
+
+    /* ── Entry card ───────────────────────────────────────────── */
+    .changelog-entry {
+      padding: var(--space-6) 0;
+      border-bottom: 0.5px solid var(--hairline);
+    }
+
+    .changelog-entry:last-child {
+      border-bottom: none;
+    }
+
+    .changelog-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      margin-bottom: var(--space-4);
+    }
+
+    .changelog-date {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--dust);
+    }
+
+    /* ── Version badge (pill, layer color) ───────────────────── */
+    .version-badge {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.10em;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      display: inline-block;
+    }
+
+    .version-badge--core {
+      background: var(--core-tint);
+      color: var(--core-dark);
+    }
+
+    .version-badge--derived {
+      background: var(--derived-tint);
+      color: var(--derived-dark);
+    }
+
+    .version-badge--quantum {
+      background: var(--quantum-tint);
+      color: var(--quantum-dark);
+    }
+
+    .version-badge--emotional {
+      background: var(--emotional-tint);
+      color: var(--emotional-dark);
+    }
+
+    /* ── Change list ──────────────────────────────────────────── */
+    .change-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .change-item {
+      display: flex;
+      gap: var(--space-3);
+      padding: var(--space-2) 0;
+      border-bottom: 0.5px solid var(--hairline);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--carbon);
+    }
+
+    .change-item:last-child {
+      border-bottom: none;
+    }
+
+    .change-prefix {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      flex-shrink: 0;
+      padding-top: 1px;
+      min-width: 16px;
+    }
+
+    .change-prefix--added    { color: var(--emotional-dark); }
+    .change-prefix--revised  { color: var(--derived-dark); }
+    .change-prefix--removed  { color: #a04040; }
+    .change-prefix--corrected { color: var(--quantum-dark); }
+  </style>
+</head>
+<body class="page-editorial">
+
+  <!-- ══════════════════════════════════════════════════════════════
+       TOPBAR — nav active: none
+       ══════════════════════════════════════════════════════════════ -->
+  <header class="topbar" role="banner">
+    <div class="lockup">
+      <div class="mark" aria-hidden="true"></div>
+      <a href="index.html" class="wm">HES<span class="sep">/</span><span class="lab">LIBRARY</span></a>
+    </div>
+    <nav class="nav-primary" aria-label="Primary navigation">
+      <a href="about.html"         class="nav-link">About</a>
+      <a href="library/index.html" class="nav-link">Library</a>
+      <a href="book.html"          class="nav-link">Book</a>
+      <a href="blog/index.html"    class="nav-link">Blog</a>
+      <a href="research.html"      class="nav-link">Research</a>
+      <a href="contribute.html"    class="nav-link">Contribute</a>
+    </nav>
+    <div class="nav-right">
+      <a href="contact.html" class="nav-link">Contact</a>
+      <div class="nav-more">
+        <button class="nav-more-btn nav-link" aria-haspopup="true" aria-expanded="false">
+          More <span class="nav-arrow">▾</span>
+        </button>
+        <div class="nav-more-menu" role="menu">
+          <a href="faq.html"            class="nav-more-item" role="menuitem">FAQ</a>
+          <a href="glossary.html"       class="nav-more-item" role="menuitem">Glossary</a>
+          <a href="press.html"          class="nav-more-item" role="menuitem">Press</a>
+          <a href="changelog.html"      class="nav-more-item active" role="menuitem" aria-current="page">Changelog</a>
+          <div class="nav-more-divider"></div>
+          <a href="community.html"      class="nav-more-item nav-more-item--placeholder" role="menuitem">Community <span class="nav-soon">Soon</span></a>
+          <a href="hes-philosophy.html" class="nav-more-item nav-more-item--placeholder" role="menuitem">HES Philosophy <span class="nav-soon">Soon</span></a>
+          <a href="hes-test.html"       class="nav-more-item nav-more-item--placeholder" role="menuitem">HES-TEST <span class="nav-soon">Soon</span></a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-body" id="main-content">
+
+    <!-- ══════════════════════════════════════════════════════════════
+         PAGE HEADER
+         ══════════════════════════════════════════════════════════════ -->
+    <div class="page-header">
+      <div class="container-narrow">
+        <div class="page-header-eyebrow">Versioning</div>
+        <h1 class="t-title-lg">Changelog</h1>
+        <p class="page-header-subtitle">Version history of the HES framework.</p>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         CHANGELOG CONTENT
+         ══════════════════════════════════════════════════════════════ -->
+    <div class="changelog-section">
+      <div class="container">
+        <div class="changelog-wrap">
+
+          <!-- Current versions callout -->
+          <div class="callout callout-versions" role="note">
+            <p class="t-mono" style="margin-bottom: 0;">
+              Core v1.3.2 · Derived v1.2.4 · Quantum v2.2 · Emotional v2.0 — as of May 2026
+            </p>
+          </div>
+
+          <!-- ── May 2026 — Core v1.3.2 ─────────────────────────── -->
+          <div class="changelog-entry">
+            <div class="changelog-meta">
+              <span class="version-badge version-badge--core">Core v1.3.2</span>
+              <span class="changelog-date">May 2026</span>
+            </div>
+            <ul class="change-list" aria-label="Changes in Core v1.3.2">
+              <li class="change-item">
+                <span class="change-prefix change-prefix--added" aria-label="Added">+</span>
+                <span>Added: C103 — Habituation Rate (B01)</span>
+              </li>
+              <li class="change-item">
+                <span class="change-prefix change-prefix--revised" aria-label="Revised">~</span>
+                <span>Revised: C047 definition updated to reflect 2025 meta-analysis</span>
+              </li>
+              <li class="change-item">
+                <span class="change-prefix change-prefix--corrected" aria-label="Corrected">✓</span>
+                <span>Corrected: MML level for C088 corrected from MML-3 to MML-2</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- ── March 2026 — Derived v1.2.4 ───────────────────── -->
+          <div class="changelog-entry">
+            <div class="changelog-meta">
+              <span class="version-badge version-badge--derived">Derived v1.2.4</span>
+              <span class="changelog-date">March 2026</span>
+            </div>
+            <ul class="change-list" aria-label="Changes in Derived v1.2.4">
+              <li class="change-item">
+                <span class="change-prefix change-prefix--added" aria-label="Added">+</span>
+                <span>Added: D151, D152, D153 (BD14 expansion)</span>
+              </li>
+              <li class="change-item">
+                <span class="change-prefix change-prefix--revised" aria-label="Revised">~</span>
+                <span>Revised: BD07 block description updated</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- ── January 2026 — Quantum v2.2 ───────────────────── -->
+          <div class="changelog-entry">
+            <div class="changelog-meta">
+              <span class="version-badge version-badge--quantum">Quantum v2.2</span>
+              <span class="changelog-date">January 2026</span>
+            </div>
+            <ul class="change-list" aria-label="Changes in Quantum v2.2">
+              <li class="change-item">
+                <span class="change-prefix change-prefix--revised" aria-label="Revised">~</span>
+                <span>Revised: QB03 Overwhelm Patterns — 2 elements re-specified</span>
+              </li>
+              <li class="change-item">
+                <span class="change-prefix change-prefix--corrected" aria-label="Corrected">✓</span>
+                <span>Corrected: Q031 nearest neighbors updated</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- ── November 2025 — Emotional v2.0 ────────────────── -->
+          <div class="changelog-entry">
+            <div class="changelog-meta">
+              <span class="version-badge version-badge--emotional">Emotional v2.0</span>
+              <span class="changelog-date">November 2025</span>
+            </div>
+            <ul class="change-list" aria-label="Changes in Emotional v2.0">
+              <li class="change-item">
+                <span class="change-prefix change-prefix--revised" aria-label="Revised">~</span>
+                <span>Major revision: EB04 Social Emotions block restructured from 4 to 6 elements</span>
+              </li>
+              <li class="change-item">
+                <span class="change-prefix change-prefix--added" aria-label="Added">+</span>
+                <span>Added: E041, E042, E043</span>
+              </li>
+              <li class="change-item">
+                <span class="change-prefix change-prefix--removed" aria-label="Removed">×</span>
+                <span>Removed: E018 (merged into E017)</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- ── September 2025 — Core v1.3.1 ──────────────────── -->
+          <div class="changelog-entry">
+            <div class="changelog-meta">
+              <span class="version-badge version-badge--core">Core v1.3.1</span>
+              <span class="changelog-date">September 2025</span>
+            </div>
+            <ul class="change-list" aria-label="Changes in Core v1.3.1">
+              <li class="change-item">
+                <span class="change-prefix change-prefix--corrected" aria-label="Corrected">✓</span>
+                <span>Corrected: 4 MML levels revised following external review</span>
+              </li>
+              <li class="change-item">
+                <span class="change-prefix change-prefix--revised" aria-label="Revised">~</span>
+                <span>Revised: B05 block description updated</span>
+              </li>
+            </ul>
+          </div>
+
+        </div><!-- /changelog-wrap -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       FOOTER
+       ══════════════════════════════════════════════════════════════ -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-col-label">Explore</div>
+          <a href="library/index.html" class="footer-link">Passport Library</a>
+          <a href="library/index.html" class="footer-link">The Four Layers</a>
+          <a href="book.html"          class="footer-link">The Book</a>
+          <a href="about.html"         class="footer-link">About HES</a>
+          <a href="research.html"      class="footer-link">MML Framework</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Learn</div>
+          <a href="faq.html"           class="footer-link">FAQ</a>
+          <a href="glossary.html"      class="footer-link">Glossary</a>
+          <a href="changelog.html"     class="footer-link" style="color: var(--vellum-1);">Changelog</a>
+          <a href="blog/index.html"    class="footer-link">Blog</a>
+          <a href="research.html"      class="footer-link">Research</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Connect</div>
+          <a href="contact.html"       class="footer-link">Contact</a>
+          <a href="contribute.html"    class="footer-link">Contribute</a>
+          <a href="contribute.html"    class="footer-link">HES Lingua</a>
+          <a href="community.html"     class="footer-link">Community</a>
+          <a href="press.html"         class="footer-link">Press</a>
+        </div>
+      </div>
+      <div class="footer-legal">
+        <div class="footer-legal-links">
+          <a href="privacy.html"    class="footer-legal-link">Privacy Policy</a>
+          <a href="terms.html"      class="footer-legal-link">Terms of Use</a>
+          <a href="disclaimer.html" class="footer-legal-link">Disclaimer</a>
+        </div>
+        <div class="footer-version">Core v1.3.2 · Derived v1.2.4 · Quantum v2.2 · Emotional v2.0</div>
+        <div class="footer-disclaimer">HES is not a clinical tool. It does not replace professional psychological, psychiatric, or medical assessment.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="prototype.js"></script>
+</body>
+</html>

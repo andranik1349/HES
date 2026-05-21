@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glossary — HES</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="typography.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="layout.css">
+
+  <style>
+    .page-header {
+      background: var(--library-surface);
+      padding: var(--space-8) 0 var(--space-7);
+      border-bottom: 0.5px solid var(--hairline-strong);
+    }
+    .page-header-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--dust);
+      margin-bottom: var(--space-3);
+    }
+    .page-header-subtitle {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 17px;
+      color: var(--dust);
+      margin-top: var(--space-3);
+      line-height: 1.5;
+    }
+
+    /* ── Jump-to-letter strip ─────────────────────────────────── */
+    .alpha-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-1);
+      padding: var(--space-5) 0 var(--space-6);
+      border-bottom: 0.5px solid var(--hairline);
+      margin-bottom: var(--space-7);
+    }
+
+    .alpha-link {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--carbon);
+      text-decoration: none;
+      padding: 3px 6px;
+      border: 0.5px solid var(--hairline-strong);
+      transition: background 0.12s, color 0.12s;
+    }
+
+    .alpha-link:hover {
+      background: var(--carbon);
+      color: var(--vellum-1);
+    }
+
+    .alpha-link--muted {
+      color: var(--hairline-strong);
+      border-color: var(--hairline);
+      pointer-events: none;
+      cursor: default;
+    }
+
+    /* ── Letter group header ──────────────────────────────────── */
+    .glossary-letter {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 32px;
+      color: var(--carbon);
+      line-height: 1;
+      padding-bottom: var(--space-4);
+      border-bottom: 0.5px solid var(--hairline);
+      margin-bottom: var(--space-5);
+    }
+
+    /* ── Glossary entry ───────────────────────────────────────── */
+    .glossary-group {
+      margin-bottom: var(--space-8);
+    }
+
+    .glossary-entry {
+      padding: var(--space-4) 0;
+      border-bottom: 0.5px solid var(--hairline);
+    }
+
+    .glossary-entry:last-child {
+      border-bottom: none;
+    }
+
+    .glossary-term {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--carbon);
+      margin-bottom: var(--space-2);
+    }
+
+    .glossary-def {
+      font-family: 'Literata', Georgia, serif;
+      font-size: 16px;
+      line-height: 1.65;
+      color: #3c3a30;
+    }
+
+    .glossary-section {
+      padding: var(--space-7) 0 var(--space-10);
+    }
+
+    .glossary-wrap {
+      max-width: 720px;
+    }
+  </style>
+</head>
+<body class="page-editorial">
+
+  <!-- ══════════════════════════════════════════════════════════════
+       TOPBAR — nav active: none
+       ══════════════════════════════════════════════════════════════ -->
+  <header class="topbar" role="banner">
+    <div class="lockup">
+      <div class="mark" aria-hidden="true"></div>
+      <a href="index.html" class="wm">HES<span class="sep">/</span><span class="lab">LIBRARY</span></a>
+    </div>
+    <nav class="nav-primary" aria-label="Primary navigation">
+      <a href="about.html"         class="nav-link">About</a>
+      <a href="library/index.html" class="nav-link">Library</a>
+      <a href="book.html"          class="nav-link">Book</a>
+      <a href="blog/index.html"    class="nav-link">Blog</a>
+      <a href="research.html"      class="nav-link">Research</a>
+      <a href="contribute.html"    class="nav-link">Contribute</a>
+    </nav>
+    <div class="nav-right">
+      <a href="contact.html" class="nav-link">Contact</a>
+      <div class="nav-more">
+        <button class="nav-more-btn nav-link" aria-haspopup="true" aria-expanded="false">
+          More <span class="nav-arrow">▾</span>
+        </button>
+        <div class="nav-more-menu" role="menu">
+          <a href="faq.html"            class="nav-more-item" role="menuitem">FAQ</a>
+          <a href="glossary.html"       class="nav-more-item active" role="menuitem" aria-current="page">Glossary</a>
+          <a href="press.html"          class="nav-more-item" role="menuitem">Press</a>
+          <a href="changelog.html"      class="nav-more-item" role="menuitem">Changelog</a>
+          <div class="nav-more-divider"></div>
+          <a href="community.html"      class="nav-more-item nav-more-item--placeholder" role="menuitem">Community <span class="nav-soon">Soon</span></a>
+          <a href="hes-philosophy.html" class="nav-more-item nav-more-item--placeholder" role="menuitem">HES Philosophy <span class="nav-soon">Soon</span></a>
+          <a href="hes-test.html"       class="nav-more-item nav-more-item--placeholder" role="menuitem">HES-TEST <span class="nav-soon">Soon</span></a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-body" id="main-content">
+
+    <!-- ══════════════════════════════════════════════════════════════
+         PAGE HEADER
+         ══════════════════════════════════════════════════════════════ -->
+    <div class="page-header">
+      <div class="container-narrow">
+        <div class="page-header-eyebrow">Reference</div>
+        <h1 class="t-title-lg">Glossary</h1>
+        <p class="page-header-subtitle">Definitions of HES-specific terms.</p>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         GLOSSARY CONTENT
+         ══════════════════════════════════════════════════════════════ -->
+    <div class="glossary-section">
+      <div class="container">
+        <div class="glossary-wrap">
+
+          <!-- Jump-to-letter strip -->
+          <nav class="alpha-strip" aria-label="Jump to letter">
+            <span class="alpha-link alpha-link--muted">A</span>
+            <a href="#letter-b" class="alpha-link">B</a>
+            <a href="#letter-c" class="alpha-link">C</a>
+            <a href="#letter-d" class="alpha-link">D</a>
+            <a href="#letter-e" class="alpha-link">E</a>
+            <span class="alpha-link alpha-link--muted">F</span>
+            <span class="alpha-link alpha-link--muted">G</span>
+            <span class="alpha-link alpha-link--muted">H</span>
+            <span class="alpha-link alpha-link--muted">I</span>
+            <span class="alpha-link alpha-link--muted">J</span>
+            <span class="alpha-link alpha-link--muted">K</span>
+            <a href="#letter-l" class="alpha-link">L</a>
+            <a href="#letter-m" class="alpha-link">M</a>
+            <a href="#letter-n" class="alpha-link">N</a>
+            <span class="alpha-link alpha-link--muted">O</span>
+            <a href="#letter-p" class="alpha-link">P</a>
+            <a href="#letter-q" class="alpha-link">Q</a>
+            <span class="alpha-link alpha-link--muted">R</span>
+            <span class="alpha-link alpha-link--muted">S</span>
+            <a href="#letter-t" class="alpha-link">T</a>
+            <span class="alpha-link alpha-link--muted">U</span>
+            <span class="alpha-link alpha-link--muted">V</span>
+            <span class="alpha-link alpha-link--muted">W</span>
+            <span class="alpha-link alpha-link--muted">X</span>
+            <span class="alpha-link alpha-link--muted">Y</span>
+            <span class="alpha-link alpha-link--muted">Z</span>
+          </nav>
+
+          <!-- ── B ───────────────────────────────────────────────── -->
+          <div class="glossary-group" id="letter-b">
+            <div class="glossary-letter" aria-hidden="true">B</div>
+
+            <div class="glossary-entry">
+              <div class="glossary-term">Block</div>
+              <div class="glossary-def">A thematic grouping of related elements within a layer. There are 46 blocks across the four layers. Blocks serve as navigation and filtering units; they do not have their own standalone pages.</div>
+            </div>
+          </div>
+
+          <!-- ── C ───────────────────────────────────────────────── -->
+          <div class="glossary-group" id="letter-c">
+            <div class="glossary-letter" aria-hidden="true">C</div>
+
+            <div class="glossary-entry">
+              <div class="glossary-term">Code</div>
+              <div class="glossary-def">The unique identifier for each element, formatted as a layer letter + 3 digits (e.g. C003, D045, Q012, E003).</div>
+            </div>
+
+            <div class="glossary-entry">
+              <div class="glossary-term">Construct</div>
+              <div class="glossary-def">A theoretical concept that organises observable psychological phenomena into a measurable unit.</div>
+            </div>
+
+            <div class="glossary-entry">
+              <div class="glossary-term">Core layer</div>
+              <div class="glossary-def">The foundational layer of HES, containing 106 stable, biologically grounded elements.</div>
+            </div>
+          </div>
+
+          <!-- ── D ───────────────────────────────────────────────── -->
+          <div class="glossary-group" id="letter-d">
+            <div class="glossary-letter" aria-hidden="true">D</div>
+
+            <div class="glossary-entry">
+              <div class="glossary-term">Derived layer</div>
+              <div class="glossary-def">The second layer of HES, containing 154 elements that grow from the core through experience and culture.</div>
+            </div>
+          </div>
+
+          <!-- ── E ───────────────────────────────────────────────── -->
+          <div class="glossary-group" id="letter-e">
+            <div class="glossary-letter" aria-hidden="true">E</div>
+
+            <div class="glossary-entry">
+              <div class="glossary-term">Element</div>
+              <div class="glossary-def">The atomic unit of HES. Each of the 343 elements has a unique code, name, definition, measurement specification, and set of nearest neighbours.</div>
+            </div>
+
+            <div class="glossary-entry">
+              <div class="glossary-term">Emotional layer</div>
+              <div class="glossary-def">The fourth layer of HES, containing 43 elements related to the workbench of conscious affect.</div>
+            </div>
+          </div>
+
+          <!-- ── L ───────────────────────────────────────────────── -->
+          <div class="glossary-group" id="letter-l">
+            <div class="glossary-letter" aria-hidden="true">L</div>
+
+            <div class="glossary-entry">
+              <div class="glossary-term">Layer</div>
+              <div class="glossary-def">One of four organisational strata in HES: Core, Derived, Quantum, and Emotional. Each layer has a distinct functional character and colour identity.</div>
+            </div>
+          </div>
+
+          <!-- ── M ───────────────────────────────────────────────── -->
+          <div class="glossary-group" id="letter-m">
+            <div class="glossary-letter" aria-hidden="true">M</div>
+
+            <div class="glossary-entry">
+              <div class="glossary-term">Mid-reference</div>
+              <div class="glossary-def">The working middle description of an element — the statistically typical range for a non-clinical adult population.</div>
+            </div>
+
+            <div class="glossary-entry">
+              <div class="glossary-term">MML</div>
+              <div class="glossary-def">Measurement Maturity Level. A 1–5 scale indicating the evidential weight behind each element's measurement infrastructure.</div>
+            </div>
+
+            <div class="glossary-entry">
+              <div class="glossary-term">Modifiability</div>
+              <div class="glossary-def">The degree to which an element can change through any means — life events, therapy, environment, or pharmacological intervention. Rated High, Mid, or Low.</div>
+            </div>
+          </div>
+
+          <!-- ── N ───────────────────────────────────────────────── -->
+          <div class="glossary-group" id="letter-n">
+            <div class="glossary-letter" aria-hidden="true">N</div>
+
+            <div class="glossary-entry">
+              <div class="glossary-term">Nearest neighbors</div>
+              <div class="glossary-def">The elements with the closest theoretical and empirical relationships to a given element, as listed on each passport page.</div>
+            </div>
+          </div>
+
+          <!-- ── P ───────────────────────────────────────────────── -->
+          <div class="glossary-group" id="letter-p">
+            <div class="glossary-letter" aria-hidden="true">P</div>
+
+            <div class="glossary-entry">
+              <div class="glossary-term">Passport</div>
+              <div class="glossary-def">The structured reference page for each element. Each passport displays all fields in the data schema and has a permanent, citable URL.</div>
+            </div>
+
+            <div class="glossary-entry">
+              <div class="glossary-term">Pole MAX / Pole MIN</div>
+              <div class="glossary-def">The high and low endpoint descriptions of an element's dimensional range.</div>
+            </div>
+          </div>
+
+          <!-- ── Q ───────────────────────────────────────────────── -->
+          <div class="glossary-group" id="letter-q">
+            <div class="glossary-letter" aria-hidden="true">Q</div>
+
+            <div class="glossary-entry">
+              <div class="glossary-term">Quantum layer</div>
+              <div class="glossary-def">The third layer of HES, containing 40 discontinuous rupture states.</div>
+            </div>
+          </div>
+
+          <!-- ── T ───────────────────────────────────────────────── -->
+          <div class="glossary-group" id="letter-t">
+            <div class="glossary-letter" aria-hidden="true">T</div>
+
+            <div class="glossary-entry">
+              <div class="glossary-term">Trainability</div>
+              <div class="glossary-def">The degree to which an element can be developed through deliberate practice. Rated High, Mid, or Low.</div>
+            </div>
+          </div>
+
+        </div><!-- /glossary-wrap -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       FOOTER
+       ══════════════════════════════════════════════════════════════ -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-col-label">Explore</div>
+          <a href="library/index.html" class="footer-link">Passport Library</a>
+          <a href="library/index.html" class="footer-link">The Four Layers</a>
+          <a href="book.html"          class="footer-link">The Book</a>
+          <a href="about.html"         class="footer-link">About HES</a>
+          <a href="research.html"      class="footer-link">MML Framework</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Learn</div>
+          <a href="faq.html"           class="footer-link">FAQ</a>
+          <a href="glossary.html"      class="footer-link" style="color: var(--vellum-1);">Glossary</a>
+          <a href="changelog.html"     class="footer-link">Changelog</a>
+          <a href="blog/index.html"    class="footer-link">Blog</a>
+          <a href="research.html"      class="footer-link">Research</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Connect</div>
+          <a href="contact.html"       class="footer-link">Contact</a>
+          <a href="contribute.html"    class="footer-link">Contribute</a>
+          <a href="contribute.html"    class="footer-link">HES Lingua</a>
+          <a href="community.html"     class="footer-link">Community</a>
+          <a href="press.html"         class="footer-link">Press</a>
+        </div>
+      </div>
+      <div class="footer-legal">
+        <div class="footer-legal-links">
+          <a href="privacy.html"    class="footer-legal-link">Privacy Policy</a>
+          <a href="terms.html"      class="footer-legal-link">Terms of Use</a>
+          <a href="disclaimer.html" class="footer-legal-link">Disclaimer</a>
+        </div>
+        <div class="footer-version">Core v1.3.2 · Derived v1.2.4 · Quantum v2.2 · Emotional v2.0</div>
+        <div class="footer-disclaimer">HES is not a clinical tool. It does not replace professional psychological, psychiatric, or medical assessment.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="prototype.js"></script>
+</body>
+</html>

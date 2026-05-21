@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Book — HES</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="typography.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="layout.css">
+
+  <style>
+    .page-header {
+      background: var(--library-surface);
+      padding: var(--space-8) 0 var(--space-7);
+      border-bottom: 0.5px solid var(--hairline-strong);
+    }
+    .page-header-eyebrow {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--dust);
+      margin-bottom: var(--space-3);
+    }
+    .page-header-subtitle {
+      font-family: 'Space Grotesk', sans-serif; font-size: 17px;
+      color: var(--dust); margin-top: var(--space-3); line-height: 1.5;
+    }
+
+    .content-section {
+      padding: var(--space-8) 0;
+      border-bottom: 0.5px solid var(--hairline);
+    }
+    .content-section:last-child { border-bottom: none; }
+
+    /* Book hero grid */
+    .book-hero {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: var(--space-8);
+      align-items: start;
+    }
+    @media (max-width: 768px) {
+      .book-hero { grid-template-columns: 1fr; }
+    }
+
+    .book-cover {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      background: var(--carbon);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .book-cover-label {
+      font-family: 'Space Mono', monospace; font-size: 11px;
+      letter-spacing: 0.14em; text-transform: uppercase; color: var(--vellum-1);
+      opacity: 0.5;
+    }
+
+    .book-title {
+      font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+      font-size: 24px; line-height: 1.2; color: var(--carbon);
+      margin-bottom: var(--space-3);
+    }
+    .book-author {
+      font-family: 'Space Mono', monospace; font-size: 12px;
+      letter-spacing: 0.10em; color: var(--dust);
+      margin-bottom: var(--space-5);
+    }
+    .book-desc {
+      font-family: 'Literata', Georgia, serif; font-size: 16px;
+      line-height: 1.7; color: #3c3a30; margin-bottom: var(--space-6);
+    }
+    .book-ctas {
+      display: flex; flex-direction: column;
+      gap: var(--space-3); max-width: 220px;
+    }
+    .book-ctas .btn { justify-content: space-between; }
+    .book-researchers-link {
+      margin-top: var(--space-5);
+      font-family: 'Space Mono', monospace; font-size: 11px;
+      letter-spacing: 0.10em; color: var(--dust); text-decoration: none;
+      border-bottom: 0.5px solid var(--hairline-strong);
+      padding-bottom: 2px; transition: color 0.15s, border-color 0.15s;
+    }
+    .book-researchers-link:hover { color: var(--carbon); border-color: var(--carbon); }
+
+    /* TOC */
+    .toc-list {
+      list-style: none;
+      counter-reset: chap;
+    }
+    .toc-item {
+      counter-increment: chap;
+      display: flex; align-items: baseline; gap: var(--space-5);
+      padding: var(--space-4) 0;
+      border-bottom: 0.5px solid var(--hairline);
+    }
+    .toc-item:first-child { border-top: 0.5px solid var(--hairline); }
+    .toc-num {
+      font-family: 'Space Mono', monospace; font-size: 11px;
+      letter-spacing: 0.10em; color: var(--dust); min-width: 28px;
+      flex-shrink: 0;
+    }
+    .toc-chapter-name {
+      font-family: 'Space Grotesk', sans-serif; font-weight: 500;
+      font-size: 15px; color: var(--carbon);
+    }
+    .toc-chapter-desc {
+      font-family: 'Space Mono', monospace; font-size: 11px;
+      color: var(--dust); margin-left: auto; text-align: right;
+      padding-left: var(--space-5); white-space: nowrap;
+    }
+    @media (max-width: 640px) {
+      .toc-chapter-desc { display: none; }
+    }
+
+    /* Researcher chips row */
+    .chip-row { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-4); }
+  </style>
+</head>
+<body class="page-editorial">
+
+  <!-- ── Topbar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <div class="lockup">
+      <div class="mark" aria-hidden="true"></div>
+      <a href="index.html" class="wm">HES<span class="sep">/</span><span class="lab">LIBRARY</span></a>
+    </div>
+    <nav class="nav-primary" aria-label="Primary navigation">
+      <a href="about.html"         class="nav-link">About</a>
+      <a href="library/index.html" class="nav-link">Library</a>
+      <a href="book.html"          class="nav-link active">Book</a>
+      <a href="blog/index.html"    class="nav-link">Blog</a>
+      <a href="research.html"      class="nav-link">Research</a>
+      <a href="contribute.html"    class="nav-link">Contribute</a>
+    </nav>
+    <div class="nav-right">
+      <a href="contact.html" class="nav-link">Contact</a>
+      <div class="nav-more">
+        <button class="nav-more-btn nav-link" aria-haspopup="true" aria-expanded="false">More <span class="nav-arrow">▾</span></button>
+        <div class="nav-more-menu" role="menu">
+          <a href="faq.html"            class="nav-more-item" role="menuitem">FAQ</a>
+          <a href="glossary.html"       class="nav-more-item" role="menuitem">Glossary</a>
+          <a href="press.html"          class="nav-more-item" role="menuitem">Press</a>
+          <a href="changelog.html"      class="nav-more-item" role="menuitem">Changelog</a>
+          <div class="nav-more-divider"></div>
+          <a href="community.html"      class="nav-more-item nav-more-item--placeholder" role="menuitem">Community <span class="nav-soon">Soon</span></a>
+          <a href="hes-philosophy.html" class="nav-more-item nav-more-item--placeholder" role="menuitem">HES Philosophy <span class="nav-soon">Soon</span></a>
+          <a href="hes-test.html"       class="nav-more-item nav-more-item--placeholder" role="menuitem">HES-TEST <span class="nav-soon">Soon</span></a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Page body ────────────────────────────────────────────────── -->
+  <main class="page-body" id="main-content">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div class="container-narrow">
+        <div class="page-header-eyebrow">Publication</div>
+        <h1 class="t-title-lg">The Book</h1>
+        <p class="page-header-subtitle">A complete reference guide to the Human Elements System.</p>
+      </div>
+    </div>
+
+    <!-- ── Section: Book hero ────────────────────────────────────── -->
+    <div class="content-section">
+      <div class="container-narrow">
+        <div class="book-hero">
+
+          <!-- Left: cover placeholder -->
+          <div class="book-cover" aria-label="Book cover placeholder">
+            <span class="book-cover-label">Cover</span>
+          </div>
+
+          <!-- Right: text -->
+          <div>
+            <h2 class="book-title">Human Elements System: A Structured Reference</h2>
+            <div class="book-author">Areg Oganesian</div>
+            <p class="book-desc">
+              A comprehensive reference for researchers, clinicians, and practitioners working
+              with psychological constructs. This volume presents all 343 elements across the
+              four HES layers — Core, Derived, Quantum, and Emotional — with full passport data,
+              validation evidence, and the MML framework for evaluating measurement maturity.
+            </p>
+
+            <!-- Four format CTAs -->
+            <div class="book-ctas">
+              <a href="#" class="btn btn-ghost">Paperback →</a>
+              <a href="#" class="btn btn-ghost">Hardcover →</a>
+              <a href="#" class="btn btn-ghost">Kindle →</a>
+              <a href="#" class="btn btn-ghost">Audiobook →</a>
+            </div>
+
+            <div style="margin-top:var(--space-5);">
+              <a href="research.html" class="book-researchers-link">For researchers →</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Section: Table of Contents ────────────────────────────── -->
+    <div class="content-section">
+      <div class="container-narrow">
+        <div class="section-label">Contents</div>
+        <ol class="toc-list" aria-label="Table of contents">
+
+          <li class="toc-item">
+            <span class="toc-num">01</span>
+            <span class="toc-chapter-name">Introduction to HES</span>
+            <span class="toc-chapter-desc">Framework overview and scope</span>
+          </li>
+          <li class="toc-item">
+            <span class="toc-num">02</span>
+            <span class="toc-chapter-name">The Core Layer</span>
+            <span class="toc-chapter-desc">Foundational capacities</span>
+          </li>
+          <li class="toc-item">
+            <span class="toc-num">03</span>
+            <span class="toc-chapter-name">The Derived Layer</span>
+            <span class="toc-chapter-desc">Learned and cultural elements</span>
+          </li>
+          <li class="toc-item">
+            <span class="toc-num">04</span>
+            <span class="toc-chapter-name">The Quantum Layer</span>
+            <span class="toc-chapter-desc">Discontinuous states</span>
+          </li>
+          <li class="toc-item">
+            <span class="toc-num">05</span>
+            <span class="toc-chapter-name">The Emotional Layer</span>
+            <span class="toc-chapter-desc">Affective workbench</span>
+          </li>
+          <li class="toc-item">
+            <span class="toc-num">06</span>
+            <span class="toc-chapter-name">The MML Framework</span>
+            <span class="toc-chapter-desc">Measurement maturity</span>
+          </li>
+          <li class="toc-item">
+            <span class="toc-num">07</span>
+            <span class="toc-chapter-name">Using HES</span>
+            <span class="toc-chapter-desc">Applications in research and practice</span>
+          </li>
+          <li class="toc-item">
+            <span class="toc-num">08</span>
+            <span class="toc-chapter-name">Appendices</span>
+            <span class="toc-chapter-desc">Data schema, validation studies, OSF links</span>
+          </li>
+
+        </ol>
+      </div>
+    </div>
+
+    <!-- ── Section: Sample chapter ───────────────────────────────── -->
+    <div class="content-section">
+      <div class="container-narrow">
+        <div class="section-label">Sample Chapter</div>
+        <div class="card card-sm" style="display:flex;align-items:center;justify-content:space-between;gap:var(--space-6);flex-wrap:wrap;">
+          <div>
+            <div class="t-ui" style="font-weight:500;margin-bottom:var(--space-2);">Chapter 2 — The Core Layer</div>
+            <div class="t-micro" style="margin-top:0;">PDF · 24 pages</div>
+          </div>
+          <a href="#" class="btn btn-primary">Download Sample →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Section: For researchers ─────────────────────────────── -->
+    <div class="content-section">
+      <div class="container-narrow">
+        <div class="section-label">For Researchers</div>
+        <p class="t-ui" style="color:var(--dust);margin-bottom:var(--space-5);">
+          Academic access, citation data, and supplementary materials are available through the research portal.
+        </p>
+        <div class="chip-row">
+          <a href="#" class="btn btn-ghost btn-sm">MML Article (PsyArXiv) ↗</a>
+          <a href="#" class="btn btn-ghost btn-sm">OSF Pre-registrations ↗</a>
+          <a href="#" class="btn btn-ghost btn-sm">HES-20 Protocol ↗</a>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── Footer ────────────────────────────────────────────────── -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-col-label">Explore</div>
+          <a href="library/index.html" class="footer-link">Passport Library</a>
+          <a href="library/index.html" class="footer-link">The Four Layers</a>
+          <a href="book.html"          class="footer-link">The Book</a>
+          <a href="about.html"         class="footer-link">About HES</a>
+          <a href="research.html"      class="footer-link">MML Framework</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Learn</div>
+          <a href="faq.html"           class="footer-link">FAQ</a>
+          <a href="glossary.html"      class="footer-link">Glossary</a>
+          <a href="changelog.html"     class="footer-link">Changelog</a>
+          <a href="blog/index.html"    class="footer-link">Blog</a>
+          <a href="research.html"      class="footer-link">Research</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Connect</div>
+          <a href="contact.html"       class="footer-link">Contact</a>
+          <a href="contribute.html"    class="footer-link">Contribute</a>
+          <a href="contribute.html"    class="footer-link">HES Lingua</a>
+          <a href="community.html"     class="footer-link">Community</a>
+          <a href="press.html"         class="footer-link">Press</a>
+        </div>
+      </div>
+      <div class="footer-legal">
+        <div class="footer-legal-links">
+          <a href="privacy.html"    class="footer-legal-link">Privacy Policy</a>
+          <a href="terms.html"      class="footer-legal-link">Terms of Use</a>
+          <a href="disclaimer.html" class="footer-legal-link">Disclaimer</a>
+        </div>
+        <div class="footer-version">Core v1.3.2 · Derived v1.2.4 · Quantum v2.2 · Emotional v2.0</div>
+        <div class="footer-disclaimer">HES is not a clinical tool. It does not replace professional psychological, psychiatric, or medical assessment.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="prototype.js"></script>
+</body>
+</html>

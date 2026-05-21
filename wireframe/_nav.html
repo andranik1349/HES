@@ -1,0 +1,62 @@
+<!-- ═══════════════════════════════════════════════════════════════
+     SHARED NAV FRAGMENT — copy into the <header> of every page.
+
+     PATH DEPTH NOTE:
+       Pages in /wireframe/ root (about.html, book.html, etc.):
+         Use bare filenames:  href="about.html"  href="library/index.html"
+       Pages one level deep (/wireframe/library/, /wireframe/blog/):
+         Use ../prefix:       href="../about.html" href="../library/index.html"
+       The hrefs below are written for ROOT-level pages.
+       Adjust all "../" prefixes when pasting into sub-directory pages.
+     ═══════════════════════════════════════════════════════════════ -->
+<header class="topbar" role="banner">
+
+  <!-- Left: logo -->
+  <div class="lockup">
+    <div class="mark" aria-hidden="true"></div>
+    <a href="index.html" class="wm">
+      HES<span class="sep">/</span><span class="lab">LIBRARY</span>
+    </a>
+  </div>
+
+  <!-- Centre: primary nav -->
+  <nav class="nav-primary" aria-label="Primary navigation">
+    <a href="about.html"         class="nav-link">About</a>
+    <a href="library/index.html" class="nav-link">Library</a>
+    <a href="book.html"          class="nav-link">Book</a>
+    <a href="blog/index.html"    class="nav-link">Blog</a>
+    <a href="research.html"      class="nav-link">Research</a>
+    <a href="contribute.html"    class="nav-link">Contribute</a>
+  </nav>
+
+  <!-- Right: contact + more dropdown -->
+  <div class="nav-right">
+    <a href="contact.html" class="nav-link">Contact</a>
+
+    <div class="nav-more">
+      <button class="nav-more-btn nav-link"
+              aria-haspopup="true"
+              aria-expanded="false">
+        More <span class="nav-arrow">▾</span>
+      </button>
+
+      <div class="nav-more-menu" role="menu">
+        <a href="faq.html"             class="nav-more-item" role="menuitem">FAQ</a>
+        <a href="glossary.html"        class="nav-more-item" role="menuitem">Glossary</a>
+        <a href="press.html"           class="nav-more-item" role="menuitem">Press</a>
+        <a href="changelog.html"       class="nav-more-item" role="menuitem">Changelog</a>
+        <div class="nav-more-divider"></div>
+        <a href="community.html"       class="nav-more-item nav-more-item--placeholder" role="menuitem">
+          Community <span class="nav-soon">Soon</span>
+        </a>
+        <a href="hes-philosophy.html"  class="nav-more-item nav-more-item--placeholder" role="menuitem">
+          HES Philosophy <span class="nav-soon">Soon</span>
+        </a>
+        <a href="hes-test.html"        class="nav-more-item nav-more-item--placeholder" role="menuitem">
+          HES-TEST <span class="nav-soon">Soon</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+</header>

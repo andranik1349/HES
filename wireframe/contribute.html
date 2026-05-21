@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contribute — HES</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="typography.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="layout.css">
+
+  <style>
+    .page-header {
+      background: var(--library-surface);
+      padding: var(--space-8) 0 var(--space-7);
+      border-bottom: 0.5px solid var(--hairline-strong);
+    }
+    .page-header-eyebrow {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--dust);
+      margin-bottom: var(--space-3);
+    }
+    .page-header-subtitle {
+      font-family: 'Space Grotesk', sans-serif; font-size: 17px;
+      color: var(--dust); margin-top: var(--space-3); line-height: 1.5;
+    }
+    .content-section {
+      padding: var(--space-8) 0;
+      border-bottom: 0.5px solid var(--hairline);
+    }
+    .content-section:last-child { border-bottom: none; }
+
+    /* Language table */
+    .lang-table {
+      width: 100%; border-collapse: collapse;
+      margin: var(--space-6) 0;
+    }
+    .lang-table th {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.16em; text-transform: uppercase; color: var(--dust);
+      text-align: left; padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--hairline-strong);
+    }
+    .lang-table td {
+      font-family: 'Space Mono', monospace; font-size: 12px;
+      padding: var(--space-4); border-bottom: 0.5px solid var(--hairline);
+      color: var(--carbon);
+    }
+    .lang-table tr:last-child td { border-bottom: none; }
+    .lang-contributor { color: var(--dust); }
+
+    .status-pill {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 3px 9px; border-radius: 0; display: inline-block;
+    }
+    .status-inprogress {
+      background: var(--core-tint); color: var(--core-dark);
+      border: 0.5px solid var(--core);
+    }
+    .status-seeking {
+      background: var(--vellum-2); color: var(--dust);
+      border: 0.5px solid var(--hairline-strong);
+    }
+
+    /* Study support cards */
+    .study-support-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4); margin-top: var(--space-5);
+    }
+    @media (max-width: 768px) {
+      .study-support-grid { grid-template-columns: 1fr; }
+    }
+    .study-support-card {
+      display: flex; flex-direction: column;
+      justify-content: space-between; gap: var(--space-4);
+    }
+    .study-support-name {
+      font-family: 'Space Grotesk', sans-serif; font-weight: 500;
+      font-size: 14px; color: var(--carbon); line-height: 1.4;
+    }
+    .fine-print {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.10em; color: var(--dust);
+      margin-top: var(--space-5);
+    }
+
+    .cta-row { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-5); }
+    .secondary-link {
+      font-family: 'Space Mono', monospace; font-size: 11px;
+      letter-spacing: 0.10em; color: var(--dust);
+      text-decoration: none; display: inline-flex; align-items: center;
+      gap: 6px; border-bottom: 0.5px solid var(--hairline-strong);
+      padding-bottom: 2px; transition: color 0.15s, border-color 0.15s;
+    }
+    .secondary-link:hover { color: var(--carbon); border-color: var(--carbon); }
+  </style>
+</head>
+<body class="page-editorial">
+
+  <!-- ── Topbar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <div class="lockup">
+      <div class="mark" aria-hidden="true"></div>
+      <a href="index.html" class="wm">HES<span class="sep">/</span><span class="lab">LIBRARY</span></a>
+    </div>
+    <nav class="nav-primary" aria-label="Primary navigation">
+      <a href="about.html"         class="nav-link">About</a>
+      <a href="library/index.html" class="nav-link">Library</a>
+      <a href="book.html"          class="nav-link">Book</a>
+      <a href="blog/index.html"    class="nav-link">Blog</a>
+      <a href="research.html"      class="nav-link">Research</a>
+      <a href="contribute.html"    class="nav-link active">Contribute</a>
+    </nav>
+    <div class="nav-right">
+      <a href="contact.html" class="nav-link">Contact</a>
+      <div class="nav-more">
+        <button class="nav-more-btn nav-link" aria-haspopup="true" aria-expanded="false">More <span class="nav-arrow">▾</span></button>
+        <div class="nav-more-menu" role="menu">
+          <a href="faq.html"            class="nav-more-item" role="menuitem">FAQ</a>
+          <a href="glossary.html"       class="nav-more-item" role="menuitem">Glossary</a>
+          <a href="press.html"          class="nav-more-item" role="menuitem">Press</a>
+          <a href="changelog.html"      class="nav-more-item" role="menuitem">Changelog</a>
+          <div class="nav-more-divider"></div>
+          <a href="community.html"      class="nav-more-item nav-more-item--placeholder" role="menuitem">Community <span class="nav-soon">Soon</span></a>
+          <a href="hes-philosophy.html" class="nav-more-item nav-more-item--placeholder" role="menuitem">HES Philosophy <span class="nav-soon">Soon</span></a>
+          <a href="hes-test.html"       class="nav-more-item nav-more-item--placeholder" role="menuitem">HES-TEST <span class="nav-soon">Soon</span></a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-body" id="main-content">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div class="container-narrow">
+        <div class="page-header-eyebrow">Get involved</div>
+        <h1 class="t-title-lg">Contribute</h1>
+        <p class="page-header-subtitle">Translation, academic collaboration, and research support.</p>
+      </div>
+    </div>
+
+    <!-- ── 01: Translation / HES Lingua ──────────────────────────── -->
+    <div class="content-section">
+      <div class="container-narrow">
+        <div class="section-label">01 — Translation · HES Lingua</div>
+        <p class="t-ui" style="color:var(--dust);max-width:600px;margin-bottom:var(--space-2);">
+          HES Lingua is the translation programme for the Human Elements System. All 343 element names,
+          definitions, and pole descriptions are being translated into multiple languages to extend the
+          framework's global reach and support cross-cultural research.
+        </p>
+
+        <table class="lang-table" aria-label="Language translation status">
+          <thead>
+            <tr>
+              <th>Language</th>
+              <th>Status</th>
+              <th>Contributor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Armenian</td>
+              <td><span class="status-pill status-inprogress">In Progress</span></td>
+              <td class="lang-contributor">—</td>
+            </tr>
+            <tr>
+              <td>Russian</td>
+              <td><span class="status-pill status-inprogress">In Progress</span></td>
+              <td class="lang-contributor">—</td>
+            </tr>
+            <tr>
+              <td>French</td>
+              <td><span class="status-pill status-seeking">Seeking contributor</span></td>
+              <td class="lang-contributor">—</td>
+            </tr>
+            <tr>
+              <td>Spanish</td>
+              <td><span class="status-pill status-seeking">Seeking contributor</span></td>
+              <td class="lang-contributor">—</td>
+            </tr>
+            <tr>
+              <td>German</td>
+              <td><span class="status-pill status-seeking">Seeking contributor</span></td>
+              <td class="lang-contributor">—</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <a href="contact.html" class="btn btn-primary">Volunteer as translator →</a>
+      </div>
+    </div>
+
+    <!-- ── 02: Academic Collaboration ────────────────────────────── -->
+    <div class="content-section">
+      <div class="container-narrow">
+        <div class="section-label">02 — Academic Collaboration</div>
+        <p class="t-body" style="max-width:640px;margin-bottom:var(--space-6);">
+          Researchers interested in conducting validation studies, cross-cultural adaptations, or applied
+          investigations using the HES framework are encouraged to get in touch. Collaboration may involve
+          co-authorship, data sharing agreements, or advisory arrangements depending on the project scope.
+          The author is particularly interested in multi-site and longitudinal study designs.
+        </p>
+        <div class="cta-row">
+          <a href="contact.html" class="btn btn-ghost">Contact for collaboration →</a>
+        </div>
+        <div style="margin-top:var(--space-5);">
+          <a href="research.html" class="secondary-link">See suggested thesis topics →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 03: Support the Research ──────────────────────────────── -->
+    <div class="content-section">
+      <div class="container-narrow">
+        <div class="section-label">03 — Support the Research</div>
+        <p class="t-ui" style="color:var(--dust);max-width:600px;margin-bottom:var(--space-5);">
+          Validation studies require time and resources. If you'd like to support specific studies,
+          contributions go directly to data collection costs.
+        </p>
+
+        <div class="study-support-grid">
+
+          <div class="card card-sm study-support-card">
+            <div class="study-support-name">Core Layer Convergent Validity Study</div>
+            <a href="#" class="btn btn-ghost btn-sm">Support this study →</a>
+          </div>
+
+          <div class="card card-sm study-support-card">
+            <div class="study-support-name">HES-20 Test-Retest Reliability</div>
+            <a href="#" class="btn btn-ghost btn-sm">Support this study →</a>
+          </div>
+
+          <div class="card card-sm study-support-card">
+            <div class="study-support-name">Future studies (general fund)</div>
+            <a href="#" class="btn btn-ghost btn-sm">Support this study →</a>
+          </div>
+
+        </div>
+
+        <div class="fine-print">Contributions processed via external payment provider.</div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── Footer ────────────────────────────────────────────────── -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-col-label">Explore</div>
+          <a href="library/index.html" class="footer-link">Passport Library</a>
+          <a href="library/index.html" class="footer-link">The Four Layers</a>
+          <a href="book.html"          class="footer-link">The Book</a>
+          <a href="about.html"         class="footer-link">About HES</a>
+          <a href="research.html"      class="footer-link">MML Framework</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Learn</div>
+          <a href="faq.html"           class="footer-link">FAQ</a>
+          <a href="glossary.html"      class="footer-link">Glossary</a>
+          <a href="changelog.html"     class="footer-link">Changelog</a>
+          <a href="blog/index.html"    class="footer-link">Blog</a>
+          <a href="research.html"      class="footer-link">Research</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Connect</div>
+          <a href="contact.html"       class="footer-link">Contact</a>
+          <a href="contribute.html"    class="footer-link">Contribute</a>
+          <a href="contribute.html"    class="footer-link">HES Lingua</a>
+          <a href="community.html"     class="footer-link">Community</a>
+          <a href="press.html"         class="footer-link">Press</a>
+        </div>
+      </div>
+      <div class="footer-legal">
+        <div class="footer-legal-links">
+          <a href="privacy.html"    class="footer-legal-link">Privacy Policy</a>
+          <a href="terms.html"      class="footer-legal-link">Terms of Use</a>
+          <a href="disclaimer.html" class="footer-legal-link">Disclaimer</a>
+        </div>
+        <div class="footer-version">Core v1.3.2 · Derived v1.2.4 · Quantum v2.2 · Emotional v2.0</div>
+        <div class="footer-disclaimer">HES is not a clinical tool. It does not replace professional psychological, psychiatric, or medical assessment.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="prototype.js"></script>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ — HES</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="typography.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="layout.css">
+
+  <style>
+    .page-header {
+      background: var(--library-surface);
+      padding: var(--space-8) 0 var(--space-7);
+      border-bottom: 0.5px solid var(--hairline-strong);
+    }
+    .page-header-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--dust);
+      margin-bottom: var(--space-3);
+    }
+    .page-header-subtitle {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 17px;
+      color: var(--dust);
+      margin-top: var(--space-3);
+      line-height: 1.5;
+    }
+
+    .faq-section {
+      padding: var(--space-8) 0 var(--space-10);
+    }
+
+    .faq-wrap {
+      max-width: 720px;
+    }
+  </style>
+</head>
+<body class="page-editorial">
+
+  <!-- ══════════════════════════════════════════════════════════════
+       TOPBAR — nav active: none (utility page via More dropdown)
+       ══════════════════════════════════════════════════════════════ -->
+  <header class="topbar" role="banner">
+    <div class="lockup">
+      <div class="mark" aria-hidden="true"></div>
+      <a href="index.html" class="wm">HES<span class="sep">/</span><span class="lab">LIBRARY</span></a>
+    </div>
+    <nav class="nav-primary" aria-label="Primary navigation">
+      <a href="about.html"         class="nav-link">About</a>
+      <a href="library/index.html" class="nav-link">Library</a>
+      <a href="book.html"          class="nav-link">Book</a>
+      <a href="blog/index.html"    class="nav-link">Blog</a>
+      <a href="research.html"      class="nav-link">Research</a>
+      <a href="contribute.html"    class="nav-link">Contribute</a>
+    </nav>
+    <div class="nav-right">
+      <a href="contact.html" class="nav-link">Contact</a>
+      <div class="nav-more">
+        <button class="nav-more-btn nav-link" aria-haspopup="true" aria-expanded="false">
+          More <span class="nav-arrow">▾</span>
+        </button>
+        <div class="nav-more-menu" role="menu">
+          <a href="faq.html"            class="nav-more-item active" role="menuitem" aria-current="page">FAQ</a>
+          <a href="glossary.html"       class="nav-more-item" role="menuitem">Glossary</a>
+          <a href="press.html"          class="nav-more-item" role="menuitem">Press</a>
+          <a href="changelog.html"      class="nav-more-item" role="menuitem">Changelog</a>
+          <div class="nav-more-divider"></div>
+          <a href="community.html"      class="nav-more-item nav-more-item--placeholder" role="menuitem">Community <span class="nav-soon">Soon</span></a>
+          <a href="hes-philosophy.html" class="nav-more-item nav-more-item--placeholder" role="menuitem">HES Philosophy <span class="nav-soon">Soon</span></a>
+          <a href="hes-test.html"       class="nav-more-item nav-more-item--placeholder" role="menuitem">HES-TEST <span class="nav-soon">Soon</span></a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-body" id="main-content">
+
+    <!-- ══════════════════════════════════════════════════════════════
+         PAGE HEADER
+         ══════════════════════════════════════════════════════════════ -->
+    <div class="page-header">
+      <div class="container-narrow">
+        <div class="page-header-eyebrow">Support</div>
+        <h1 class="t-title-lg">FAQ</h1>
+        <p class="page-header-subtitle">Common questions about the HES framework.</p>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         FAQ ACCORDION
+         ══════════════════════════════════════════════════════════════ -->
+    <div class="faq-section">
+      <div class="container">
+        <div class="faq-wrap">
+
+          <div class="accordion-item">
+            <button class="accordion-trigger">
+              Is HES a personality test?
+              <span class="accordion-icon">▾</span>
+            </button>
+            <div class="accordion-body">
+              <p class="t-body">No. HES is a reference framework for structured psychological constructs — not a test, not a diagnostic instrument, and not a tool for labelling individuals. It maps the building blocks of human psychology, not types or categories.</p>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-trigger">
+              What does MML mean?
+              <span class="accordion-icon">▾</span>
+            </button>
+            <div class="accordion-body">
+              <p class="t-body">MML stands for Measurement Maturity Level. It is a 1–5 scale that indicates the evidential weight behind each element's measurement infrastructure, from MML-1 (Established — multiple independent validation studies) to MML-5 (Speculative — theoretical basis only).</p>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-trigger">
+              How were the 343 elements selected?
+              <span class="accordion-icon">▾</span>
+            </button>
+            <div class="accordion-body">
+              <p class="t-body">Elements were selected through a systematic review of the psychological literature over 19 years. Each element meets a minimum threshold of construct distinctiveness, theoretical coherence, and at least preliminary measurability.</p>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-trigger">
+              What is the difference between Core and Derived layers?
+              <span class="accordion-icon">▾</span>
+            </button>
+            <div class="accordion-body">
+              <p class="t-body">Core elements are stable, biologically grounded capacities that change slowly across the lifespan — attention, memory, sensory processing. Derived elements grow from the core through experience and culture — communication styles, identity constructs, decision-making patterns.</p>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-trigger">
+              What are Quantum states?
+              <span class="accordion-icon">▾</span>
+            </button>
+            <div class="accordion-body">
+              <p class="t-body">Quantum states are discontinuous rupture events — freeze, collapse, overwhelm, dissociation — that interrupt ordinary function. They are brief but consequential, and are often misread as stable traits rather than states.</p>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-trigger">
+              Can HES be used for clinical assessment?
+              <span class="accordion-icon">▾</span>
+            </button>
+            <div class="accordion-body">
+              <p class="t-body">No. HES is explicitly not a clinical tool and does not replace professional psychological, psychiatric, or medical assessment. It is a reference framework for research and educational purposes.</p>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-trigger">
+              How does versioning work?
+              <span class="accordion-icon">▾</span>
+            </button>
+            <div class="accordion-body">
+              <p class="t-body">Each layer has its own version number (e.g. Core v1.3.2). Individual passports carry a last-revised date. The changelog at <a href="changelog.html">changelog</a> tracks all additions, migrations, and corrections. This mirrors the Stanford Encyclopedia of Philosophy model.</p>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-trigger">
+              What is the Nearest Neighbors field?
+              <span class="accordion-icon">▾</span>
+            </button>
+            <div class="accordion-body">
+              <p class="t-body">Each element lists up to five other elements with the closest theoretical and empirical relationships. These connections are assigned based on shared variance in validation studies and conceptual proximity in the literature.</p>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-trigger">
+              Is HES available in other languages?
+              <span class="accordion-icon">▾</span>
+            </button>
+            <div class="accordion-body">
+              <p class="t-body">Translation is underway via the HES Lingua project. Armenian and Russian are currently in progress. See <a href="contribute.html">contribute</a> for the current language status and to volunteer as a translator.</p>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-trigger">
+              How do I cite a passport?
+              <span class="accordion-icon">▾</span>
+            </button>
+            <div class="accordion-body">
+              <p class="t-body">Each passport page includes a citation block with APA and BibTeX formats and a one-click copy button. The canonical URL for each passport is permanent and individually indexable.</p>
+            </div>
+          </div>
+
+        </div><!-- /faq-wrap -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       FOOTER
+       ══════════════════════════════════════════════════════════════ -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-col-label">Explore</div>
+          <a href="library/index.html" class="footer-link">Passport Library</a>
+          <a href="library/index.html" class="footer-link">The Four Layers</a>
+          <a href="book.html"          class="footer-link">The Book</a>
+          <a href="about.html"         class="footer-link">About HES</a>
+          <a href="research.html"      class="footer-link">MML Framework</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Learn</div>
+          <a href="faq.html"           class="footer-link" style="color: var(--vellum-1);">FAQ</a>
+          <a href="glossary.html"      class="footer-link">Glossary</a>
+          <a href="changelog.html"     class="footer-link">Changelog</a>
+          <a href="blog/index.html"    class="footer-link">Blog</a>
+          <a href="research.html"      class="footer-link">Research</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Connect</div>
+          <a href="contact.html"       class="footer-link">Contact</a>
+          <a href="contribute.html"    class="footer-link">Contribute</a>
+          <a href="contribute.html"    class="footer-link">HES Lingua</a>
+          <a href="community.html"     class="footer-link">Community</a>
+          <a href="press.html"         class="footer-link">Press</a>
+        </div>
+      </div>
+      <div class="footer-legal">
+        <div class="footer-legal-links">
+          <a href="privacy.html"    class="footer-legal-link">Privacy Policy</a>
+          <a href="terms.html"      class="footer-legal-link">Terms of Use</a>
+          <a href="disclaimer.html" class="footer-legal-link">Disclaimer</a>
+        </div>
+        <div class="footer-version">Core v1.3.2 · Derived v1.2.4 · Quantum v2.2 · Emotional v2.0</div>
+        <div class="footer-disclaimer">HES is not a clinical tool. It does not replace professional psychological, psychiatric, or medical assessment.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="prototype.js"></script>
+</body>
+</html>

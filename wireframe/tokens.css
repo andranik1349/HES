@@ -1,0 +1,92 @@
+/* ══════════════════════════════════════════════════════════════════
+   tokens.css — HES Design System · Design Tokens
+   Extracted and expanded from HES Passport Library - Orrery.html
+   ══════════════════════════════════════════════════════════════════ */
+
+:root {
+
+  /* ── Surfaces & Backgrounds ──────────────────────────────────── */
+  --vellum-1: #EBEEF2;                           /* orrery --vellum-1 */
+  --vellum-2: #E3DED8;                           /* orrery --vellum-2 */
+  --bg-page: #dad4cc;                             /* orrery body background */
+  --bg-card: rgba(246,244,238,0.85);              /* orrery card/panel surface */
+  --bg-elevated: rgba(255,255,255,0.55);          /* orrery raised surfaces */
+  --library-surface: linear-gradient(
+    160deg,
+    var(--vellum-1) 0%,
+    var(--vellum-2) 100%
+  );                                              /* library-specific bg */
+
+  /* ── Ink Scale ───────────────────────────────────────────────── */
+  --carbon: #18160F;                              /* warm near-black — primary text, CTAs */
+  --dust: #7B7869;                                /* orrery — secondary text, labels */
+  --hairline: rgba(24,22,15,0.14);                /* derived from --carbon */
+  --hairline-strong: rgba(24,22,15,0.22);         /* derived from --carbon */
+
+  /* ── Layer Palette — Earth-2 ────────────────────────────────── */
+  /* Values from orrery PALETTES[Earth-2]. Dark = _darkenHex(primary, 0.55). */
+  --core:            #627C99;
+  --core-tint:       #e2e7ed;
+  --core-dark:       #364454;
+
+  --derived:         #B27E6B;
+  --derived-tint:    #ece7e3;
+  --derived-dark:    #62453b;
+
+  --quantum:         #D69D2B;
+  --quantum-tint:    #ede8d2;
+  --quantum-dark:    #765618;
+
+  --emotional:       #5BA38B;
+  --emotional-tint:  #d4ebe5;
+  --emotional-dark:  #325a4c;
+
+  /* ── MML Tokens — one pair per level ────────────────────────── */
+  --mml-1-color: var(--core-dark);    --mml-1-bg: var(--core-tint);
+  --mml-2-color: var(--derived-dark); --mml-2-bg: var(--derived-tint);
+  --mml-3-color: var(--quantum-dark); --mml-3-bg: var(--quantum-tint);
+  --mml-4-color: var(--emotional-dark); --mml-4-bg: var(--emotional-tint);
+  --mml-5-color: #7B7869;             --mml-5-bg: rgba(123,120,105,0.08);
+
+  /* ── CTAs & Interactive ──────────────────────────────────────── */
+  /* Main site uses monochromatic CTAs — no accent color */
+  --cta-bg:           var(--carbon);
+  --cta-text:         var(--vellum-1);
+  --cta-bg-hover:     #2C2A23;  /* --carbon + 20 per channel */
+  --cta-ghost-border: var(--hairline-strong);
+  --cta-ghost-text:   var(--carbon);
+
+  /* ── Spacing Scale ───────────────────────────────────────────── */
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  48px;
+  --space-8:  64px;
+  --space-9:  96px;
+  --space-10: 128px;
+
+  /* ── Border Radius ───────────────────────────────────────────── */
+  /* Orrery uses 2px in isolated chrome elements; main site is strict 0 */
+  --radius-sm:   0px;
+  --radius-md:   0px;
+  --radius-lg:   0px;
+  --radius-pill: 100px;
+
+  /* ── Shadows ─────────────────────────────────────────────────── */
+  --shadow-card:   0 2px 6px rgba(24,22,15,0.06);
+  --shadow-panel:  0 24px 56px -22px rgba(24,22,15,0.28),
+                   0 2px 6px rgba(24,22,15,0.06);
+  --shadow-topbar: 0 1px 0 rgba(24,22,15,0.95);
+
+  /* ── Z-Index Scale ───────────────────────────────────────────── */
+  --z-base:    1;
+  --z-overlay: 10;
+  --z-panel:   35;
+  --z-topbar:  30;
+  --z-tooltip: 40;
+  --z-dropdown:50;
+
+}

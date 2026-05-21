@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HES Wireframe — Design System QA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="typography.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="layout.css">
+</head>
+<body class="page-editorial">
+
+  <!-- ── Nav fragment ── -->
+  <header class="topbar" role="banner">
+    <div class="lockup">
+      <div class="mark" aria-hidden="true"></div>
+      <a href="index.html" class="wm">
+        HES<span class="sep">/</span><span class="lab">LIBRARY</span>
+      </a>
+    </div>
+    <nav class="nav-primary" aria-label="Primary navigation">
+      <a href="about.html"         class="nav-link">About</a>
+      <a href="library/index.html" class="nav-link">Library</a>
+      <a href="book.html"          class="nav-link">Book</a>
+      <a href="blog/index.html"    class="nav-link">Blog</a>
+      <a href="research.html"      class="nav-link">Research</a>
+      <a href="contribute.html"    class="nav-link">Contribute</a>
+    </nav>
+    <div class="nav-right">
+      <a href="contact.html" class="nav-link">Contact</a>
+      <div class="nav-more">
+        <button class="nav-more-btn nav-link" aria-haspopup="true" aria-expanded="false">
+          More <span class="nav-arrow">▾</span>
+        </button>
+        <div class="nav-more-menu" role="menu">
+          <a href="faq.html"            class="nav-more-item" role="menuitem">FAQ</a>
+          <a href="glossary.html"       class="nav-more-item" role="menuitem">Glossary</a>
+          <a href="press.html"          class="nav-more-item" role="menuitem">Press</a>
+          <a href="changelog.html"      class="nav-more-item" role="menuitem">Changelog</a>
+          <div class="nav-more-divider"></div>
+          <a href="community.html"      class="nav-more-item nav-more-item--placeholder" role="menuitem">Community <span class="nav-soon">Soon</span></a>
+          <a href="hes-philosophy.html" class="nav-more-item nav-more-item--placeholder" role="menuitem">HES Philosophy <span class="nav-soon">Soon</span></a>
+          <a href="hes-test.html"       class="nav-more-item nav-more-item--placeholder" role="menuitem">HES-TEST <span class="nav-soon">Soon</span></a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Main content ── -->
+  <main class="page-body">
+    <div class="container section">
+
+      <div class="section-label">Design system QA — skeleton page</div>
+
+      <!-- Type scale -->
+      <p class="t-display">Display heading</p>
+      <p class="t-title-lg">Title large</p>
+      <p class="t-title-sm">Title small</p>
+      <p class="t-body">Body editorial — Literata. The capacity to hold and manipulate information in mind over short periods.</p>
+      <p class="t-ui">Body UI — Space Grotesk. General interface text.</p>
+      <p class="t-mono">C003 · Working Memory Capacity</p>
+      <p class="t-micro">Section label · Space Mono</p>
+
+      <hr class="divider mt-6 mb-6">
+
+      <!-- Buttons -->
+      <div class="flex gap-3 mb-6">
+        <a href="#" class="btn btn-primary">Explore the Library</a>
+        <a href="#" class="btn btn-ghost">Read the Book</a>
+        <a href="#" class="btn btn-primary btn-sm">Small CTA</a>
+        <a href="#" class="btn btn-ghost btn-lg">Large Ghost</a>
+      </div>
+
+      <!-- Layer badges -->
+      <div class="flex gap-2 mb-6">
+        <span class="badge-layer badge-layer-core">Core</span>
+        <span class="badge-layer badge-layer-derived">Derived</span>
+        <span class="badge-layer badge-layer-quantum">Quantum</span>
+        <span class="badge-layer badge-layer-emotional">Emotional</span>
+      </div>
+
+      <!-- MML badges -->
+      <div class="flex gap-2 mb-6">
+        <span class="mml-badge mml-1">MML-1</span>
+        <span class="mml-badge mml-2">MML-2</span>
+        <span class="mml-badge mml-3">MML-3</span>
+        <span class="mml-badge mml-4">MML-4</span>
+        <span class="mml-badge mml-5">MML-5</span>
+      </div>
+
+      <!-- Cards -->
+      <div class="grid-3 mb-6">
+        <div class="card">
+          <p class="t-micro mb-4">Card default</p>
+          <p class="t-ui">Card content goes here.</p>
+        </div>
+        <div class="card card-elevated">
+          <p class="t-micro mb-4">Card elevated</p>
+          <p class="t-ui">Elevated card with shadow.</p>
+        </div>
+        <div class="card card-sm">
+          <p class="t-micro mb-4">Card small</p>
+          <p class="t-ui">Compact card variant.</p>
+        </div>
+      </div>
+
+      <!-- Callout -->
+      <div class="callout mb-4">
+        <p class="t-ui">Default callout — left border, subtle background.</p>
+      </div>
+      <div class="callout callout-amber mb-6">
+        <p class="t-ui">Amber callout — for warnings and handoff notes.</p>
+      </div>
+
+      <!-- Form elements -->
+      <div class="container-narrow mb-6" style="padding:0">
+        <label class="field-label" for="sk-email">Email address</label>
+        <input type="email" id="sk-email" class="input" placeholder="your@email.com">
+        <div class="mt-4">
+          <label class="field-label" for="sk-subject">Subject</label>
+          <select id="sk-subject" class="input select">
+            <option>General enquiry</option>
+            <option>Research collaboration</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Accordion -->
+      <div style="max-width:640px" class="mb-6">
+        <div class="accordion-item">
+          <button class="accordion-trigger">
+            Is HES a personality test?
+            <span class="accordion-icon">▾</span>
+          </button>
+          <div class="accordion-body">
+            <p class="t-body">HES is not a personality test, not a diagnostic tool, and not a clinical instrument. It is a reference framework for structured psychological constructs.</p>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger">
+            What does MML mean?
+            <span class="accordion-icon">▾</span>
+          </button>
+          <div class="accordion-body">
+            <p class="t-body">MML stands for Measurement Maturity Level, a 1–5 scale indicating the evidential weight behind each element's measurement.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nav More dropdown — visual check label -->
+      <div class="section-label mt-7">Nav — click "More ▾" in the topbar to test dropdown</div>
+
+    </div>
+  </main>
+
+  <!-- ── Footer fragment ── -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-col-label">Explore</div>
+          <a href="library/index.html" class="footer-link">Passport Library</a>
+          <a href="library/index.html" class="footer-link">The Four Layers</a>
+          <a href="book.html"          class="footer-link">The Book</a>
+          <a href="about.html"         class="footer-link">About HES</a>
+          <a href="research.html"      class="footer-link">MML Framework</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Learn</div>
+          <a href="faq.html"           class="footer-link">FAQ</a>
+          <a href="glossary.html"      class="footer-link">Glossary</a>
+          <a href="changelog.html"     class="footer-link">Changelog</a>
+          <a href="blog/index.html"    class="footer-link">Blog</a>
+          <a href="research.html"      class="footer-link">Research</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Connect</div>
+          <a href="contact.html"       class="footer-link">Contact</a>
+          <a href="contribute.html"    class="footer-link">Contribute</a>
+          <a href="contribute.html"    class="footer-link">HES Lingua</a>
+          <a href="community.html"     class="footer-link">Community</a>
+          <a href="press.html"         class="footer-link">Press</a>
+        </div>
+      </div>
+      <div class="footer-legal">
+        <div class="footer-legal-links">
+          <a href="privacy.html"    class="footer-legal-link">Privacy Policy</a>
+          <a href="terms.html"      class="footer-legal-link">Terms of Use</a>
+          <a href="disclaimer.html" class="footer-legal-link">Disclaimer</a>
+        </div>
+        <div class="footer-version">Core v1.3.2 · Derived v1.2.4 · Quantum v2.2 · Emotional v2.0</div>
+        <div class="footer-disclaimer">HES is not a clinical tool. It does not replace professional psychological, psychiatric, or medical assessment.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="prototype.js"></script>
+</body>
+</html>

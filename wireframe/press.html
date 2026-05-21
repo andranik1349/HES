@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Press — HES</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="typography.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="layout.css">
+
+  <style>
+    .page-header {
+      background: var(--library-surface);
+      padding: var(--space-8) 0 var(--space-7);
+      border-bottom: 0.5px solid var(--hairline-strong);
+    }
+    .page-header-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--dust);
+      margin-bottom: var(--space-3);
+    }
+    .page-header-subtitle {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 17px;
+      color: var(--dust);
+      margin-top: var(--space-3);
+      line-height: 1.5;
+    }
+
+    .press-section {
+      padding: var(--space-8) 0 var(--space-10);
+    }
+
+    .press-wrap {
+      max-width: 720px;
+    }
+
+    /* ── Press section blocks ─────────────────────────────────── */
+    .press-block {
+      margin-bottom: var(--space-8);
+      padding-bottom: var(--space-8);
+      border-bottom: 0.5px solid var(--hairline);
+    }
+
+    .press-block:last-of-type {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+
+    .press-block-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--dust);
+      margin-bottom: var(--space-4);
+    }
+
+    /* ── Copyable text block ──────────────────────────────────── */
+    .copy-block {
+      position: relative;
+    }
+
+    .copy-block-text {
+      font-family: 'Literata', Georgia, serif;
+      font-size: 16px;
+      line-height: 1.7;
+      color: #3c3a30;
+      padding: var(--space-5);
+      background: var(--bg-elevated);
+      border: 0.5px solid var(--hairline-strong);
+      margin-bottom: var(--space-3);
+    }
+
+    .copy-block-actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    /* ── Key facts list ───────────────────────────────────────── */
+    .facts-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .facts-item {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      color: var(--carbon);
+      padding: var(--space-3) 0;
+      border-bottom: 0.5px solid var(--hairline);
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .facts-item:last-child {
+      border-bottom: none;
+    }
+
+    .facts-bullet {
+      color: var(--dust);
+      flex-shrink: 0;
+    }
+
+    /* ── Download grid ────────────────────────────────────────── */
+    .download-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-3);
+    }
+
+    @media (max-width: 560px) {
+      .download-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Press enquiries CTA ──────────────────────────────────── */
+    .press-cta {
+      background: var(--library-surface);
+      border: 0.5px solid var(--hairline-strong);
+      padding: var(--space-7);
+      text-align: center;
+      margin-top: var(--space-8);
+    }
+
+    .press-cta-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--dust);
+      margin-bottom: var(--space-4);
+    }
+
+    .press-cta-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      color: var(--carbon);
+      margin-bottom: var(--space-5);
+    }
+  </style>
+</head>
+<body class="page-editorial">
+
+  <!-- ══════════════════════════════════════════════════════════════
+       TOPBAR — nav active: none
+       ══════════════════════════════════════════════════════════════ -->
+  <header class="topbar" role="banner">
+    <div class="lockup">
+      <div class="mark" aria-hidden="true"></div>
+      <a href="index.html" class="wm">HES<span class="sep">/</span><span class="lab">LIBRARY</span></a>
+    </div>
+    <nav class="nav-primary" aria-label="Primary navigation">
+      <a href="about.html"         class="nav-link">About</a>
+      <a href="library/index.html" class="nav-link">Library</a>
+      <a href="book.html"          class="nav-link">Book</a>
+      <a href="blog/index.html"    class="nav-link">Blog</a>
+      <a href="research.html"      class="nav-link">Research</a>
+      <a href="contribute.html"    class="nav-link">Contribute</a>
+    </nav>
+    <div class="nav-right">
+      <a href="contact.html" class="nav-link">Contact</a>
+      <div class="nav-more">
+        <button class="nav-more-btn nav-link" aria-haspopup="true" aria-expanded="false">
+          More <span class="nav-arrow">▾</span>
+        </button>
+        <div class="nav-more-menu" role="menu">
+          <a href="faq.html"            class="nav-more-item" role="menuitem">FAQ</a>
+          <a href="glossary.html"       class="nav-more-item" role="menuitem">Glossary</a>
+          <a href="press.html"          class="nav-more-item active" role="menuitem" aria-current="page">Press</a>
+          <a href="changelog.html"      class="nav-more-item" role="menuitem">Changelog</a>
+          <div class="nav-more-divider"></div>
+          <a href="community.html"      class="nav-more-item nav-more-item--placeholder" role="menuitem">Community <span class="nav-soon">Soon</span></a>
+          <a href="hes-philosophy.html" class="nav-more-item nav-more-item--placeholder" role="menuitem">HES Philosophy <span class="nav-soon">Soon</span></a>
+          <a href="hes-test.html"       class="nav-more-item nav-more-item--placeholder" role="menuitem">HES-TEST <span class="nav-soon">Soon</span></a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-body" id="main-content">
+
+    <!-- ══════════════════════════════════════════════════════════════
+         PAGE HEADER
+         ══════════════════════════════════════════════════════════════ -->
+    <div class="page-header">
+      <div class="container-narrow">
+        <div class="page-header-eyebrow">Media</div>
+        <h1 class="t-title-lg">Press</h1>
+        <p class="page-header-subtitle">Resources for journalists, podcasters, and media.</p>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         PRESS CONTENT
+         ══════════════════════════════════════════════════════════════ -->
+    <div class="press-section">
+      <div class="container">
+        <div class="press-wrap">
+
+          <!-- ── About HES ──────────────────────────────────────── -->
+          <div class="press-block">
+            <div class="press-block-title">About HES — copyable description</div>
+            <div class="copy-block">
+              <div class="copy-block-text" id="copy-hes-text">
+                The Human Elements System (HES) is a structured reference framework for the constituent elements of human psychology. It catalogues 343 psychological constructs across four layers — Core, Derived, Quantum, and Emotional — each rated on a Measurement Maturity Level scale from MML-1 (established, multiple independent validation studies) to MML-5 (theoretical basis only). HES is not a personality test or diagnostic instrument. It is a versioned reference architecture for researchers, practitioners, and educators who need to work with psychological constructs precisely.
+              </div>
+              <div class="copy-block-actions">
+                <button class="btn btn-ghost btn-sm" onclick="copyText('copy-hes-text', this)">Copy text</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── About the Author ───────────────────────────────── -->
+          <div class="press-block">
+            <div class="press-block-title">About the Author — copyable bio</div>
+            <div class="copy-block">
+              <div class="copy-block-text" id="copy-author-text">
+                Areg Oganesian is an independent researcher and practitioner working at the intersection of psychological measurement, cognitive science, and applied frameworks for human development. He is the creator of the Human Elements System (HES), a structured reference framework cataloguing 343 psychological constructs developed over 19 years of systematic literature review and clinical practice. He lives and works in Yerevan, Armenia.
+              </div>
+              <div class="copy-block-actions">
+                <button class="btn btn-ghost btn-sm" onclick="copyText('copy-author-text', this)">Copy text</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Key Facts ──────────────────────────────────────── -->
+          <div class="press-block">
+            <div class="press-block-title">Key Facts — copyable</div>
+            <div class="copy-block">
+              <ul class="facts-list" id="copy-facts-text" aria-label="Key facts about HES">
+                <li class="facts-item">
+                  <span class="facts-bullet" aria-hidden="true">—</span>
+                  <span>343 structured psychological elements</span>
+                </li>
+                <li class="facts-item">
+                  <span class="facts-bullet" aria-hidden="true">—</span>
+                  <span>4 layers: Core (106), Derived (154), Quantum (40), Emotional (43)</span>
+                </li>
+                <li class="facts-item">
+                  <span class="facts-bullet" aria-hidden="true">—</span>
+                  <span>46 thematic blocks</span>
+                </li>
+                <li class="facts-item">
+                  <span class="facts-bullet" aria-hidden="true">—</span>
+                  <span>MML-rated (1–5 evidential weight scale)</span>
+                </li>
+                <li class="facts-item">
+                  <span class="facts-bullet" aria-hidden="true">—</span>
+                  <span>Pre-registered validation studies underway (OSF)</span>
+                </li>
+              </ul>
+              <div class="copy-block-actions" style="margin-top: var(--space-3);">
+                <button class="btn btn-ghost btn-sm" onclick="copyFactsList()">Copy text</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Downloadable Assets ────────────────────────────── -->
+          <div class="press-block">
+            <div class="press-block-title">Downloadable Assets</div>
+            <div class="download-grid">
+              <a href="#" class="btn btn-ghost">Book Cover (PNG) ↓</a>
+              <a href="#" class="btn btn-ghost">Author Photo (JPG) ↓</a>
+              <a href="#" class="btn btn-ghost">HES Logo (SVG + PNG) ↓</a>
+              <a href="#" class="btn btn-ghost">One-page HES Summary (PDF) ↓</a>
+            </div>
+          </div>
+
+        </div><!-- /press-wrap -->
+
+        <!-- ── Press enquiries CTA ────────────────────────────── -->
+        <div class="press-cta" style="max-width: 720px;">
+          <div class="press-cta-label">Press enquiries</div>
+          <p class="press-cta-text">For interview requests, media queries, or editorial enquiries, get in touch directly.</p>
+          <a href="contact.html?subject=press" class="btn btn-primary">Send press enquiry →</a>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       FOOTER
+       ══════════════════════════════════════════════════════════════ -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-col-label">Explore</div>
+          <a href="library/index.html" class="footer-link">Passport Library</a>
+          <a href="library/index.html" class="footer-link">The Four Layers</a>
+          <a href="book.html"          class="footer-link">The Book</a>
+          <a href="about.html"         class="footer-link">About HES</a>
+          <a href="research.html"      class="footer-link">MML Framework</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Learn</div>
+          <a href="faq.html"           class="footer-link">FAQ</a>
+          <a href="glossary.html"      class="footer-link">Glossary</a>
+          <a href="changelog.html"     class="footer-link">Changelog</a>
+          <a href="blog/index.html"    class="footer-link">Blog</a>
+          <a href="research.html"      class="footer-link">Research</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Connect</div>
+          <a href="contact.html"       class="footer-link">Contact</a>
+          <a href="contribute.html"    class="footer-link">Contribute</a>
+          <a href="contribute.html"    class="footer-link">HES Lingua</a>
+          <a href="community.html"     class="footer-link">Community</a>
+          <a href="press.html"         class="footer-link" style="color: var(--vellum-1);">Press</a>
+        </div>
+      </div>
+      <div class="footer-legal">
+        <div class="footer-legal-links">
+          <a href="privacy.html"    class="footer-legal-link">Privacy Policy</a>
+          <a href="terms.html"      class="footer-legal-link">Terms of Use</a>
+          <a href="disclaimer.html" class="footer-legal-link">Disclaimer</a>
+        </div>
+        <div class="footer-version">Core v1.3.2 · Derived v1.2.4 · Quantum v2.2 · Emotional v2.0</div>
+        <div class="footer-disclaimer">HES is not a clinical tool. It does not replace professional psychological, psychiatric, or medical assessment.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="prototype.js"></script>
+  <script>
+    // Copy text helper for press page copy buttons
+    function copyText(elementId, btn) {
+      const el = document.getElementById(elementId);
+      const text = el ? el.innerText.trim() : '';
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(() => {
+        const original = btn.textContent;
+        btn.textContent = 'Copied ✓';
+        setTimeout(() => { btn.textContent = original; }, 2000);
+      }).catch(() => {
+        btn.textContent = 'Copy failed';
+        setTimeout(() => { btn.textContent = 'Copy text'; }, 2000);
+      });
+    }
+
+    function copyFactsList() {
+      const items = document.querySelectorAll('#copy-facts-text .facts-item');
+      const lines = Array.from(items).map(li => {
+        const spans = li.querySelectorAll('span');
+        return '— ' + (spans[1] ? spans[1].textContent.trim() : '');
+      }).join('\n');
+      const btn = document.querySelector('[onclick="copyFactsList()"]');
+      navigator.clipboard.writeText(lines).then(() => {
+        btn.textContent = 'Copied ✓';
+        setTimeout(() => { btn.textContent = 'Copy text'; }, 2000);
+      }).catch(() => {
+        btn.textContent = 'Copy failed';
+        setTimeout(() => { btn.textContent = 'Copy text'; }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>

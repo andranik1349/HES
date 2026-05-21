@@ -1,0 +1,112 @@
+/* ══════════════════════════════════════════════════════════════════
+   typography.css — HES Design System · Type Scale
+   Three typefaces: Space Grotesk · Space Mono · Literata
+   No DM Mono. No Tailwind. Pure CSS utility classes.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Font Imports ─────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&display=swap');
+
+/*
+   Space Grotesk  — UI, headings, body interface text
+   Space Mono     — all monospace: codes, labels, micro text, data, nav items
+   Literata       — editorial long-form only (About, Blog, Research prose)
+*/
+
+/* ── Type Scale — Utility Classes ────────────────────────────── */
+
+/* Display — hero headlines */
+.t-display {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: clamp(36px, 5vw, 64px);
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  color: var(--carbon);
+}
+
+/* Title large — page titles */
+.t-title-lg {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: clamp(24px, 3vw, 42px);
+  line-height: 1.1;
+  color: var(--carbon);
+}
+
+/* Title small — section headings */
+.t-title-sm {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.3;
+  color: var(--carbon);
+}
+
+/* Body editorial — long-form reading (About, Blog, Research) */
+.t-body {
+  font-family: 'Literata', Georgia, serif;
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.7;
+  color: #3c3a30;
+}
+
+/* Body UI — general interface text */
+.t-ui {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--carbon);
+}
+
+/* Mono data — codes, numbers, structured data */
+.t-mono {
+  font-family: 'Space Mono', monospace;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--carbon);
+  letter-spacing: 0.02em;
+}
+
+/* Micro label — Space Mono, uppercase, letter-spaced */
+.t-micro {
+  font-family: 'Space Mono', monospace;
+  font-weight: 500;
+  font-size: 10px;
+  line-height: 1.4;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dust);
+}
+
+/* ── Prose Container ─────────────────────────────────────────── */
+.prose {
+  max-width: 680px;
+}
+
+.prose p {
+  font-family: 'Literata', Georgia, serif;
+  font-size: 17px;
+  line-height: 1.7;
+  color: #3c3a30;
+  margin-bottom: 1.2em;
+}
+
+.prose h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 22px;
+  color: var(--carbon);
+  margin: 2em 0 0.6em;
+}
+
+.prose h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+  font-size: 17px;
+  color: var(--carbon);
+  margin: 1.6em 0 0.4em;
+}
