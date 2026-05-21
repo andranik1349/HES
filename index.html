@@ -235,6 +235,61 @@
       transform: translateX(4px);
     }
 
+    /* Archive section — compact cards */
+    .cards-archive {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      width: 100%;
+      max-width: 1160px;
+    }
+
+    .card-small {
+      position: relative;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 18px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: border-color 0.25s, background 0.25s;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards;
+    }
+
+    .card-small:hover {
+      border-color: rgba(79,255,176,0.25);
+      background: rgba(79,255,176,0.04);
+    }
+
+    .card-small-title {
+      font-size: 12px;
+      color: var(--text-label);
+    }
+
+    .card-small-arrow {
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .card-small:hover .card-small-arrow {
+      color: var(--accent);
+      transform: translateX(3px);
+    }
+
+    .archive-divider {
+      width: 100%;
+      max-width: 1160px;
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 8px 0 0;
+    }
+
     /* Footer */
     footer {
       position: relative;
@@ -257,39 +312,9 @@
   <main>
     <header>
       <p class="label">HES — Tools</p>
-      <h1>Network <span>Explorer</span></h1>
+      <h1>Passport <span>Library</span></h1>
       <p class="subtitle">Select a view to get started</p>
     </header>
-
-    <div class="section">
-      <p class="section-label">Network Explorer</p>
-      <div class="cards">
-        <a class="card" href="HES Network Explorer.html">
-          <span class="card-tag">Standard</span>
-          <p class="card-title">Network Explorer</p>
-          <p class="card-desc">Explore and navigate the HES network topology with the standard interactive view.</p>
-          <span class="card-arrow">Open
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </span>
-        </a>
-        <a class="card" href="HES Network Explorer - God View.html">
-          <span class="card-tag">God View</span>
-          <p class="card-title">Network Explorer — God View</p>
-          <p class="card-desc">Full-scope aerial overview of the entire HES network with elevated visibility.</p>
-          <span class="card-arrow">Open
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </span>
-        </a>
-        <a class="card" href="HES Network Explorer - Continuous Field.html">
-          <span class="card-tag">Continuous Field</span>
-          <p class="card-title">Network Explorer — Continuous Field</p>
-          <p class="card-desc">Visualise the HES network as a continuous field with smooth gradient transitions across elements.</p>
-          <span class="card-arrow">Open
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </span>
-        </a>
-      </div>
-    </div>
 
     <div class="section">
       <p class="section-label">Passport Library</p>
@@ -310,6 +335,14 @@
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </span>
         </a>
+        <a class="card" href="HES Passport Library - Orrery-ellipses.html">
+          <span class="card-tag">Orrery — Ellipses</span>
+          <p class="card-title">Passport Library — Orrery Ellipses</p>
+          <p class="card-desc">Orrery variant with elliptical orbital paths for a more dynamic spatial layout.</p>
+          <span class="card-arrow">Open
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+        </a>
         <a class="card" href="HES Passport Library - Periodic Table.html">
           <span class="card-tag">Periodic Table</span>
           <p class="card-title">Passport Library — Periodic Table</p>
@@ -317,6 +350,40 @@
           <span class="card-arrow">Open
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </span>
+        </a>
+      </div>
+    </div>
+
+    <div class="section">
+      <p class="section-label">Wireframe</p>
+      <div class="cards">
+        <a class="card" href="wireframe/index.html">
+          <span class="card-tag">Wireframe</span>
+          <p class="card-title">Site Wireframe</p>
+          <p class="card-desc">Interactive wireframe prototype for the hestable.com site structure and layout.</p>
+          <span class="card-arrow">Open
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+        </a>
+      </div>
+    </div>
+
+    <hr class="archive-divider"/>
+
+    <div class="section">
+      <p class="section-label">Archive — Network Explorer</p>
+      <div class="cards-archive">
+        <a class="card-small" href="HES Network Explorer.html">
+          <span class="card-small-title">Network Explorer</span>
+          <svg class="card-small-arrow" width="12" height="12" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a class="card-small" href="HES Network Explorer - God View.html">
+          <span class="card-small-title">Network Explorer — God View</span>
+          <svg class="card-small-arrow" width="12" height="12" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a class="card-small" href="HES Network Explorer - Continuous Field.html">
+          <span class="card-small-title">Network Explorer — Continuous Field</span>
+          <svg class="card-small-arrow" width="12" height="12" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
       </div>
     </div>
