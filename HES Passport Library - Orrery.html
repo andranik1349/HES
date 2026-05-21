@@ -196,6 +196,44 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
 }
 #minimap canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:pointer}
 
+/* ── palette switcher ──────────────────────────────────────────
+   Temporary demo control. Lives inside the .controls cluster
+   immediately to the left of the Explorer/Tree viewswitch, so the
+   two move together as the topbar reflows — no centred element
+   to collide with the right-hand controls when the viewport
+   narrows. Each button is a small strip carrying the four layer
+   colours as dots plus a text label, so the palette is
+   identifiable both visually and by name. The active palette is
+   bordered with the carbon ink colour; inactive palettes sit at
+   low contrast. */
+#palette-switcher{
+  display:flex;gap:4px;
+  background:rgba(246,244,238,0.85);backdrop-filter:blur(6px);
+  border:0.5px solid var(--hairline);
+  border-radius:2px;padding:3px;
+}
+.pal-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  background:transparent;border:0.5px solid transparent;border-radius:2px;
+  padding:5px 9px;cursor:pointer;
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;
+  text-transform:uppercase;color:var(--dust);
+  transition:background 0.15s,color 0.15s,border-color 0.15s,opacity 0.15s;
+  opacity:0.62;
+}
+.pal-btn:hover{color:var(--carbon);opacity:0.92}
+.pal-btn.active{
+  opacity:1;color:var(--carbon);
+  border-color:var(--hairline-strong);
+  background:rgba(255,255,255,0.55);
+}
+.pal-dots{display:inline-flex;gap:3px}
+.pal-dots span{
+  width:7px;height:7px;border-radius:50%;
+  box-shadow:0 0 0 0.5px rgba(15,35,64,0.18) inset;
+}
+.pal-label{font:inherit;color:inherit}
+
 #minimap .mm-tag{
   position:absolute;top:6px;left:8px;
   font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;
@@ -306,7 +344,7 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
 .pp-eyebrow .pp-dot{width:5px;height:5px;border-radius:50%;background:var(--dust)}
 .pp-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:42px;line-height:1.04;letter-spacing:0.005em;color:var(--carbon);margin-bottom:22px;text-wrap:balance}
 .pp-badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:28px}
-.pp-badge{font-family:'Geologica','DM Sans',sans-serif;font-weight:500;font-size:11px;letter-spacing:0.04em;padding:5px 12px;border-radius:100px}
+.pp-badge{font-family:'Space Mono',monospace;font-weight:500;font-size:11px;letter-spacing:0.04em;padding:5px 12px;border-radius:100px}
 .pp-rule{height:1px;background:var(--hairline);margin:24px 0;border:none}
 .pp-lbl{font-family:'DM Mono',monospace;font-weight:500;font-size:10px;letter-spacing:0.20em;text-transform:uppercase;color:var(--dust);margin-bottom:8px;display:flex;justify-content:space-between;align-items:baseline}
 .pp-lbl .pp-lbl-meta{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:none;color:var(--dust);opacity:0.75}
@@ -589,6 +627,32 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
       </div>
     </div>
     <div class="controls">
+      <div id="palette-switcher" role="radiogroup" aria-label="Colour palette">
+        <button class="pal-btn" type="button" data-pal="0" role="radio" aria-checked="false" aria-label="Palette Spec">
+          <span class="pal-dots" aria-hidden="true">
+            <span style="background:#1565c0"></span><span style="background:#43a047"></span><span style="background:#ff8f00"></span><span style="background:#ab47bc"></span>
+          </span>
+          <span class="pal-label">Spec</span>
+        </button>
+        <button class="pal-btn" type="button" data-pal="1" role="radio" aria-checked="false" aria-label="Palette Bright">
+          <span class="pal-dots" aria-hidden="true">
+            <span style="background:#00b4e0"></span><span style="background:#00b88d"></span><span style="background:#fa7a2b"></span><span style="background:#9163e0"></span>
+          </span>
+          <span class="pal-label">Bright</span>
+        </button>
+        <button class="pal-btn active" type="button" data-pal="2" role="radio" aria-checked="true" aria-label="Palette Earth">
+          <span class="pal-dots" aria-hidden="true">
+            <span style="background:#65778c"></span><span style="background:#a8806c"></span><span style="background:#ccb576"></span><span style="background:#7dada0"></span>
+          </span>
+          <span class="pal-label">Earth</span>
+        </button>
+        <button class="pal-btn" type="button" data-pal="3" role="radio" aria-checked="false" aria-label="Palette Earth-2">
+          <span class="pal-dots" aria-hidden="true">
+            <span style="background:#627C99"></span><span style="background:#B27E6B"></span><span style="background:#D69D2B"></span><span style="background:#5BA38B"></span>
+          </span>
+          <span class="pal-label">Earth-2</span>
+        </button>
+      </div>
       <div class="viewswitch" role="tablist" aria-label="View mode">
         <button id="btn-explorer" aria-pressed="true">Explorer</button>
         <button id="btn-tree"     aria-pressed="false">Tree</button>
@@ -1359,7 +1423,7 @@ let selectedBlockId = null;  /* set only when the block card is open */
 let mouseX = -999, mouseY = -999;
 
 const zoom = d3.zoom()
-  .scaleExtent([0.08, 12])
+  .scaleExtent([0.6, 12])
   .filter(ev => {
     if(ev.type === 'mousedown' || ev.type === 'touchstart'){
       const tgt = ev.target;
@@ -1523,7 +1587,7 @@ function drawOrbitRings(t, k, view){
       if(seenR.has(key)) return;
       seenR.add(key);
       ctx.setLineDash([4 / k, 6 / k]);
-      ctx.strokeStyle = ha(lcol, 0.35);
+      ctx.strokeStyle = ha(lcol, 0.42);
       ctx.beginPath();
       ctx.arc(sun.x, sun.y, bn.orbitR, 0, Math.PI * 2);
       ctx.stroke();
@@ -1674,7 +1738,7 @@ function drawNodes(t, k, view){
        gymnastics, no save/restore needed. */
     const haloR = ln.systemR || (ln.r * 8);
     const grad = ctx.createRadialGradient(ln.x, ln.y, 0, ln.x, ln.y, haloR);
-    grad.addColorStop(0,   ha(lcol, 0.28));
+    grad.addColorStop(0,   ha(lcol, 0.36));
     grad.addColorStop(0.3, ha(lcol, 0.10));
     grad.addColorStop(1.0, ha(lcol, 0.00));
     ctx.fillStyle = grad;
@@ -1850,12 +1914,14 @@ function drawLabels(t, k){
   /* Block (planet) labels appear at moderate zoom. Planets themselves
      are always visible, so the labels can start fading in around k≈0.2x
      and be fully visible by k≈0.5x (the natural fit zoom). */
-  /* Split into two fades: the code pill comes in early (k ≈ 0.2→0.5),
-     the full block NAME only appears once the user has zoomed in
-     past the natural fit (k ≈ 0.5→0.8). Below k=0.5 we only render
-     the code pill, so god view stays calm. */
-  const blockCodeOp = ramp(k, 0.20, 0.50) * Math.min(1, 0.4 + density*0.7);
-  const blockNameOp = ramp(k, 0.50, 0.80) * blockCodeOp;
+  /* Three-tier block label disclosure:
+       0.6x → 1.6x  code pill only — colored badge, no backdrop, no name.
+       1.6x → 2.0x  frosted backdrop and block name fade in together.
+     Min zoom is capped at 0.6x so blockCodeOp is already ~0.4 at the
+     zoom floor and fully opaque well before 1.6x. */
+  const blockCodeOp    = ramp(k, 0.50, 0.75) * Math.min(1, 0.4 + density*0.7);
+  const blockBackdropOp = ramp(k, 1.6, 2.0);
+  const blockNameOp    = blockBackdropOp * blockCodeOp;
   if(blockCodeOp > 0.04){
     const blockSize = k < 2.0 ? 11 : (k < 3.0 ? 12 : 12);
     const showName = (blockNameOp > 0.05);
@@ -1919,20 +1985,22 @@ function drawLabels(t, k){
         id: b.id,
       });
 
-      /* frosted backdrop (lighter than layer label backdrops). Belongs
-         to the whole label group, so it uses blockCodeOp. */
-      ctx.save();
-      ctx.shadowColor = 'rgba(24,22,15,0.04)';
-      ctx.shadowBlur = 6;
-      ctx.shadowOffsetY = 1;
-      ctx.fillStyle = ha('#F6F4EE', 0.58 * blockCodeOp);
-      roundRect(ctx, sx - groupW/2, groupTop, groupW, groupH, 4);
-      ctx.fill();
-      ctx.restore();
-      ctx.strokeStyle = ha('#0f2340', 0.06 * blockCodeOp);
-      ctx.lineWidth = 0.5;
-      roundRect(ctx, sx - groupW/2, groupTop, groupW, groupH, 4);
-      ctx.stroke();
+      /* frosted backdrop — only visible once blockBackdropOp > 0.
+         Below 1.6x the group is just the code pill with no backdrop. */
+      if(blockBackdropOp > 0.02){
+        ctx.save();
+        ctx.shadowColor = 'rgba(24,22,15,0.04)';
+        ctx.shadowBlur = 6;
+        ctx.shadowOffsetY = 1;
+        ctx.fillStyle = ha('#F6F4EE', 0.58 * blockBackdropOp * blockCodeOp);
+        roundRect(ctx, sx - groupW/2, groupTop, groupW, groupH, 4);
+        ctx.fill();
+        ctx.restore();
+        ctx.strokeStyle = ha('#0f2340', 0.06 * blockBackdropOp * blockCodeOp);
+        ctx.lineWidth = 0.5;
+        roundRect(ctx, sx - groupW/2, groupTop, groupW, groupH, 4);
+        ctx.stroke();
+      }
 
       /* colored code pill on top of backdrop */
       ctx.font = `500 9.5px 'DM Mono', monospace`;
@@ -2725,27 +2793,112 @@ document.querySelectorAll('.viewswitch button').forEach(b=>{
   });
 });
 
-/* Remember the last opened passport / layer / block card so the
-   render loop can refresh inline-styled colour accents in place when
-   needed (kept as a hook even though the palette switcher is gone). */
+/* ── PALETTES ────────────────────────────────────────────────────────
+   Three named colour palettes. Each entry pairs a primary (used for
+   node fill/stroke and strong UI accents) with a tint (used for
+   backgrounds, badge fills, faded states). The "dark" colour used as
+   readable text on a tint background is derived from the primary at
+   render time — see _darkenHex().                                       */
+const PALETTES = [
+  { name:'Spec',   colors:[
+    {primary:'#1565c0', tint:'#e4e7eb'},
+    {primary:'#43a047', tint:'#ebe8e6'},
+    {primary:'#ff8f00', tint:'#ebe2d8'},
+    {primary:'#ab47bc', tint:'#e8d8eb'}
+  ]},
+  { name:'Bright', colors:[
+    {primary:'#00b4e0', tint:'#d8e4eb'},
+    {primary:'#00b88d', tint:'#d8ebe6'},
+    {primary:'#fa7a2b', tint:'#ebddd8'},
+    {primary:'#9163e0', tint:'#e7d8eb'}
+  ]},
+  { name:'Earth',  colors:[
+    {primary:'#65778c', tint:'#e4e7eb'},
+    {primary:'#a8806c', tint:'#ebe8e6'},
+    {primary:'#ccb576', tint:'#ebe6d8'},
+    {primary:'#7dada0', tint:'#d8ebe6'}
+  ]},
+  { name:'Earth-2', colors:[
+    {primary:'#627C99', tint:'#e2e7ed'},
+    {primary:'#B27E6B', tint:'#ece7e3'},
+    {primary:'#D69D2B', tint:'#ede8d2'},
+    {primary:'#5BA38B', tint:'#d4ebe5'}
+  ]}
+];
+let currentPalette = 2; /* default: Earth */
+
+/* Darken a primary hex to produce a readable text colour on the tint
+   background. Factor ~0.55 matches the relative depth of the original
+   stroke→dark mapping closely enough for body-text contrast. */
+function _darkenHex(hex, f=0.55){
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  const dr=Math.round(r*f), dg=Math.round(g*f), db=Math.round(b*f);
+  return '#' + [dr,dg,db].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+
+/* Remember the last opened passport / layer / block card so that a
+   palette switch can re-render its inline-styled colour accents
+   (stripe, badges) without the user having to close + reopen it. */
 let _lastOpenCall = null;
 
-/* ── LEGEND / MINIMAP VISIBILITY ─────────────────────────────────────
-   The Earth palette values are baked directly into LY[].stroke/tint/dark
-   and into the CSS :root variables, so there is no longer any palette
-   to "apply" at runtime. applyAll() now only handles legend + minimap
-   visibility and one initial pass to sync the legend dots with the
-   hardcoded LY stroke values. */
+/* ── LEGEND / MINIMAP VISIBILITY + PALETTE APPLICATION ───────────────
+   applyPalette() is called both at boot and on every palette button
+   click. It mutates LY[*].stroke/tint/dark in place — the render loop
+   reads from those fields each frame, so the canvas picks up the new
+   colours on the next animation tick without any simulation restart,
+   layout recompute, or zoom reset. */
 function applyLegendVis(){ document.getElementById('legend').style.display = TW.showLegend? 'flex':'none'; }
 function applyMinimapVis(){ document.getElementById('minimap').style.display = TW.showMinimap? 'block':'none'; }
-function syncLegendDots(){
+function applyPalette(idx){
+  if(typeof idx === 'number') currentPalette = idx;
+  const pal = PALETTES[currentPalette];
   const keys = ['core','derived','quantum','emotional'];
-  keys.forEach((k, i)=>{
-    const dot = document.querySelector(`#lg-${k} .lg-dot`);
-    if(dot) dot.style.background = LY[i].stroke;
+  const root = document.documentElement;
+  pal.colors.forEach((c, i)=>{
+    const dark = _darkenHex(c.primary, 0.55);
+    LY[i].stroke = c.primary;
+    LY[i].tint   = c.tint;
+    LY[i].dark   = dark;
+    root.style.setProperty(`--${keys[i]}`,       c.primary);
+    root.style.setProperty(`--${keys[i]}-tint`,  c.tint);
+    root.style.setProperty(`--${keys[i]}-dark`,  dark);
+    const dot = document.querySelector(`#lg-${keys[i]} .lg-dot`);
+    if(dot) dot.style.background = c.primary;
   });
+  /* Keep TW.palette in sync — it's referenced in a couple of other
+     places (legacy compatibility). */
+  TW.palette = pal.colors.map(c => c.primary);
+
+  /* Update the switcher button states. */
+  document.querySelectorAll('#palette-switcher .pal-btn').forEach((b,i)=>{
+    const on = (i === currentPalette);
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-checked', on ? 'true' : 'false');
+  });
+
+  /* Tree view rows carry inline-style layer accents — refresh them if
+     the tree DOM has been built. Calling them when hidden is harmless.*/
+  if(typeof renderTreeLayerCol === 'function' && document.getElementById('tree-layer-list')){
+    renderTreeLayerCol();
+    renderTreeBlockCol();
+    renderTreeElementCol();
+  }
+
+  /* Re-render currently open passport / layer / block card so its
+     stripe + badge colours pick up the new palette. */
+  if(_lastOpenCall){ try{ _lastOpenCall(); } catch(_){} }
 }
-function applyAll(){ syncLegendDots(); applyLegendVis(); applyMinimapVis(); refreshForces(); }
+function applyAll(){ applyPalette(); applyLegendVis(); applyMinimapVis(); refreshForces(); }
+
+/* Wire up palette switcher buttons. Each click swaps the four layer
+   colours; the render loop redraws the canvas on the next frame with
+   no simulation restart, no zoom reset, no layout recompute. */
+document.querySelectorAll('#palette-switcher .pal-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const idx = parseInt(btn.dataset.pal, 10);
+    if(!Number.isNaN(idx)) applyPalette(idx);
+  });
+});
 
 /* tweaks panel removed in Passport Library build — TW constants are now
    hardcoded above. Keeping `refreshForces` for internal use only. */
