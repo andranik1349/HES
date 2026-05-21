@@ -63,7 +63,7 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
 
 .controls{display:flex;align-items:center;gap:14px}
 .viewswitch{
-  display:inline-flex;border:0.5px solid var(--hairline-strong);border-radius:2px;overflow:hidden;
+  display:inline-flex;border:0.5px solid var(--hairline-strong);border-radius:0;overflow:hidden;
   font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
 }
 .viewswitch button{
@@ -79,7 +79,7 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
 .searchwrap{position:relative;display:flex;align-items:center}
 .searchwrap svg{position:absolute;left:10px;color:var(--dust);pointer-events:none}
 #search{
-  background:rgba(24,22,15,0.04);border:0.5px solid var(--hairline-strong);border-radius:2px;
+  background:rgba(24,22,15,0.04);border:0.5px solid var(--hairline-strong);border-radius:0;
   font-family:'Space Mono',monospace;font-size:12px;color:var(--carbon);
   padding:8px 12px 8px 32px;width:260px;outline:none;
   transition:border-color 0.15s,background 0.15s;
@@ -91,7 +91,7 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
   background:rgba(246,244,238,0.98);backdrop-filter:blur(10px);
   border:0.5px solid var(--hairline-strong);
   box-shadow:0 24px 56px -22px rgba(24,22,15,0.28),0 2px 6px rgba(24,22,15,0.06);
-  border-radius:2px;display:none;z-index:50;
+  border-radius:0;display:none;z-index:50;
 }
 #search-dd.on{display:block}
 .dd-row{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:0.5px solid var(--hairline);transition:background 0.12s}
@@ -105,7 +105,7 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
 .dd-section{padding:6px 14px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.20em;text-transform:uppercase;color:var(--dust);background:rgba(24,22,15,0.025);border-bottom:0.5px solid var(--hairline)}
 
 #mml-filter{
-  background:rgba(24,22,15,0.04);border:0.5px solid var(--hairline-strong);border-radius:2px;
+  background:rgba(24,22,15,0.04);border:0.5px solid var(--hairline-strong);border-radius:0;
   font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;
   color:var(--carbon);padding:8px 10px;outline:none;cursor:pointer;
 }
@@ -145,7 +145,7 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
   display:flex;flex-direction:column;gap:10px;
   background:rgba(246,244,238,0.6);backdrop-filter:blur(6px);
   border:0.5px solid var(--hairline);
-  padding:14px 16px;border-radius:2px;
+  padding:14px 16px;border-radius:0;
   min-width:200px;
 }
 #legend .lg-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--dust);display:flex;justify-content:space-between;align-items:center}
@@ -159,7 +159,7 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
   position:absolute;right:32px;bottom:200px;z-index:10;
   display:flex;flex-direction:column;
   background:rgba(246,244,238,0.85);backdrop-filter:blur(6px);
-  border:0.5px solid var(--hairline-strong);border-radius:2px;
+  border:0.5px solid var(--hairline-strong);border-radius:0;
   font-family:'DM Mono',monospace;
   transition:right 0.55s cubic-bezier(0.22,1,0.36,1);
 }
@@ -182,7 +182,7 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
   position:absolute;right:32px;bottom:28px;z-index:10;
   width:200px;height:148px;
   background:rgba(246,244,238,0.70);backdrop-filter:blur(8px);
-  border:0.5px solid var(--hairline-strong);border-radius:2px;
+  border:0.5px solid var(--hairline-strong);border-radius:0;
   overflow:hidden;
   transition:right 0.55s cubic-bezier(0.22,1,0.36,1);
 }
@@ -210,11 +210,11 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
   display:flex;gap:4px;
   background:rgba(246,244,238,0.85);backdrop-filter:blur(6px);
   border:0.5px solid var(--hairline);
-  border-radius:2px;padding:3px;
+  border-radius:0;padding:3px;
 }
 .pal-btn{
   display:inline-flex;align-items:center;gap:8px;
-  background:transparent;border:0.5px solid transparent;border-radius:2px;
+  background:transparent;border:0.5px solid transparent;border-radius:0;
   padding:5px 9px;cursor:pointer;
   font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;
   text-transform:uppercase;color:var(--dust);
@@ -274,14 +274,14 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
   mask-image:linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
 }
 #recents-scroller::-webkit-scrollbar{height:5px}
-#recents-scroller::-webkit-scrollbar-thumb{background:rgba(24,22,15,0.18);border-radius:3px}
+#recents-scroller::-webkit-scrollbar-thumb{background:rgba(24,22,15,0.18);border-radius:0}
 #recents-scroller::-webkit-scrollbar-track{background:transparent}
 .rec-chip{
   flex-shrink:0;
   display:inline-flex;align-items:center;gap:8px;
   height:28px;padding:0 4px 0 10px;
   background:rgba(246,244,238,0.85);backdrop-filter:blur(6px);
-  border:0.5px solid var(--hairline-strong);border-radius:2px;
+  border:0.5px solid var(--hairline-strong);border-radius:0;
   cursor:pointer;font:inherit;color:var(--carbon);
   transition:background 0.12s,border-color 0.12s;
 }
@@ -312,7 +312,7 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
   position:absolute;pointer-events:none;z-index:40;display:none;
   background:var(--carbon);color:var(--vellum-1);
   font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.04em;
-  padding:6px 10px;border-radius:2px;white-space:nowrap;
+  padding:6px 10px;border-radius:0;white-space:nowrap;
   box-shadow:0 8px 24px rgba(24,22,15,0.18);
 }
 #tip .tc{color:rgba(235,238,242,0.55);margin-right:8px}
@@ -350,13 +350,13 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
 .pp-lbl .pp-lbl-meta{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:none;color:var(--dust);opacity:0.75}
 .pp-body{font-family:'Space Grotesk',sans-serif;font-weight:300;font-size:17px;line-height:1.55;letter-spacing:-0.003em;color:#3c3a30;margin-bottom:24px;text-wrap:pretty}
 .pp-poles{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:6px}
-.pp-pole{padding:14px 14px 12px;background:rgba(255,255,255,0.32);border:0.5px solid var(--hairline);border-radius:2px}
+.pp-pole{padding:14px 14px 12px;background:rgba(255,255,255,0.32);border:0.5px solid var(--hairline);border-radius:0}
 .pp-pole .pl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.20em;text-transform:uppercase;color:var(--dust);margin-bottom:6px}
 .pp-pole .pv{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:400;line-height:1.5;color:var(--carbon)}
 .pp-2col{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
 .pp-2col .pv-mono{font-family:'Space Mono',monospace;font-size:12px;color:var(--carbon);letter-spacing:0.02em}
 .pp-nbrs{display:flex;flex-wrap:wrap;gap:6px}
-.pp-nbr{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.06em;padding:5px 10px;border-radius:2px;border:0.5px solid var(--hairline-strong);background:rgba(255,255,255,0.4);color:var(--carbon);cursor:pointer;transition:all 0.15s}
+.pp-nbr{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.06em;padding:5px 10px;border-radius:0;border:0.5px solid var(--hairline-strong);background:rgba(255,255,255,0.4);color:var(--carbon);cursor:pointer;transition:all 0.15s}
 .pp-nbr .nb-name{color:var(--dust);margin-left:6px}
 .pp-nbr:hover{border-color:var(--carbon);background:var(--carbon);color:var(--vellum-1)}
 .pp-nbr:hover .nb-name{color:rgba(235,238,242,0.7)}
@@ -420,7 +420,7 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
   content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--carbon);
 }
 .tree-row-left-accent{
-  width:3px;height:36px;border-radius:2px;flex-shrink:0;
+  width:3px;height:36px;border-radius:0;flex-shrink:0;
 }
 .tree-row-body{flex:1;min-width:0}
 .tree-row-name{
@@ -456,7 +456,7 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
 .tree-filter-chip{
   background:transparent;border:0.5px solid var(--hairline-strong);
   font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.10em;text-transform:uppercase;
-  padding:4px 9px;color:var(--dust);cursor:pointer;border-radius:2px;
+  padding:4px 9px;color:var(--dust);cursor:pointer;border-radius:0;
   transition:background 0.12s,color 0.12s,border-color 0.12s;
 }
 .tree-filter-chip:hover{color:var(--carbon)}
@@ -482,7 +482,7 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
 .tree-el-mml{display:flex;gap:6px;flex-shrink:0}
 .mml-badge{
   font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;
-  padding:3px 8px;border-radius:2px;border:0.5px solid currentColor;
+  padding:3px 8px;border-radius:0;border:0.5px solid currentColor;
   white-space:nowrap;
 }
 .mml-1{color:var(--core-dark);background:var(--core-tint)}
@@ -809,11 +809,11 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
    palette values — the production look. Keep these in sync with the
    CSS :root variables. */
 const LY=[
-  {id:'core',     label:'Core',     tag:'foundational, stable', count:106, stroke:'#65778c', tint:'#e4e7eb', dark:'#384252',
+  {id:'core',     label:'Core',     tag:'Hardware, stable', count:106, stroke:'#65778c', tint:'#e4e7eb', dark:'#384252',
    desc:'The foundational layer. Stable, well-evidenced capacities that underlie all higher cognition — attention, memory, executive control, sensory and motor systems. These elements change slowly and are measurable across the lifespan.'},
-  {id:'derived',  label:'Derived',  tag:'grown from core',      count:154, stroke:'#a8806c', tint:'#ebe8e6', dark:'#5c463b',
+  {id:'derived',  label:'Derived',  tag:'Software',      count:154, stroke:'#a8806c', tint:'#ebe8e6', dark:'#5c463b',
    desc:'Capacities that grow out of the core layer through experience and culture — cognitive styles, communication, decision-making, identity, belief. They are plastic, shaped by environment, and form the bulk of individual character.'},
-  {id:'quantum',  label:'Quantum',  tag:'volatile, rupture',    count:40,  stroke:'#ccb576', tint:'#ebe6d8', dark:'#706341',
+  {id:'quantum',  label:'Quantum',  tag:'Crash States, rupture',    count:40,  stroke:'#ccb576', tint:'#ebe6d8', dark:'#706341',
    desc:'Discontinuous states that interrupt ordinary function: freeze, collapse, overwhelm, dissociation, panic, shame loops. They are rupture rather than gradient — short-lived but consequential, and often misread as the layers beneath them.'},
   {id:'emotional',label:'Emotional',tag:'rare, shifting',       count:43,  stroke:'#7dada0', tint:'#d8ebe6', dark:'#456058',
    desc:'The capacity to hold and manipulate emotional information across time — the workbench of conscious affect. Underpins reasoning about meaning, comprehension of others, and learning from felt experience.'},
@@ -1665,6 +1665,29 @@ function drawNodes(t, k, view){
   const planetAlpha = ramp(k, 0.30, 0.60);
   const moonAlpha   = ramp(k, 1.20, 2.00);
 
+  /* ── 0. ELEMENT CENTRE DOTS (god-view) ──────────────────────────────
+     Tiny filled circles that mark every element position at low-to-mid
+     zoom (0.6x→~1.3x). Alpha is exactly (1 - moonAlpha), so the dots
+     cross-fade out as the full moon circles fade in — the two
+     representations never stack. Radius is 2 screen-px (2/k in world
+     space) so the dots stay a consistent size across the zoom range. */
+  const dotAlpha = 1 - moonAlpha;
+  if(dotAlpha > 0.01){
+    for(let i=0; i<NODES.length; i++){
+      const n = NODES[i];
+      if(n.x < view.minX || n.x > view.maxX || n.y < view.minY || n.y > view.maxY) continue;
+      const matchMML  = !mfilt || String(n.mml) === mfilt;
+      const matchSrch = !sterm || matchesNode(n, sterm);
+      const dim = (!matchMML || !matchSrch);
+      const lcol = LY_BY_ID[n.layer].stroke;
+      const m = mmlVis(n.mml);
+      ctx.fillStyle = ha(lcol, (dim ? 0.20 : 0.55 + m * 0.45) * dotAlpha);
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, 2 / k, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
   /* ── 1. ELEMENT NODES (bottom) ── only when moonAlpha is non-trivial */
   if(moonAlpha > 0.01){
     for(let i=0; i<NODES.length; i++){
@@ -1838,7 +1861,7 @@ function drawLabels(t, k){
       const sy = ny - (nodeRadiusPx + _halfGroupH + 4);
       if(sx < -200 || sx > W+200 || sy < -100 || sy > H+100) return;
 
-      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.textBaseline='middle';
       const tagText = l.tag.split(',')[0].toUpperCase();
       const tagSize = layerSize < 26 ? 9 : 10;
       const cSize = layerSize < 26 ? 10 : 11;
@@ -1879,29 +1902,37 @@ function drawLabels(t, k){
          drop shadow approximates the frosted-glass feel. */
       ctx.save();
       ctx.shadowColor = 'rgba(24,22,15,0.06)';
-      ctx.shadowBlur = 10;
+      ctx.shadowBlur = 14;
       ctx.shadowOffsetY = 1;
-      ctx.fillStyle = ha('#F6F4EE', 0.68 * layerOp);
-      roundRect(ctx, sx - bgW/2, groupTop, bgW, groupH, 5);
+      ctx.fillStyle = ha('#F6F4EE', 0.61 * layerOp);
+      roundRect(ctx, sx - bgW/2, groupTop, bgW, groupH, 0);
       ctx.fill();
       ctx.restore();
       ctx.strokeStyle = ha('#0f2340', 0.08 * layerOp);
       ctx.lineWidth = 0.5;
-      roundRect(ctx, sx - bgW/2, groupTop, bgW, groupH, 5);
+      roundRect(ctx, sx - bgW/2, groupTop, bgW, groupH, 0);
       ctx.stroke();
 
       /* texts on top of backdrop */
+      const labelLeft  = sx - bgW/2 + 8;
+      const labelRight = sx + bgW/2 - 8;
+
+      /* descriptor: right-aligned, flush with the label's top-right corner */
+      ctx.textAlign = 'right';
       ctx.font = `500 ${tagSize}px 'DM Mono', monospace`;
       ctx.fillStyle = ha('#7B7869', layerOp * 0.9);
-      ctx.fillText(tagText, sx, tagY);
+      ctx.fillText(tagText, labelRight, tagY);
 
+      /* title: left-aligned */
+      ctx.textAlign = 'left';
       ctx.font = `700 ${layerSize}px 'Space Grotesk', sans-serif`;
       ctx.fillStyle = ha('#0f2340', layerOp);
-      ctx.fillText(l.label, sx, nameY);
+      ctx.fillText(l.label, labelLeft, nameY);
 
+      /* count: left-aligned */
       ctx.font = `400 ${cSize}px 'Space Mono', monospace`;
       ctx.fillStyle = ha('#7B7869', layerOp*0.85);
-      ctx.fillText(countText, sx, countY);
+      ctx.fillText(countText, labelLeft, countY);
     });
   }
 
@@ -1939,7 +1970,7 @@ function drawLabels(t, k){
       const nodeRadiusPx = bn.r * k;
       const sx = nx;
       /* sy is the code-pill area center; the name (if shown) sits below */
-      const sy = ny - (nodeRadiusPx + 18 + 4);
+      const sy = ny - (nodeRadiusPx + Math.max(2, Math.min(22, 8 * k)));
       if(sx < -100 || sx > W+100 || sy < -60 || sy > H+60) return;
 
       ctx.textAlign='center'; ctx.textBaseline='middle';
@@ -1990,15 +2021,15 @@ function drawLabels(t, k){
       if(blockBackdropOp > 0.02){
         ctx.save();
         ctx.shadowColor = 'rgba(24,22,15,0.04)';
-        ctx.shadowBlur = 6;
+        ctx.shadowBlur = 9;
         ctx.shadowOffsetY = 1;
-        ctx.fillStyle = ha('#F6F4EE', 0.58 * blockBackdropOp * blockCodeOp);
-        roundRect(ctx, sx - groupW/2, groupTop, groupW, groupH, 4);
+        ctx.fillStyle = ha('#F6F4EE', 0.52 * blockBackdropOp * blockCodeOp);
+        roundRect(ctx, sx - groupW/2, groupTop, groupW, groupH, 0);
         ctx.fill();
         ctx.restore();
         ctx.strokeStyle = ha('#0f2340', 0.06 * blockBackdropOp * blockCodeOp);
         ctx.lineWidth = 0.5;
-        roundRect(ctx, sx - groupW/2, groupTop, groupW, groupH, 4);
+        roundRect(ctx, sx - groupW/2, groupTop, groupW, groupH, 0);
         ctx.stroke();
       }
 
