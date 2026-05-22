@@ -346,6 +346,8 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
 .pp-badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:28px}
 .pp-badge{font-family:'Space Mono',monospace;font-weight:500;font-size:11px;letter-spacing:0.04em;padding:5px 12px;border-radius:100px}
 .pp-rule{height:1px;background:var(--hairline);margin:24px 0;border:none}
+.pp-full-link{display:inline-block;margin-top:16px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--carbon);text-decoration:none;border-bottom:0.5px solid var(--hairline-strong);padding-bottom:2px;transition:border-color 0.15s,opacity 0.15s;opacity:0.6}
+.pp-full-link:hover{opacity:1;border-bottom-color:var(--carbon)}
 .pp-lbl{font-family:'DM Mono',monospace;font-weight:500;font-size:10px;letter-spacing:0.20em;text-transform:uppercase;color:var(--dust);margin-bottom:8px;display:flex;justify-content:space-between;align-items:baseline}
 .pp-lbl .pp-lbl-meta{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:none;color:var(--dust);opacity:0.75}
 .pp-body{font-family:'Space Grotesk',sans-serif;font-weight:300;font-size:17px;line-height:1.55;letter-spacing:-0.003em;color:#3c3a30;margin-bottom:24px;text-wrap:pretty}
@@ -2770,6 +2772,8 @@ function openPassport(d){
           return `<button class="pp-nbr" data-code="${nc}">${nc}<span class="nb-name">${f?f.name:''}</span></button>`;
        }).join('')}
      </div>
+
+     <a class="pp-full-link" href="/wireframe/library/C003.html" target="_blank" rel="noopener">Open full passport ↗</a>
 
      <div class="pp-meta">
        <span>Author · ${d.author}</span>
