@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>What MML-1 actually means — HES Blog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../tokens.css">
+  <link rel="stylesheet" href="../typography.css">
+  <link rel="stylesheet" href="../components.css">
+  <link rel="stylesheet" href="../layout.css">
+
+  <style>
+    /* Breadcrumb */
+    .breadcrumb {
+      display: flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-4) 0 var(--space-5);
+    }
+    .breadcrumb-link {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--dust); text-decoration: none; transition: color 0.15s;
+    }
+    .breadcrumb-link:hover { color: var(--carbon); }
+    .breadcrumb-sep {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      color: var(--hairline-strong);
+    }
+    .breadcrumb-current {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.14em; text-transform: uppercase; color: var(--carbon);
+      /* Truncate long title in breadcrumb */
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      max-width: 320px;
+    }
+
+    /* Article header */
+    .article-header {
+      padding: var(--space-7) 0 var(--space-6);
+      border-bottom: 0.5px solid var(--hairline);
+      margin-bottom: var(--space-7);
+    }
+    .article-date {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.14em; text-transform: uppercase; color: var(--dust);
+      margin-bottom: var(--space-4);
+    }
+    .article-byline {
+      display: flex; align-items: center; gap: var(--space-4);
+      flex-wrap: wrap;
+      margin-top: var(--space-4);
+    }
+    .article-byline-text {
+      font-family: 'Space Mono', monospace; font-size: 11px;
+      letter-spacing: 0.08em; color: var(--dust);
+    }
+
+    /* Article body — prose */
+    .article-body { padding-bottom: var(--space-8); }
+    .article-body h2 {
+      font-family: 'Space Grotesk', sans-serif; font-weight: 600;
+      font-size: 20px; color: var(--carbon);
+      margin: var(--space-8) 0 var(--space-4);
+    }
+    .article-body p {
+      font-family: 'Space Grotesk', sans-serif; font-size: 17px;
+      line-height: 1.75; color: #3c3a30; margin-bottom: var(--space-5);
+    }
+
+    /* Inline passport chip */
+    .passport-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: 'Space Mono', monospace; font-size: 11px;
+      letter-spacing: 0.06em; padding: 3px 9px; border-radius: 2px;
+      border: 0.5px solid var(--hairline-strong);
+      background: rgba(255,255,255,0.5);
+      color: var(--carbon); text-decoration: none;
+      transition: all 0.12s;
+    }
+    .passport-chip:hover {
+      border-color: var(--carbon);
+      background: var(--carbon); color: var(--vellum-1);
+    }
+    .passport-chip .chip-name { color: var(--dust); margin-left: 3px; }
+    .passport-chip:hover .chip-name { color: rgba(235,238,242,0.7); }
+
+    /* Article footer */
+    .article-footer {
+      padding: var(--space-6) 0 var(--space-9);
+      border-top: 0.5px solid var(--hairline);
+    }
+    .related-passports {
+      margin: var(--space-5) 0 var(--space-6);
+    }
+    .related-passports-label {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.16em; text-transform: uppercase; color: var(--dust);
+      margin-bottom: var(--space-4);
+    }
+    .article-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: var(--space-4); flex-wrap: wrap;
+      margin-top: var(--space-6);
+    }
+    .back-link {
+      font-family: 'Space Mono', monospace; font-size: 11px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--dust); text-decoration: none;
+      transition: color 0.15s;
+    }
+    .back-link:hover { color: var(--carbon); }
+  </style>
+</head>
+<body class="page-editorial">
+
+  <!-- ── Topbar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <div class="lockup">
+      <div class="mark" aria-hidden="true"></div>
+      <a href="../index.html" class="wm">HES<span class="sep">/</span><span class="lab">LIBRARY</span></a>
+    </div>
+    <nav class="nav-primary" aria-label="Primary navigation">
+      <a href="../about.html"         class="nav-link">About</a>
+      <a href="../library/index.html" class="nav-link">Library</a>
+      <a href="../book.html"          class="nav-link">Book</a>
+      <a href="index.html"            class="nav-link active">Blog</a>
+      <a href="../research.html"      class="nav-link">Research</a>
+      <a href="../contribute.html"    class="nav-link">Contribute</a>
+    </nav>
+    <div class="nav-right">
+      <a href="../contact.html" class="nav-link">Contact</a>
+      <div class="nav-more">
+        <button class="nav-more-btn nav-link" aria-haspopup="true" aria-expanded="false">More <span class="nav-arrow">▾</span></button>
+        <div class="nav-more-menu" role="menu">
+          <a href="../faq.html"            class="nav-more-item" role="menuitem">FAQ</a>
+          <a href="../glossary.html"       class="nav-more-item" role="menuitem">Glossary</a>
+          <a href="../press.html"          class="nav-more-item" role="menuitem">Press</a>
+          <a href="../changelog.html"      class="nav-more-item" role="menuitem">Changelog</a>
+          <div class="nav-more-divider"></div>
+          <a href="../community.html"      class="nav-more-item nav-more-item--placeholder" role="menuitem">Community <span class="nav-soon">Soon</span></a>
+          <a href="../hes-philosophy.html" class="nav-more-item nav-more-item--placeholder" role="menuitem">HES Philosophy <span class="nav-soon">Soon</span></a>
+          <a href="../hes-test.html"       class="nav-more-item nav-more-item--placeholder" role="menuitem">HES-TEST <span class="nav-soon">Soon</span></a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-body" id="main-content">
+    <div class="container-narrow">
+
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html" class="breadcrumb-link">Home</a>
+        <span class="breadcrumb-sep" aria-hidden="true">›</span>
+        <a href="index.html" class="breadcrumb-link">Blog</a>
+        <span class="breadcrumb-sep" aria-hidden="true">›</span>
+        <span class="breadcrumb-current">What MML-1 actually means</span>
+      </nav>
+
+      <!-- Article header -->
+      <header class="article-header">
+        <div class="article-date">May 2026</div>
+        <h1 class="t-title-lg">What MML-1 actually means — and why most frameworks don't have one</h1>
+        <div class="article-byline">
+          <span class="article-byline-text">Areg Oganesian · 8 min read</span>
+          <a href="#" class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer">Read on Substack ↗</a>
+        </div>
+      </header>
+
+      <!-- Article body -->
+      <article class="article-body prose">
+
+        <p>
+          Most psychological frameworks describe their constructs as if they exist and can be measured,
+          without distinguishing between those with decades of robust validation and those that remain
+          theoretical sketches. The Human Elements System takes a different approach: every element
+          carries an MML rating — a Measurement Maturity Level — that makes this distinction explicit.
+        </p>
+
+        <p>
+          MML-1, the highest level, is deliberately hard to achieve. It requires not just one good study,
+          but multiple independent validation studies with consistent results, conducted by different
+          research groups, using different methodologies, across different populations. Most psychological
+          constructs — even well-known ones — do not qualify.
+        </p>
+
+        <h2>The infrastructure question</h2>
+
+        <p>
+          The key phrase in the MML-1 definition is "measurement infrastructure." This means the field
+          has agreed-upon operationalisations, standardised tasks or questionnaires with published
+          psychometric properties, and norms for interpretation. Without this infrastructure, claims
+          about a construct's prevalence or predictive validity cannot be meaningfully compared across
+          studies.
+        </p>
+
+        <p>
+          Consider
+          <a href="../library/C003.html" class="passport-chip"><span>C003</span><span class="chip-name">Working Memory Capacity</span></a>
+          — one of the clearest examples of an MML-1 element in the HES Core layer.
+          N-back variants, reading span, and operation span tasks have been validated across hundreds of
+          independent studies. The Baddeley &amp; Hitch multi-component model provides a stable theoretical
+          framework. Cross-cultural replications exist. This is what measurement maturity looks like.
+        </p>
+
+        <div class="callout" style="margin:var(--space-6) 0;">
+          <strong>Note:</strong> MML ratings in HES are assigned at the time of last revision and are
+          updated when new evidence warrants. An element's MML reflects the state of the published
+          literature, not the author's confidence in the construct's existence.
+        </div>
+
+        <h2>Why cognitive load is harder to pin down</h2>
+
+        <p>
+          Compare this with
+          <a href="../library/D012.html" class="passport-chip"><span>D012</span><span class="chip-name">Cognitive Load Sensitivity</span></a>
+          — a Derived element that captures individual differences in susceptibility to performance
+          degradation under load. While cognitive load theory as a pedagogical framework is well-developed,
+          the <em>individual differences</em> construct — stable variation in how sensitive people are to load —
+          sits at MML-2. Measurement is possible but cross-study replication of the individual-differences
+          component specifically is limited.
+        </p>
+
+        <p>
+          This is the kind of distinction HES is designed to surface. Both constructs are real and
+          important. But treating them as equally validated in a research design would be a mistake
+          that an explicit maturity framework prevents.
+        </p>
+
+        <h2>What the scale implies for practitioners</h2>
+
+        <p>
+          The MML scale is not a quality judgment about which constructs matter more. An MML-4 element
+          can be theoretically central and practically significant — it simply hasn't yet accumulated
+          the validation evidence needed for a higher rating. The rating tells you what kind of epistemic
+          claim you are making when you use the element in applied work, and what the literature can and
+          cannot yet support.
+        </p>
+
+        <p>
+          For practitioners, this means MML-1 and MML-2 elements are appropriate for use in assessment
+          contexts with reasonable confidence. MML-3 elements warrant caution and should be treated as
+          indicative rather than definitive. MML-4 and MML-5 elements are included in HES for theoretical
+          completeness — they map the landscape, not the terrain that has been surveyed.
+        </p>
+
+      </article>
+
+      <!-- Article footer -->
+      <div class="article-footer">
+
+        <div class="related-passports">
+          <div class="related-passports-label">Related passports</div>
+          <div class="pp-nbrs">
+            <a href="../library/C003.html" class="pp-nbr">C003<span class="nb-name">Working Memory Capacity</span></a>
+            <a href="../library/D012.html" class="pp-nbr">D012<span class="nb-name">Cognitive Load Sensitivity</span></a>
+          </div>
+        </div>
+
+        <div class="article-nav">
+          <a href="index.html" class="back-link">← Back to Blog</a>
+          <a href="#" class="btn btn-ghost">Follow on Substack for new posts →</a>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ── Footer ────────────────────────────────────────────────── -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-col-label">Explore</div>
+          <a href="../library/index.html" class="footer-link">Passport Library</a>
+          <a href="../library/index.html" class="footer-link">The Four Layers</a>
+          <a href="../book.html"          class="footer-link">The Book</a>
+          <a href="../about.html"         class="footer-link">About HES</a>
+          <a href="../research.html"      class="footer-link">MML Framework</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Learn</div>
+          <a href="../faq.html"           class="footer-link">FAQ</a>
+          <a href="../glossary.html"      class="footer-link">Glossary</a>
+          <a href="../changelog.html"     class="footer-link">Changelog</a>
+          <a href="index.html"            class="footer-link">Blog</a>
+          <a href="../research.html"      class="footer-link">Research</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Connect</div>
+          <a href="../contact.html"       class="footer-link">Contact</a>
+          <a href="../contribute.html"    class="footer-link">Contribute</a>
+          <a href="../contribute.html"    class="footer-link">HES Lingua</a>
+          <a href="../community.html"     class="footer-link">Community</a>
+          <a href="../press.html"         class="footer-link">Press</a>
+        </div>
+      </div>
+      <div class="footer-legal">
+        <div class="footer-legal-links">
+          <a href="../privacy.html"    class="footer-legal-link">Privacy Policy</a>
+          <a href="../terms.html"      class="footer-legal-link">Terms of Use</a>
+          <a href="../disclaimer.html" class="footer-legal-link">Disclaimer</a>
+        </div>
+        <div class="footer-version">Core v1.3.2 · Derived v1.2.4 · Quantum v2.2 · Emotional v2.0</div>
+        <div class="footer-disclaimer">HES is not a clinical tool. It does not replace professional psychological, psychiatric, or medical assessment.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../prototype.js"></script>
+</body>
+</html>

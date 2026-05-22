@@ -3,792 +3,257 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Passport Library — Human Elements System</title>
+  <title>Blog — HES</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../tokens.css">
   <link rel="stylesheet" href="../typography.css">
   <link rel="stylesheet" href="../components.css">
   <link rel="stylesheet" href="../layout.css">
 
   <style>
-    /* ── Library page — full-viewport layout ─────────────────────── */
-    body { overflow: hidden; }
+    .page-header {
+      background: var(--library-surface);
+      padding: var(--space-8) 0 var(--space-7);
+      border-bottom: 0.5px solid var(--hairline-strong);
+    }
+    .page-header-eyebrow {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--dust);
+      margin-bottom: var(--space-3);
+    }
+    .page-header-subtitle {
+      font-family: 'Space Grotesk', sans-serif; font-size: 17px;
+      color: var(--dust); margin-top: var(--space-3); line-height: 1.5;
+    }
 
-    .lib-shell {
-      position: fixed; top: 64px; left: 0; right: 0; bottom: 0;
+    /* Newsletter block */
+    .newsletter-bar {
+      background: var(--vellum-2);
+      border-bottom: 0.5px solid var(--hairline-strong);
+      padding: var(--space-5) 0;
+    }
+    .newsletter-inner {
+      display: flex; align-items: center; gap: var(--space-4);
+      flex-wrap: wrap;
+    }
+    .newsletter-label {
+      font-family: 'Space Mono', monospace; font-size: 11px;
+      letter-spacing: 0.12em; text-transform: uppercase; color: var(--dust);
+      flex-shrink: 0;
+    }
+    .newsletter-input {
+      flex: 1; min-width: 220px; max-width: 340px;
+    }
+
+    /* Articles grid */
+    .articles-section {
+      padding: var(--space-8) 0 var(--space-10);
+    }
+
+    .article-card {
       display: flex; flex-direction: column;
     }
-
-    /* ── Library topbar overrides (product shell, not content nav) ── */
-    .topbar-lib {
-      position: fixed; top: 0; left: 0; right: 0; height: 64px;
-      z-index: 30;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 var(--space-6);
-      background: rgba(235,238,242,0.96);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+    .article-thumb {
+      width: 100%; aspect-ratio: 16 / 9;
+      background: var(--vellum-2);
+      border: 0.5px solid var(--hairline);
+      margin-bottom: var(--space-4);
+      flex-shrink: 0;
     }
-    .topbar-lib::after {
-      content: ""; position: absolute;
-      left: var(--space-6); right: var(--space-6); bottom: 0;
-      height: 1px; background: rgba(24,22,15,0.90);
-    }
-
-    /* Wordmark + back link cluster */
-    .lib-lockup {
-      display: flex; align-items: center; gap: 14px;
-    }
-    .lib-lockup .mark {
-      width: 22px; height: 22px; border-radius: 50%;
-      background: var(--carbon); position: relative; flex-shrink: 0;
-    }
-    .lib-lockup .mark::after {
-      content: ""; position: absolute; inset: 5px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--vellum-1), var(--vellum-2));
-    }
-    .lib-lockup .wm {
-      font-family: 'Space Mono', monospace; font-weight: 500; font-size: 12px;
-      letter-spacing: 0.18em; text-transform: uppercase;
-      color: var(--carbon); text-decoration: none;
-    }
-    .lib-lockup .wm .sep { color: var(--dust); margin: 0 8px; }
-    .lib-lockup .wm .lab { color: var(--dust); }
-
-    .lib-back {
+    .article-date {
       font-family: 'Space Mono', monospace; font-size: 10px;
-      letter-spacing: 0.14em; text-transform: uppercase;
+      letter-spacing: 0.12em; text-transform: uppercase; color: var(--dust);
+      margin-bottom: var(--space-2);
+    }
+    .article-title {
+      font-family: 'Space Grotesk', sans-serif; font-weight: 500;
+      font-size: 16px; line-height: 1.4; color: var(--carbon);
+      margin-bottom: var(--space-3); text-decoration: none;
+      display: block;
+    }
+    .article-title:hover { color: var(--dust); }
+    .article-excerpt {
+      font-family: 'Space Grotesk', sans-serif; font-size: 14px;
+      line-height: 1.6; color: var(--dust); margin-bottom: var(--space-4);
+      flex: 1;
+    }
+    .article-read-link {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 0.12em; text-transform: uppercase;
       color: var(--dust); text-decoration: none;
-      border-left: 0.5px solid var(--hairline-strong);
-      padding-left: 14px;
-      margin-left: 4px;
       transition: color 0.15s;
     }
-    .lib-back:hover { color: var(--carbon); }
-
-    /* Controls cluster (right side of topbar) */
-    .lib-controls {
-      display: flex; align-items: center; gap: 12px;
-    }
-
-    /* Search */
-    .lib-searchwrap {
-      position: relative; display: flex; align-items: center;
-    }
-    .lib-searchwrap svg {
-      position: absolute; left: 10px; color: var(--dust); pointer-events: none;
-    }
-    .lib-search {
-      background: rgba(24,22,15,0.04);
-      border: 0.5px solid var(--hairline-strong);
-      border-radius: 0;
-      font-family: 'Space Mono', monospace; font-size: 12px;
-      color: var(--carbon);
-      padding: 8px 12px 8px 32px; width: 260px; outline: none;
-      transition: border-color 0.15s, background 0.15s;
-    }
-    .lib-search::placeholder { color: var(--dust); }
-    .lib-search:focus {
-      border-color: var(--carbon);
-      background: rgba(255,255,255,0.4);
-    }
-
-    /* MML filter */
-    .lib-mml-filter {
-      background: rgba(24,22,15,0.04);
-      border: 0.5px solid var(--hairline-strong);
-      border-radius: 0;
-      font-family: 'Space Mono', monospace; font-size: 11px;
-      letter-spacing: 0.12em; text-transform: uppercase;
-      color: var(--carbon); padding: 8px 28px 8px 10px;
-      outline: none; cursor: pointer; appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237B7869' stroke-width='1.25'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 10px center;
-    }
-    .lib-mml-filter:focus { border-color: var(--carbon); }
-
-    /* ── Library subbar ──────────────────────────────────────────── */
-    .lib-subbar {
-      height: 54px; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 var(--space-6);
-      border-bottom: 0.5px solid var(--hairline);
-      background: rgba(235,238,242,0.6);
-    }
-    .lib-subbar .bc {
-      display: flex; align-items: center; gap: 10px;
-    }
-    .lib-subbar .bc a, .lib-subbar .bc span {
-      font-family: 'Space Mono', monospace; font-size: 11px;
-      letter-spacing: 0.14em; text-transform: uppercase; color: var(--dust);
-      text-decoration: none;
-    }
-    .lib-subbar .bc a:hover { color: var(--carbon); }
-    .lib-subbar .bc .sep { opacity: 0.45; }
-    .lib-subbar .status {
-      font-family: 'Space Mono', monospace; font-size: 11px;
-      letter-spacing: 0.10em; text-transform: uppercase; color: var(--dust);
-      display: flex; gap: 18px; align-items: center;
-    }
-    .lib-subbar .status em { font-style: normal; color: var(--carbon); }
-
-    /* ── Tree view ───────────────────────────────────────────────── */
-    #tree-view {
-      flex: 1; display: flex; overflow: hidden;
-      background: linear-gradient(160deg, var(--vellum-1) 0%, var(--vellum-2) 100%);
-    }
-
-    .tree-col {
-      display: flex; flex-direction: column;
-      border-right: 0.5px solid var(--hairline-strong);
-      overflow-y: auto;
-    }
-    .tree-col-layer   { width: 260px; flex-shrink: 0; }
-    .tree-col-block   { width: 300px; flex-shrink: 0; }
-    .tree-col-element { flex: 1; }
-
-    .tree-col-header {
-      padding: 14px 20px 10px;
-      font-family: 'Space Mono', monospace; font-size: 10px;
-      letter-spacing: 0.16em; text-transform: uppercase; color: var(--dust);
-      border-bottom: 0.5px solid var(--hairline);
-      position: sticky; top: 0;
-      background: rgba(235,238,242,0.92); backdrop-filter: blur(6px);
-      z-index: 2;
-    }
-
-    .tree-col-hint {
-      padding: 14px 20px;
-      font-family: 'Space Mono', monospace; font-size: 10px;
-      letter-spacing: 0.12em; color: var(--dust); font-style: italic;
-      border-bottom: 0.5px solid var(--hairline);
-    }
-
-    .tree-layer-row, .tree-block-row, .tree-element-row {
-      display: flex; align-items: center; gap: 12px;
-      padding: 14px 20px; border-bottom: 0.5px solid var(--hairline);
-      cursor: pointer; transition: background 0.12s;
-    }
-    .tree-layer-row:hover, .tree-block-row:hover, .tree-element-row:hover {
-      background: rgba(24,22,15,0.04);
-    }
-    .tree-layer-row.active, .tree-block-row.active {
-      background: rgba(24,22,15,0.05);
-    }
-    .tree-layer-row, .tree-block-row { position: relative; }
-    .tree-layer-row.active::before, .tree-block-row.active::before {
-      content: ""; position: absolute; left: 0; top: 0; bottom: 0;
-      width: 2px; background: var(--carbon);
-    }
-
-    .tree-row-accent { width: 3px; height: 32px; border-radius: 0; flex-shrink: 0; }
-    .tree-row-body   { flex: 1; min-width: 0; }
-    .tree-row-name {
-      font-family: 'Space Grotesk', sans-serif; font-weight: 500;
-      font-size: 14px; color: var(--carbon);
-    }
-    .tree-row-desc {
-      font-family: 'Space Mono', monospace; font-size: 11px;
-      color: var(--dust); margin-top: 2px;
-    }
-    .tree-row-count {
-      font-family: 'Space Mono', monospace; font-size: 11px;
-      color: var(--dust); white-space: nowrap; margin-left: auto;
-    }
-
-    /* Block rows — simpler, no accent bar */
-    .tree-block-code {
-      font-family: 'Space Mono', monospace; font-size: 10px;
-      color: var(--dust); min-width: 32px; letter-spacing: 0.06em;
-    }
-    .tree-block-body { flex: 1; }
-    .tree-block-name {
-      font-family: 'Space Grotesk', sans-serif; font-weight: 500;
-      font-size: 13px; color: var(--carbon);
-    }
-
-    /* Element rows */
-    .tree-el-code {
-      font-family: 'Space Mono', monospace; font-size: 11px;
-      color: var(--dust); min-width: 46px;
-    }
-    .tree-el-name {
-      font-family: 'Space Grotesk', sans-serif; font-size: 14px;
-      color: var(--carbon); flex: 1;
-    }
-    .tree-element-row.highlighted .tree-el-name { font-weight: 600; }
-    .tree-element-row.highlighted {
-      background: rgba(100,119,140,0.08);
-    }
-    .tree-element-row.highlighted:hover {
-      background: rgba(100,119,140,0.13);
-    }
-    .tree-el-arrow {
-      font-family: 'Space Mono', monospace; font-size: 11px;
-      color: var(--dust); margin-left: var(--space-2);
-    }
-    .tree-element-row a {
-      display: flex; align-items: center; gap: 12px;
-      width: 100%; text-decoration: none; color: inherit;
-    }
-
-    /* Filter bar inside elements column */
-    .tree-filter-bar {
-      display: flex; align-items: center; gap: var(--space-4);
-      padding: 10px 20px; border-bottom: 0.5px solid var(--hairline);
-      background: rgba(235,238,242,0.6); flex-wrap: wrap;
-    }
-    .tree-filter-group { display: flex; align-items: center; gap: 6px; }
-    .tree-filter-label {
-      font-family: 'Space Mono', monospace; font-size: 9.5px;
-      letter-spacing: 0.16em; text-transform: uppercase; color: var(--dust);
-    }
-
-    /* Filter toggle chips */
-    .filter-chip {
-      font-family: 'Space Mono', monospace; font-size: 10px;
-      letter-spacing: 0.08em;
-      padding: 3px 8px; border-radius: 2px;
-      border: 0.5px solid var(--hairline-strong);
-      background: transparent; color: var(--dust);
-      cursor: pointer; transition: all 0.12s;
-    }
-    .filter-chip:hover {
-      border-color: var(--carbon); color: var(--carbon);
-    }
-    .filter-chip.on {
-      background: var(--carbon); color: var(--vellum-1);
-      border-color: var(--carbon);
-    }
-
-    /* ── Explorer placeholder ────────────────────────────────────── */
-    #explorer-view {
-      flex: 1; display: none;
-      align-items: center; justify-content: center;
-      background: linear-gradient(160deg, var(--vellum-1) 0%, var(--vellum-2) 100%);
-      flex-direction: column; gap: var(--space-5); text-align: center;
-    }
-    .explorer-placeholder-thumb {
-      width: 200px; height: 140px; opacity: 0.65;
-    }
-    .explorer-fine-print {
-      font-family: 'Space Mono', monospace; font-size: 10px;
-      letter-spacing: 0.14em; text-transform: uppercase;
-      color: var(--dust);
-    }
-
-    /* ── Layer active background tints ──────────────────────────── */
-    .tree-layer-row[data-layer="core"].active {
-      background: rgba(100,119,140,0.12);
-    }
-    .tree-layer-row[data-layer="derived"].active {
-      background: rgba(168,128,108,0.10);
-    }
-    .tree-layer-row[data-layer="quantum"].active {
-      background: rgba(204,181,118,0.10);
-    }
-    .tree-layer-row[data-layer="emotional"].active {
-      background: rgba(125,173,160,0.10);
-    }
+    .article-read-link:hover { color: var(--carbon); }
   </style>
 </head>
+<body class="page-editorial">
 
-<body>
-
-  <!-- ══════════════════════════════════════════════════════════════
-       TOPBAR — library variant (product shell, no main-site nav)
-       ══════════════════════════════════════════════════════════════ -->
-  <header class="topbar-lib" role="banner">
-
-    <!-- Left: logo + back link -->
-    <div class="lib-lockup">
+  <!-- ── Topbar ──────────────────────────────────────────────────── -->
+  <header class="topbar" role="banner">
+    <div class="lockup">
       <div class="mark" aria-hidden="true"></div>
-      <a href="../index.html" class="wm">
-        HES<span class="sep">/</span><span class="lab">LIBRARY</span>
-      </a>
-      <a href="../index.html" class="lib-back" title="Back to hestable.com">← hestable.com</a>
+      <a href="../index.html" class="wm">HES<span class="sep">/</span><span class="lab">LIBRARY</span></a>
     </div>
-
-    <!-- Right: controls cluster -->
-    <div class="lib-controls">
-
-      <!-- View switcher -->
-      <div class="viewswitch" role="group" aria-label="View switcher">
-        <button id="btn-explorer" aria-pressed="false">Explorer</button>
-        <button id="btn-tree"     aria-pressed="true">Tree</button>
+    <nav class="nav-primary" aria-label="Primary navigation">
+      <a href="../about.html"         class="nav-link">About</a>
+      <a href="../library/index.html" class="nav-link">Library</a>
+      <a href="../book.html"          class="nav-link">Book</a>
+      <a href="index.html"            class="nav-link active">Blog</a>
+      <a href="../research.html"      class="nav-link">Research</a>
+      <a href="../contribute.html"    class="nav-link">Contribute</a>
+    </nav>
+    <div class="nav-right">
+      <a href="../contact.html" class="nav-link">Contact</a>
+      <div class="nav-more">
+        <button class="nav-more-btn nav-link" aria-haspopup="true" aria-expanded="false">More <span class="nav-arrow">▾</span></button>
+        <div class="nav-more-menu" role="menu">
+          <a href="../faq.html"            class="nav-more-item" role="menuitem">FAQ</a>
+          <a href="../glossary.html"       class="nav-more-item" role="menuitem">Glossary</a>
+          <a href="../press.html"          class="nav-more-item" role="menuitem">Press</a>
+          <a href="../changelog.html"      class="nav-more-item" role="menuitem">Changelog</a>
+          <div class="nav-more-divider"></div>
+          <a href="../community.html"      class="nav-more-item nav-more-item--placeholder" role="menuitem">Community <span class="nav-soon">Soon</span></a>
+          <a href="../hes-philosophy.html" class="nav-more-item nav-more-item--placeholder" role="menuitem">HES Philosophy <span class="nav-soon">Soon</span></a>
+          <a href="../hes-test.html"       class="nav-more-item nav-more-item--placeholder" role="menuitem">HES-TEST <span class="nav-soon">Soon</span></a>
+        </div>
       </div>
-
-      <!-- Search -->
-      <div class="lib-searchwrap">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-          <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.2"/>
-          <path d="M9.5 9.5L12.5 12.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-        </svg>
-        <input
-          type="search"
-          class="lib-search"
-          id="lib-search-input"
-          placeholder="search elements, codes, blocks…"
-          autocomplete="off"
-          aria-label="Search elements"
-        >
-      </div>
-
-      <!-- MML filter -->
-      <select class="lib-mml-filter" id="lib-mml-filter" aria-label="Filter by MML level">
-        <option value="">All MML</option>
-        <option value="1">MML-1 · Established</option>
-        <option value="2">MML-2 · Validated</option>
-        <option value="3">MML-3 · Emerging</option>
-        <option value="4">MML-4 · Theoretical</option>
-        <option value="5">MML-5 · Speculative</option>
-      </select>
-
     </div>
   </header>
 
-  <!-- ══════════════════════════════════════════════════════════════
-       LIB SHELL — everything below the topbar
-       ══════════════════════════════════════════════════════════════ -->
-  <div class="lib-shell">
+  <main class="page-body" id="main-content">
 
-    <!-- ── Subbar — shown in Tree view only ───────────────────── -->
-    <div class="lib-subbar" id="lib-subbar" role="navigation" aria-label="Library breadcrumb">
-      <div class="bc">
-        <span class="crumb current">All elements</span>
-      </div>
-      <div class="status" aria-label="Library statistics">
-        <span><em>343</em> Passports</span>
-        <span><em>4</em> Layers</span>
-        <span><em>46</em> Blocks</span>
+    <!-- Page header -->
+    <div class="page-header">
+      <div class="container-narrow">
+        <div class="page-header-eyebrow">Writing</div>
+        <h1 class="t-title-lg">Blog</h1>
+        <p class="page-header-subtitle">Notes on the framework, measurement, and applied psychology. Mirrored from Substack.</p>
       </div>
     </div>
 
-    <!-- ════════════════════════════════════════════════════════════
-         TREE VIEW (default, visible on load)
-         ════════════════════════════════════════════════════════════ -->
-    <div id="tree-view">
-
-      <!-- ── Column 1: Layer ─────────────────────────────────── -->
-      <div class="tree-col tree-col-layer" role="listbox" aria-label="Layers">
-
-        <div class="tree-col-header">Layer · 1 of 4 selected</div>
-
-        <!-- Core — active by default -->
-        <div class="tree-layer-row active" data-layer="core" role="option" aria-selected="true" tabindex="0">
-          <div class="tree-row-accent" style="background:var(--core);"></div>
-          <div class="tree-row-body">
-            <div class="tree-row-name">Core</div>
-            <div class="tree-row-desc">Hardware</div>
-          </div>
-          <div class="tree-row-count">106 →</div>
+    <!-- ── Newsletter signup ──────────────────────────────────────── -->
+    <div class="newsletter-bar">
+      <div class="container-narrow">
+        <div class="newsletter-inner">
+          <span class="newsletter-label">Subscribe for new posts</span>
+          <input
+            type="email"
+            class="input newsletter-input"
+            placeholder="your@email.com"
+            aria-label="Email address for newsletter"
+          >
+          <button class="btn btn-primary" type="button">Subscribe</button>
         </div>
-
-        <div class="tree-layer-row" data-layer="derived" role="option" aria-selected="false" tabindex="0">
-          <div class="tree-row-accent" style="background:var(--derived);"></div>
-          <div class="tree-row-body">
-            <div class="tree-row-name">Derived</div>
-            <div class="tree-row-desc">Software</div>
-          </div>
-          <div class="tree-row-count">84 →</div>
-        </div>
-
-        <div class="tree-layer-row" data-layer="quantum" role="option" aria-selected="false" tabindex="0">
-          <div class="tree-row-accent" style="background:var(--quantum);"></div>
-          <div class="tree-row-body">
-            <div class="tree-row-name">Quantum</div>
-            <div class="tree-row-desc">Emergent</div>
-          </div>
-          <div class="tree-row-count">87 →</div>
-        </div>
-
-        <div class="tree-layer-row" data-layer="emotional" role="option" aria-selected="false" tabindex="0">
-          <div class="tree-row-accent" style="background:var(--emotional);"></div>
-          <div class="tree-row-body">
-            <div class="tree-row-name">Emotional</div>
-            <div class="tree-row-desc">Felt sense</div>
-          </div>
-          <div class="tree-row-count">66 →</div>
-        </div>
-
-      </div><!-- /tree-col-layer -->
-
-      <!-- ── Column 2: Blocks ────────────────────────────────── -->
-      <div class="tree-col tree-col-block" role="listbox" aria-label="Blocks in Core layer">
-
-        <div class="tree-col-header">Blocks in Core · 14</div>
-
-        <div class="tree-block-row" role="option" aria-selected="false" tabindex="0">
-          <div class="tree-block-code">B01</div>
-          <div class="tree-block-body">
-            <div class="tree-block-name">Attention &amp; Processing</div>
-          </div>
-          <div class="tree-row-count">8 →</div>
-        </div>
-
-        <div class="tree-block-row" role="option" aria-selected="false" tabindex="0">
-          <div class="tree-block-code">B02</div>
-          <div class="tree-block-body">
-            <div class="tree-block-name">Memory Systems</div>
-          </div>
-          <div class="tree-row-count">7 →</div>
-        </div>
-
-        <!-- B03 — active, since C003 lives here -->
-        <div class="tree-block-row active" role="option" aria-selected="true" tabindex="0">
-          <div class="tree-block-code">B03</div>
-          <div class="tree-block-body">
-            <div class="tree-block-name">Executive Function</div>
-          </div>
-          <div class="tree-row-count">9 →</div>
-        </div>
-
-        <div class="tree-block-row" role="option" aria-selected="false" tabindex="0">
-          <div class="tree-block-code">B04</div>
-          <div class="tree-block-body">
-            <div class="tree-block-name">Sensory Processing</div>
-          </div>
-          <div class="tree-row-count">6 →</div>
-        </div>
-
-        <div class="tree-block-row" role="option" aria-selected="false" tabindex="0">
-          <div class="tree-block-code">B05</div>
-          <div class="tree-block-body">
-            <div class="tree-block-name">Emotional Core</div>
-          </div>
-          <div class="tree-row-count">8 →</div>
-        </div>
-
-        <div class="tree-block-row" role="option" aria-selected="false" tabindex="0">
-          <div class="tree-block-code">B06</div>
-          <div class="tree-block-body">
-            <div class="tree-block-name">Social Cognition</div>
-          </div>
-          <div class="tree-row-count">7 →</div>
-        </div>
-
-        <div class="tree-block-row" role="option" aria-selected="false" tabindex="0">
-          <div class="tree-block-code">B07</div>
-          <div class="tree-block-body">
-            <div class="tree-block-name">Motor &amp; Coordination</div>
-          </div>
-          <div class="tree-row-count">5 →</div>
-        </div>
-
-        <div class="tree-block-row" role="option" aria-selected="false" tabindex="0">
-          <div class="tree-block-code">B08</div>
-          <div class="tree-block-body">
-            <div class="tree-block-name">Interoception</div>
-          </div>
-          <div class="tree-row-count">6 →</div>
-        </div>
-
-        <div class="tree-block-row" role="option" aria-selected="false" tabindex="0">
-          <div class="tree-block-code">B09</div>
-          <div class="tree-block-body">
-            <div class="tree-block-name">Temporal Processing</div>
-          </div>
-          <div class="tree-row-count">5 →</div>
-        </div>
-
-        <div class="tree-block-row" role="option" aria-selected="false" tabindex="0">
-          <div class="tree-block-code">B10</div>
-          <div class="tree-block-body">
-            <div class="tree-block-name">Reward &amp; Motivation</div>
-          </div>
-          <div class="tree-row-count">7 →</div>
-        </div>
-
-        <div class="tree-block-row" role="option" aria-selected="false" tabindex="0">
-          <div class="tree-block-code">B11</div>
-          <div class="tree-block-body">
-            <div class="tree-block-name">Language Foundation</div>
-          </div>
-          <div class="tree-row-count">6 →</div>
-        </div>
-
-        <div class="tree-block-row" role="option" aria-selected="false" tabindex="0">
-          <div class="tree-block-code">B12</div>
-          <div class="tree-block-body">
-            <div class="tree-block-name">Pattern Recognition</div>
-          </div>
-          <div class="tree-row-count">8 →</div>
-        </div>
-
-        <div class="tree-block-row" role="option" aria-selected="false" tabindex="0">
-          <div class="tree-block-code">B13</div>
-          <div class="tree-block-body">
-            <div class="tree-block-name">Arousal &amp; Energy</div>
-          </div>
-          <div class="tree-row-count">7 →</div>
-        </div>
-
-        <div class="tree-block-row" role="option" aria-selected="false" tabindex="0">
-          <div class="tree-block-code">B14</div>
-          <div class="tree-block-body">
-            <div class="tree-block-name">Biological Rhythms</div>
-          </div>
-          <div class="tree-row-count">7 →</div>
-        </div>
-
-      </div><!-- /tree-col-block -->
-
-      <!-- ── Column 3: Elements ──────────────────────────────── -->
-      <div class="tree-col tree-col-element" role="listbox" aria-label="Elements in Executive Function">
-
-        <div class="tree-col-header">Elements in Core · Executive Function · 9</div>
-
-        <div class="tree-col-hint">Click an element to open its passport. Hover for a 1-line preview.</div>
-
-        <!-- Filter bar -->
-        <div class="tree-filter-bar" role="group" aria-label="Element filters">
-
-          <div class="tree-filter-group">
-            <span class="tree-filter-label">MML</span>
-            <button class="filter-chip mml-badge mml-1" data-filter="mml" data-val="1">1</button>
-            <button class="filter-chip mml-badge mml-2" data-filter="mml" data-val="2">2</button>
-            <button class="filter-chip mml-badge mml-3" data-filter="mml" data-val="3">3</button>
-            <button class="filter-chip mml-badge mml-4" data-filter="mml" data-val="4">4</button>
-            <button class="filter-chip mml-badge mml-5" data-filter="mml" data-val="5">5</button>
-          </div>
-
-          <div class="tree-filter-group">
-            <span class="tree-filter-label">Train</span>
-            <button class="filter-chip" data-filter="train" data-val="hi">Hi</button>
-            <button class="filter-chip" data-filter="train" data-val="mid">Mid</button>
-            <button class="filter-chip" data-filter="train" data-val="lo">Lo</button>
-          </div>
-
-          <div class="tree-filter-group">
-            <span class="tree-filter-label">Modify</span>
-            <button class="filter-chip" data-filter="modify" data-val="hi">Hi</button>
-            <button class="filter-chip" data-filter="modify" data-val="mid">Mid</button>
-            <button class="filter-chip" data-filter="modify" data-val="lo">Lo</button>
-          </div>
-
-        </div>
-
-        <!-- Element list — 9 elements in B03 -->
-
-        <!-- C003 — highlighted, links to real passport file -->
-        <div class="tree-element-row highlighted" role="option" aria-selected="true">
-          <a href="C003.html" title="Working Memory Capacity — The workbench of conscious thought.">
-            <span class="tree-el-code">C003</span>
-            <span class="tree-el-name">Working Memory Capacity</span>
-            <span class="mml-badge mml-1" style="flex-shrink:0;">MML-1</span>
-            <span class="tree-el-arrow">→</span>
-          </a>
-        </div>
-
-        <div class="tree-element-row" role="option" aria-selected="false">
-          <a href="#" title="Inhibitory Control — The ability to suppress prepotent responses.">
-            <span class="tree-el-code">C006</span>
-            <span class="tree-el-name">Inhibitory Control</span>
-            <span class="mml-badge mml-2" style="flex-shrink:0;">MML-2</span>
-            <span class="tree-el-arrow">→</span>
-          </a>
-        </div>
-
-        <div class="tree-element-row" role="option" aria-selected="false">
-          <a href="#" title="Cognitive Flexibility — Capacity to shift between mental sets.">
-            <span class="tree-el-code">C007</span>
-            <span class="tree-el-name">Cognitive Flexibility</span>
-            <span class="mml-badge mml-2" style="flex-shrink:0;">MML-2</span>
-            <span class="tree-el-arrow">→</span>
-          </a>
-        </div>
-
-        <div class="tree-element-row" role="option" aria-selected="false">
-          <a href="#" title="Task Switching — Speed and accuracy of shifting between tasks.">
-            <span class="tree-el-code">C008</span>
-            <span class="tree-el-name">Task Switching</span>
-            <span class="mml-badge mml-2" style="flex-shrink:0;">MML-2</span>
-            <span class="tree-el-arrow">→</span>
-          </a>
-        </div>
-
-        <div class="tree-element-row" role="option" aria-selected="false">
-          <a href="#" title="Planning Capacity — Ability to formulate and sequence goal-directed actions.">
-            <span class="tree-el-code">C009</span>
-            <span class="tree-el-name">Planning Capacity</span>
-            <span class="mml-badge mml-3" style="flex-shrink:0;">MML-3</span>
-            <span class="tree-el-arrow">→</span>
-          </a>
-        </div>
-
-        <div class="tree-element-row" role="option" aria-selected="false">
-          <a href="#" title="Goal Maintenance — Sustained representation of goals over time.">
-            <span class="tree-el-code">C010</span>
-            <span class="tree-el-name">Goal Maintenance</span>
-            <span class="mml-badge mml-3" style="flex-shrink:0;">MML-3</span>
-            <span class="tree-el-arrow">→</span>
-          </a>
-        </div>
-
-        <div class="tree-element-row" role="option" aria-selected="false">
-          <a href="#" title="Conflict Monitoring — Detection and resolution of competing responses.">
-            <span class="tree-el-code">C011</span>
-            <span class="tree-el-name">Conflict Monitoring</span>
-            <span class="mml-badge mml-2" style="flex-shrink:0;">MML-2</span>
-            <span class="tree-el-arrow">→</span>
-          </a>
-        </div>
-
-        <div class="tree-element-row" role="option" aria-selected="false">
-          <a href="#" title="Response Selection — Selection among competing action candidates.">
-            <span class="tree-el-code">C012</span>
-            <span class="tree-el-name">Response Selection</span>
-            <span class="mml-badge mml-2" style="flex-shrink:0;">MML-2</span>
-            <span class="tree-el-arrow">→</span>
-          </a>
-        </div>
-
-        <div class="tree-element-row" role="option" aria-selected="false">
-          <a href="#" title="Working-Memory Updating — Refreshing contents of working memory.">
-            <span class="tree-el-code">C013</span>
-            <span class="tree-el-name">Working-Memory Updating</span>
-            <span class="mml-badge mml-2" style="flex-shrink:0;">MML-2</span>
-            <span class="tree-el-arrow">→</span>
-          </a>
-        </div>
-
-      </div><!-- /tree-col-element -->
-
-    </div><!-- /#tree-view -->
-
-    <!-- ════════════════════════════════════════════════════════════
-         EXPLORER VIEW (hidden by default)
-         ════════════════════════════════════════════════════════════ -->
-    <div id="explorer-view" role="region" aria-label="Network Explorer">
-
-      <!-- Abstract orrery thumbnail SVG -->
-      <svg class="explorer-placeholder-thumb" viewBox="0 0 200 140" fill="none"
-           xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-
-        <!-- Layer 1 (Core — top-left cluster) -->
-        <g transform="translate(44,38)">
-          <circle cx="0" cy="0" r="5" fill="var(--core-dark)" opacity="0.6"/>
-          <circle cx="0" cy="0" r="14" stroke="var(--core)" stroke-width="0.8" opacity="0.5"/>
-          <circle cx="0" cy="0" r="24" stroke="var(--core)" stroke-width="0.5" opacity="0.3"/>
-          <circle cx="14" cy="0" r="2" fill="var(--core)" opacity="0.7"/>
-          <circle cx="-10" cy="10" r="1.5" fill="var(--core)" opacity="0.6"/>
-          <circle cx="4" cy="-22" r="1.5" fill="var(--core)" opacity="0.5"/>
-        </g>
-
-        <!-- Layer 2 (Derived — top-right cluster) -->
-        <g transform="translate(148,36)">
-          <circle cx="0" cy="0" r="4.5" fill="var(--derived-dark)" opacity="0.6"/>
-          <circle cx="0" cy="0" r="13" stroke="var(--derived)" stroke-width="0.8" opacity="0.5"/>
-          <circle cx="0" cy="0" r="22" stroke="var(--derived)" stroke-width="0.5" opacity="0.3"/>
-          <circle cx="12" cy="-5" r="2" fill="var(--derived)" opacity="0.7"/>
-          <circle cx="-11" cy="7" r="1.5" fill="var(--derived)" opacity="0.6"/>
-          <circle cx="5" cy="20" r="1.5" fill="var(--derived)" opacity="0.5"/>
-        </g>
-
-        <!-- Layer 3 (Quantum — bottom-left cluster) -->
-        <g transform="translate(54,102)">
-          <circle cx="0" cy="0" r="4" fill="var(--quantum-dark)" opacity="0.6"/>
-          <circle cx="0" cy="0" r="12" stroke="var(--quantum)" stroke-width="0.8" opacity="0.5"/>
-          <circle cx="0" cy="0" r="21" stroke="var(--quantum)" stroke-width="0.5" opacity="0.3"/>
-          <circle cx="11" cy="-4" r="1.8" fill="var(--quantum)" opacity="0.7"/>
-          <circle cx="-9" cy="-8" r="1.5" fill="var(--quantum)" opacity="0.6"/>
-        </g>
-
-        <!-- Layer 4 (Emotional — bottom-right cluster) -->
-        <g transform="translate(148,104)">
-          <circle cx="0" cy="0" r="4.5" fill="var(--emotional-dark)" opacity="0.6"/>
-          <circle cx="0" cy="0" r="13" stroke="var(--emotional)" stroke-width="0.8" opacity="0.5"/>
-          <circle cx="0" cy="0" r="22" stroke="var(--emotional)" stroke-width="0.5" opacity="0.3"/>
-          <circle cx="-12" cy="-4" r="2" fill="var(--emotional)" opacity="0.7"/>
-          <circle cx="6" cy="11" r="1.5" fill="var(--emotional)" opacity="0.6"/>
-          <circle cx="9" cy="-10" r="1.5" fill="var(--emotional)" opacity="0.5"/>
-        </g>
-
-        <!-- Cross-layer connectors (faint) -->
-        <line x1="58" y1="38" x2="134" y2="36" stroke="var(--hairline-strong)" stroke-width="0.5" opacity="0.5"/>
-        <line x1="44" y1="50" x2="54" y2="90" stroke="var(--hairline-strong)" stroke-width="0.5" opacity="0.4"/>
-        <line x1="148" y1="50" x2="148" y2="90" stroke="var(--hairline-strong)" stroke-width="0.5" opacity="0.4"/>
-        <line x1="68" y1="102" x2="134" y2="104" stroke="var(--hairline-strong)" stroke-width="0.5" opacity="0.3"/>
-        <line x1="65" y1="55" x2="135" y2="90" stroke="var(--hairline-strong)" stroke-width="0.5" opacity="0.2"/>
-      </svg>
-
-      <div>
-        <h2 class="t-title-sm" style="margin-bottom:var(--space-3);">Network Explorer</h2>
-        <p class="t-ui" style="color:var(--dust);max-width:360px;margin:0 auto var(--space-2);">
-          An interactive star-chart of all 343 elements.
-          Each layer is a sun, each block a planet, each element a moon.
-        </p>
       </div>
+    </div>
 
-      <a href="https://andranik1349.github.io/HES/HES%20Passport%20Library%20-%20Orrery.html"
-         target="_blank"
-         rel="noopener noreferrer"
-         class="btn btn-primary">
-        Open Explorer →
-      </a>
+    <!-- ── Article grid ───────────────────────────────────────────── -->
+    <div class="articles-section">
+      <div class="container">
+        <div class="grid-3">
 
-      <div class="explorer-fine-print">The explorer opens as a standalone tool.</div>
+          <!-- Article 1 -->
+          <article class="article-card">
+            <div class="article-thumb" aria-hidden="true"></div>
+            <div class="article-date">May 2026</div>
+            <a href="article.html" class="article-title">What MML-1 actually means — and why most frameworks don't have one</a>
+            <p class="article-excerpt">Most psychological constructs lack the measurement infrastructure to claim Established status. Here's what it takes.</p>
+            <a href="article.html" class="article-read-link">Read →</a>
+          </article>
 
-    </div><!-- /#explorer-view -->
+          <!-- Article 2 -->
+          <article class="article-card">
+            <div class="article-thumb" aria-hidden="true"></div>
+            <div class="article-date">April 2026</div>
+            <a href="article.html" class="article-title">The Stop List: 10 constructs HES deliberately excludes</a>
+            <p class="article-excerpt">Defining a framework by what it excludes is as important as what it includes.</p>
+            <a href="article.html" class="article-read-link">Read →</a>
+          </article>
 
-  </div><!-- /.lib-shell -->
+          <!-- Article 3 -->
+          <article class="article-card">
+            <div class="article-thumb" aria-hidden="true"></div>
+            <div class="article-date">March 2026</div>
+            <a href="article.html" class="article-title">Nearest neighbours: how the 343 elements relate to each other</a>
+            <p class="article-excerpt">The relationship graph encodes theoretical proximity, not just conceptual similarity.</p>
+            <a href="article.html" class="article-read-link">Read →</a>
+          </article>
 
-  <script>
-    /* ── View switcher ─────────────────────────────────────────── */
-    const btnExplorer  = document.getElementById('btn-explorer');
-    const btnTree      = document.getElementById('btn-tree');
-    const treeView     = document.getElementById('tree-view');
-    const explorerView = document.getElementById('explorer-view');
-    const subbar       = document.getElementById('lib-subbar');
+          <!-- Article 4 -->
+          <article class="article-card">
+            <div class="article-thumb" aria-hidden="true"></div>
+            <div class="article-date">February 2026</div>
+            <a href="article.html" class="article-title">Why the Quantum layer is named what it is</a>
+            <p class="article-excerpt">Discontinuity, not uncertainty — the naming logic behind HES's rupture states.</p>
+            <a href="article.html" class="article-read-link">Read →</a>
+          </article>
 
-    btnExplorer.addEventListener('click', () => {
-      btnExplorer.setAttribute('aria-pressed', 'true');
-      btnTree.setAttribute('aria-pressed', 'false');
-      explorerView.style.display = 'flex';
-      treeView.style.display = 'none';
-      subbar.style.display = 'none';
-    });
+          <!-- Article 5 -->
+          <article class="article-card">
+            <div class="article-thumb" aria-hidden="true"></div>
+            <div class="article-date">January 2026</div>
+            <a href="article.html" class="article-title">Building the MML framework: lessons from two years of iteration</a>
+            <p class="article-excerpt">How a five-level scale became the backbone of credibility for the entire system.</p>
+            <a href="article.html" class="article-read-link">Read →</a>
+          </article>
 
-    btnTree.addEventListener('click', () => {
-      btnTree.setAttribute('aria-pressed', 'true');
-      btnExplorer.setAttribute('aria-pressed', 'false');
-      treeView.style.display = 'flex';
-      explorerView.style.display = 'none';
-      subbar.style.display = 'flex';
-    });
+          <!-- Article 6 -->
+          <article class="article-card">
+            <div class="article-thumb" aria-hidden="true"></div>
+            <div class="article-date">December 2025</div>
+            <a href="article.html" class="article-title">What 'modifiability' means in the HES framework</a>
+            <p class="article-excerpt">Trainability and modifiability are distinct constructs. Here's why that distinction matters.</p>
+            <a href="article.html" class="article-read-link">Read →</a>
+          </article>
 
-    /* ── Layer row clicks ──────────────────────────────────────── */
-    document.querySelectorAll('.tree-layer-row').forEach(row => {
-      row.addEventListener('click', () => {
-        document.querySelectorAll('.tree-layer-row').forEach(r => {
-          r.classList.remove('active');
-          r.setAttribute('aria-selected', 'false');
-        });
-        row.classList.add('active');
-        row.setAttribute('aria-selected', 'true');
-      });
-    });
+        </div>
+      </div>
+    </div>
 
-    /* ── Block row clicks ──────────────────────────────────────── */
-    document.querySelectorAll('.tree-block-row').forEach(row => {
-      row.addEventListener('click', () => {
-        document.querySelectorAll('.tree-block-row').forEach(r => {
-          r.classList.remove('active');
-          r.setAttribute('aria-selected', 'false');
-        });
-        row.classList.add('active');
-        row.setAttribute('aria-selected', 'true');
-      });
-    });
+  </main>
 
-    /* ── Filter chip toggles (prototype — visual only) ─────────── */
-    document.querySelectorAll('.filter-chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        chip.classList.toggle('on');
-      });
-    });
-  </script>
+  <!-- ── Footer ────────────────────────────────────────────────── -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-col-label">Explore</div>
+          <a href="../library/index.html" class="footer-link">Passport Library</a>
+          <a href="../library/index.html" class="footer-link">The Four Layers</a>
+          <a href="../book.html"          class="footer-link">The Book</a>
+          <a href="../about.html"         class="footer-link">About HES</a>
+          <a href="../research.html"      class="footer-link">MML Framework</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Learn</div>
+          <a href="../faq.html"           class="footer-link">FAQ</a>
+          <a href="../glossary.html"      class="footer-link">Glossary</a>
+          <a href="../changelog.html"     class="footer-link">Changelog</a>
+          <a href="index.html"            class="footer-link">Blog</a>
+          <a href="../research.html"      class="footer-link">Research</a>
+        </div>
+        <div>
+          <div class="footer-col-label">Connect</div>
+          <a href="../contact.html"       class="footer-link">Contact</a>
+          <a href="../contribute.html"    class="footer-link">Contribute</a>
+          <a href="../contribute.html"    class="footer-link">HES Lingua</a>
+          <a href="../community.html"     class="footer-link">Community</a>
+          <a href="../press.html"         class="footer-link">Press</a>
+        </div>
+      </div>
+      <div class="footer-legal">
+        <div class="footer-legal-links">
+          <a href="../privacy.html"    class="footer-legal-link">Privacy Policy</a>
+          <a href="../terms.html"      class="footer-legal-link">Terms of Use</a>
+          <a href="../disclaimer.html" class="footer-legal-link">Disclaimer</a>
+        </div>
+        <div class="footer-version">Core v1.3.2 · Derived v1.2.4 · Quantum v2.2 · Emotional v2.0</div>
+        <div class="footer-disclaimer">HES is not a clinical tool. It does not replace professional psychological, psychiatric, or medical assessment.</div>
+      </div>
+    </div>
+  </footer>
 
+  <script src="../prototype.js"></script>
 </body>
 </html>
