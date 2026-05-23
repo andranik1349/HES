@@ -24,20 +24,17 @@
   --hairline-strong: rgba(15,35,64,0.22);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grotesk',sans-serif;color:var(--carbon)}
+html,body{height:100%;overflow:hidden;background:var(--vellum-1);font-family:'Space Grotesk',sans-serif;color:var(--carbon)}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
 /* ── shell ─────────────────────────────────────────────────────── */
 #app{
   position:relative;width:100vw;height:100vh;overflow:hidden;
-  background:linear-gradient(160deg,var(--vellum-1) 0%,var(--vellum-2) 100%);
+  background:transparent;
 }
-#app::before{
-  content:"";position:absolute;inset:0;pointer-events:none;
-  background:
-    radial-gradient(60% 50% at 18% 22%, rgba(255,255,255,0.55), transparent 70%),
-    radial-gradient(50% 40% at 82% 86%, rgba(150,135,110,0.10), transparent 75%);
-  z-index:0;
+/* #app::before removed — replaced by Atmosphere shader canvas */
+#shader-bg{
+  position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;pointer-events:none;
 }
 
 /* ── top bar ───────────────────────────────────────────────────── */
@@ -621,6 +618,7 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
 <h2 class="sr-only">HES Passport Library — Orrery. A static star-chart of the Human Elements System. Each of the four layers sits as a sun in a 2×2 grid; its blocks orbit it as planets on a perfect ring, and each block's elements orbit it as moons on a smaller ring. All positions are calculated geometrically — no physics, no drift. Neighbor relationships are revealed only on hover.</h2>
 
 <div id="app">
+  <canvas id="shader-bg" aria-hidden="true"></canvas>
   <header id="topbar">
     <div class="lockup">
       <div class="mark" aria-hidden="true"></div>
@@ -642,13 +640,13 @@ html,body{height:100%;overflow:hidden;background:#dad4cc;font-family:'Space Grot
           </span>
           <span class="pal-label">Bright</span>
         </button>
-        <button class="pal-btn active" type="button" data-pal="2" role="radio" aria-checked="true" aria-label="Palette Earth">
+        <button class="pal-btn" type="button" data-pal="2" role="radio" aria-checked="false" aria-label="Palette Earth">
           <span class="pal-dots" aria-hidden="true">
             <span style="background:#65778c"></span><span style="background:#a8806c"></span><span style="background:#ccb576"></span><span style="background:#7dada0"></span>
           </span>
           <span class="pal-label">Earth</span>
         </button>
-        <button class="pal-btn" type="button" data-pal="3" role="radio" aria-checked="false" aria-label="Palette Earth-2">
+        <button class="pal-btn active" type="button" data-pal="3" role="radio" aria-checked="true" aria-label="Palette Earth-2">
           <span class="pal-dots" aria-hidden="true">
             <span style="background:#627C99"></span><span style="background:#B27E6B"></span><span style="background:#D69D2B"></span><span style="background:#5BA38B"></span>
           </span>
@@ -1054,22 +1052,38 @@ const BLOCK_ORBIT_PARAMS = {};
 
 (function generateOrbitParams(){
   /* One orbital-plane orientation per layer sun system.
-     tilt = 0 so every system's ellipses lie with their major axis
-     running left-to-right — the isometric / solar-system-diagram look. */
+
+     compression: raised ~22% from the original range so ellipses are
+       noticeably less squished while still reading as tilted disks.
+       Old range 0.32–0.68 → new range 0.44–0.76.
+
+     tilt: a small seeded-random angle (±~17°) so each of the four sun
+       systems sits on a slightly different orbital plane. All nested
+       elements within a system inherit this exact same tilt, keeping
+       each system internally coherent while the four systems visibly
+       differ from one another.                                         */
+  /* Per-system tilt nudges applied on top of the seeded random value.
+     Negative = counter-clockwise; positive = clockwise.              */
+  const TILT_BIAS = { core: -0.18, derived: 0, quantum: 0, emotional: 0 };
+
   LY.forEach(l => {
+    const tilt = (Math.random() - 0.5) * 0.60 + (TILT_BIAS[l.id] || 0);
     LAYER_ORBIT_PARAMS[l.id] = {
-      compression: 0.32 + Math.random() * (0.68 - 0.32),
-      tilt:        0,
+      compression: 0.44 + Math.random() * (0.76 - 0.44),
+      tilt,
       incl:        0.05 + Math.random() * (0.70 - 0.05),
     };
   });
 
   /* One orbital-plane orientation per block / planet moon system.
-     Same reasoning: tilt = 0 keeps all moon disks horizontal. */
+     compression: similarly raised — old 0.38–0.72 → new 0.50–0.80.
+     tilt: copied from the parent layer so every planet and moon arc
+       within a given sun system shares the same orbital plane.        */
   Object.values(BL).flat().forEach(b => {
+    const layerTilt = LAYER_ORBIT_PARAMS[BLOCK_LAYER[b.id]].tilt;
     BLOCK_ORBIT_PARAMS[b.id] = {
-      compression: 0.38 + Math.random() * (0.72 - 0.38),
-      tilt:        0,
+      compression: 0.50 + Math.random() * (0.80 - 0.50),
+      tilt:        layerTilt,
       incl:        0.05 + Math.random() * (0.55 - 0.05),
     };
   });
@@ -1192,20 +1206,19 @@ function computeBlockOrbits(blocks){
    preventing actual ellipse overlap.                                  */
 function computeSunPositions(systemRadii){
   const proposed = {
-    core:      { x: -145, y:  -70 },
-    derived:   { x:  145, y:  -70 },
-    quantum:   { x:  -15, y:   20 },
-    emotional: { x:  160, y:   12 },
+    core:      { x: -210, y:  -60 },
+    derived:   { x:  240, y:  -80 },
+    quantum:   { x:  -25, y:   95 },
+    emotional: { x:  200, y:  190 },
   };
   const pairs = [
     ['core','derived'], ['core','quantum'], ['core','emotional'],
     ['derived','quantum'], ['derived','emotional'], ['quantum','emotional'],
   ];
-  /* With horizontal ellipses the binding clearance is on the minor
-     (vertical) axis. Factor 0.50 matches the average compression range
-     (0.32–0.68) and prevents the packer from enforcing 2× too much
-     vertical room. */
-  const ELLIPSE_FACTOR = 0.40;
+  /* Compression range is 0.44–0.76 (avg ~0.60). ELLIPSE_FACTOR must
+     match that average so the packer grants the right clearance for
+     the actual ellipse footprint in all directions.                   */
+  const ELLIPSE_FACTOR = 0.60;
   let scale = 1;
   pairs.forEach(([a, b]) => {
     const dx = proposed[a].x - proposed[b].x;
@@ -1673,7 +1686,7 @@ function drawOrbitRings(t, k, view){
       if(seenR.has(key)) return;
       seenR.add(key);
       ctx.setLineDash([4 / k, 6 / k]);
-      ctx.strokeStyle = ha(lcol, ringOpacity);
+      ctx.strokeStyle = ha('#7B7869', 0.64);
       ctx.beginPath();
       ctx.ellipse(sun.x, sun.y, bn.orbitR, bn.orbitR * comp, tilt, 0, Math.PI * 2);
       ctx.stroke();
@@ -1707,7 +1720,7 @@ function drawOrbitRings(t, k, view){
         ctx.setLineDash([3 / k, 5 / k]);
         for(let j=0; j<arcs; j++){
           const r = GEO.moonArcR(j, planet.r);
-          ctx.strokeStyle = ha(lcol, mAlpha);
+          ctx.strokeStyle = ha('#7B7869', mAlpha);
           ctx.beginPath();
           ctx.ellipse(planet.x, planet.y, r, r * mComp, mTilt, 0, Math.PI * 2);
           ctx.stroke();
@@ -2155,14 +2168,12 @@ function drawLabels(t, k){
   /* Element labels fade in alongside the moons themselves. */
   const _moonAlpha = ramp(k, 1.40, 2.20);
   const codeOp = ramp(k, 1.8, 2.6) * _moonAlpha * Math.min(1, 0.4 + density*0.7);
-  const nameOp = ramp(k, 3.0, 4.5) * _moonAlpha * density;
-  if(codeOp > 0.04 || nameOp > 0.04){
+  if(codeOp > 0.04){
     const candidates = NODES.slice().sort((a,b)=>{
       if(a.mml !== b.mml) return a.mml - b.mml;
       return 0;
     });
     const codeSize = 10;
-    const nameSize = 11;
     candidates.forEach(n=>{
       const [sx, sy] = worldToScreen(n.x, n.y);
       if(sx < -40 || sx > W+40 || sy < -30 || sy > H+30) return;
@@ -2181,16 +2192,8 @@ function drawLabels(t, k){
           ctx.fillText(n.code, sx, ny);
         }
       }
-      if(nameOp > 0.04){
-        ctx.font = `400 ${nameSize}px 'Space Grotesk', sans-serif`;
-        const w = measureText(n.name, ctx.font);
-        const ny = sy + n.r*transform.k + 9 + codeSize + 4;
-        if(tryPlace(sx, ny, w+6, nameSize+4, 3, 2)){
-          ctx.textAlign='center'; ctx.textBaseline='middle';
-          ctx.fillStyle = ha('#3c3a30', nameOp * op);
-          ctx.fillText(n.name, sx, ny);
-        }
-      }
+      /* Element names are intentionally not drawn on the canvas —
+         titles appear exclusively in the passport panel.            */
     });
   }
 }
@@ -2952,7 +2955,7 @@ const PALETTES = [
     {primary:'#5BA38B', tint:'#d4ebe5'}
   ]}
 ];
-let currentPalette = 2; /* default: Earth */
+let currentPalette = 3; /* default: Earth-2 */
 
 /* Darken a primary hex to produce a readable text colour on the tint
    background. Factor ~0.55 matches the relative depth of the original
@@ -3361,6 +3364,194 @@ updateZoomUI();
 /* Read ?view= from URL and activate the appropriate view on load. */
 const _urlView = new URLSearchParams(location.search).get('view') || 'explorer';
 activateView(_urlView);
+</script>
+
+<!-- ── Atmosphere shader background (from hes-shaders-batch-04-ambient) ── -->
+<script>
+(function(){
+const V4_VERT = `#version 300 es
+in vec2 aPos;
+void main() { gl_Position = vec4(aPos, 0.0, 1.0); }
+`;
+
+const V4_HEADER = `#version 300 es
+precision highp float;
+uniform vec2  uResolution;
+uniform vec2  uMouse;
+uniform vec2  uMouseEased;
+uniform float uTime;
+uniform float uClickTime;
+uniform vec2  uClickPos;
+uniform float uClickIdx;
+out vec4 outColor;
+
+const vec3 VELLUM1 = vec3(0.922, 0.933, 0.949);
+const vec3 VELLUM2 = vec3(0.890, 0.871, 0.847);
+const vec3 CORE    = vec3(0.396, 0.467, 0.549);
+const vec3 EMOTION = vec3(0.490, 0.678, 0.628);
+const vec3 DERIVED = vec3(0.659, 0.502, 0.424);
+const vec3 QUANTUM = vec3(0.800, 0.710, 0.463);
+
+float hash21(vec2 p) {
+  vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.x + p3.y) * p3.z);
+}
+float vnoise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  float a = hash21(i);
+  float b = hash21(i + vec2(1.0, 0.0));
+  float c = hash21(i + vec2(0.0, 1.0));
+  float d = hash21(i + vec2(1.0, 1.0));
+  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+float fbm(vec2 p) {
+  float v = 0.0;
+  float a = 0.5;
+  for (int i = 0; i < 4; i++) {
+    v += a * vnoise(p);
+    p *= 2.02;
+    p += 17.0;
+    a *= 0.5;
+  }
+  return v;
+}
+`;
+
+const V4_ATMOSPHERE = V4_HEADER + `
+void main() {
+  vec2 res = uResolution;
+  vec2 uv  = gl_FragCoord.xy / res;
+  float ar = res.x / res.y;
+  vec2 p   = vec2(uv.x * ar, uv.y);
+
+  float wash = fbm(p * 0.4);
+  vec3 base  = mix(VELLUM1, VELLUM2, wash * 0.6);
+
+  vec2 par = (uMouseEased - 0.5) * vec2(ar, 1.0);
+  vec2 cur = vec2(uMouseEased.x * ar, uMouseEased.y);
+  vec2 c1 = vec2(ar * 0.30, 0.65) + vec2(sin(uTime * 0.08) * 0.08, cos(uTime * 0.06) * 0.06) - par * 0.40;
+  vec2 c2 = cur;
+  vec2 c3 = vec2(ar, 1.0) - cur + vec2(sin(uTime * 0.05) * 0.04, 0.0);
+
+  float b1 = exp(-dot(p - c1, p - c1) * 1.4);
+  float b2 = exp(-dot(p - c2, p - c2) * 1.6);
+  float b3 = exp(-dot(p - c3, p - c3) * 1.8);
+
+  vec3 cool = mix(VELLUM1, CORE,    0.50);
+  vec3 warm = mix(VELLUM2, DERIVED, 0.48);
+  vec3 quan = mix(VELLUM1, QUANTUM, 0.32);
+
+  vec3 col = base;
+  col = mix(col, warm, b1 * 0.95);
+  col = mix(col, cool, b2);
+  col = mix(col, quan, b3 * 0.70);
+
+  vec2 cc = vec2(uClickPos.x * ar, uClickPos.y);
+  float dc = length(p - cc);
+  float breath = exp(-uClickTime * 0.6) * exp(-dc * 1.0);
+  col = mix(col, mix(VELLUM1, EMOTION, 0.45), breath * 0.75);
+
+  outColor = vec4(col, 1.0);
+}
+`;
+
+function compile(gl, type, src) {
+  const sh = gl.createShader(type);
+  gl.shaderSource(sh, src);
+  gl.compileShader(sh);
+  if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+    console.error('Atmosphere shader compile:\n', gl.getShaderInfoLog(sh));
+    return null;
+  }
+  return sh;
+}
+
+function buildProg(gl, fragSrc) {
+  const vs = compile(gl, gl.VERTEX_SHADER, V4_VERT);
+  const fs = compile(gl, gl.FRAGMENT_SHADER, fragSrc);
+  if (!vs || !fs) return null;
+  const prog = gl.createProgram();
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+    console.error('Atmosphere link:', gl.getProgramInfoLog(prog));
+    return null;
+  }
+  return prog;
+}
+
+const canvas = document.getElementById('shader-bg');
+const gl = canvas.getContext('webgl2', { antialias: false, premultipliedAlpha: false });
+if (!gl) { console.warn('WebGL2 unavailable — static background fallback'); return; }
+
+// geometry
+const buf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+const vao = gl.createVertexArray();
+gl.bindVertexArray(vao);
+gl.enableVertexAttribArray(0);
+gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+const prog = buildProg(gl, V4_ATMOSPHERE);
+if (!prog) return;
+
+const startTime   = performance.now() / 1000;
+let mouse         = [0.5, 0.5];
+let mouseEased    = [0.5, 0.5];
+const easeK       = 0.04;
+let clickPos      = [0.5, 0.5];
+let clickTime     = startTime - 9999;
+let clickIdx      = 0;
+
+function resize() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width  = Math.floor(canvas.clientWidth  * dpr);
+  canvas.height = Math.floor(canvas.clientHeight * dpr);
+  gl.viewport(0, 0, canvas.width, canvas.height);
+}
+resize();
+window.addEventListener('resize', resize);
+
+window.addEventListener('mousemove', e => {
+  const r = canvas.getBoundingClientRect();
+  mouse = [(e.clientX - r.left) / r.width, 1.0 - (e.clientY - r.top) / r.height];
+});
+window.addEventListener('touchmove', e => {
+  if (e.touches[0]) {
+    const r = canvas.getBoundingClientRect();
+    mouse = [(e.touches[0].clientX - r.left) / r.width, 1.0 - (e.touches[0].clientY - r.top) / r.height];
+  }
+}, { passive: true });
+window.addEventListener('click', e => {
+  const r = canvas.getBoundingClientRect();
+  clickPos  = [(e.clientX - r.left) / r.width, 1.0 - (e.clientY - r.top) / r.height];
+  clickTime = performance.now() / 1000;
+  clickIdx++;
+});
+
+(function loop() {
+  mouseEased[0] += (mouse[0] - mouseEased[0]) * easeK;
+  mouseEased[1] += (mouse[1] - mouseEased[1]) * easeK;
+
+  gl.useProgram(prog);
+  const now = performance.now() / 1000;
+  gl.uniform2f(gl.getUniformLocation(prog,'uResolution'), canvas.width, canvas.height);
+  gl.uniform2f(gl.getUniformLocation(prog,'uMouse'),      mouse[0],       mouse[1]);
+  gl.uniform2f(gl.getUniformLocation(prog,'uMouseEased'), mouseEased[0],  mouseEased[1]);
+  gl.uniform1f(gl.getUniformLocation(prog,'uTime'),       now - startTime);
+  gl.uniform1f(gl.getUniformLocation(prog,'uClickTime'),  now - clickTime);
+  gl.uniform2f(gl.getUniformLocation(prog,'uClickPos'),   clickPos[0],    clickPos[1]);
+  gl.uniform1f(gl.getUniformLocation(prog,'uClickIdx'),   clickIdx);
+  gl.bindVertexArray(vao);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  requestAnimationFrame(loop);
+})();
+})();
 </script>
 </body>
 </html>
