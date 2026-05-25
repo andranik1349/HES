@@ -1,0 +1,3866 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>HES — Passport Library · Orrery · Ellipses</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&family=DM+Mono:wght@400;500&family=Geologica:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --vellum-1:#EBEEF2;
+  --vellum-2:#E3DED8;
+  --carbon:#0f2340;
+  --dust:#7B7869;
+  /* Layer palette — Earth values, hardcoded. These are the permanent
+     production colours; mirror them in LY[].stroke/tint/dark so canvas
+     and CSS stay in sync. */
+  --core:#65778c;       --core-dark:#384252;       --core-tint:#e4e7eb;
+  --derived:#a8806c;    --derived-dark:#5c463b;    --derived-tint:#ebe8e6;
+  --quantum:#ccb576;    --quantum-dark:#706341;    --quantum-tint:#ebe6d8;
+  --emotional:#7dada0;  --emotional-dark:#456058;  --emotional-tint:#d8ebe6;
+  --hairline: rgba(15,35,64,0.14);
+  --hairline-strong: rgba(15,35,64,0.22);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--vellum-1);font-family:'Space Grotesk',sans-serif;color:var(--carbon)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* ── shell ─────────────────────────────────────────────────────── */
+#app{
+  position:relative;width:100vw;height:100vh;overflow:hidden;
+  background:transparent;
+}
+/* #app::before removed — replaced by Atmosphere shader canvas */
+#shader-bg{
+  position:absolute;inset:0;width:100%;height:100%;display:none;z-index:0;pointer-events:none;
+}
+body.is-explorer #shader-bg { display:block; }
+
+/* ── top bar ───────────────────────────────────────────────────── */
+#topbar{
+  position:absolute;top:0;left:0;right:0;height:64px;z-index:30;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;
+}
+#topbar::after{
+  content:"";position:absolute;left:32px;right:32px;bottom:0;height:1px;
+  background:rgba(24,22,15,0.95);
+}
+.lockup{display:flex;align-items:center;gap:14px}
+.lockup .mark{width:22px;height:22px;border-radius:50%;background:var(--carbon);position:relative}
+.lockup .mark::after{
+  content:"";position:absolute;inset:5px;border-radius:50%;
+  background:linear-gradient(135deg,var(--vellum-1),var(--vellum-2));
+}
+.lockup .wm{font-family:'DM Mono',monospace;font-weight:500;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:var(--carbon)}
+.lockup .wm .sep{color:var(--dust);margin:0 8px}
+.lockup .wm .lab{color:var(--dust)}
+.lockup .wm .mode{margin-left:14px;padding:3px 8px;border:0.5px solid var(--hairline-strong);color:var(--carbon);letter-spacing:0.16em;font-size:10px}
+
+.controls{display:flex;align-items:center;gap:14px}
+.viewswitch{
+  display:inline-flex;border:0.5px solid var(--hairline-strong);border-radius:0;overflow:hidden;
+  font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+}
+.viewswitch button{
+  background:transparent;border:none;color:var(--dust);padding:7px 14px;cursor:pointer;
+  letter-spacing:inherit;text-transform:inherit;font:inherit;
+  border-right:0.5px solid var(--hairline-strong);
+  transition:background 0.15s,color 0.15s;
+}
+.viewswitch button:last-child{border-right:none}
+.viewswitch button:hover{color:var(--carbon)}
+.viewswitch button[aria-pressed="true"]{background:var(--carbon);color:var(--vellum-1)}
+
+.searchwrap{position:relative;display:flex;align-items:center}
+.searchwrap svg{position:absolute;left:10px;color:var(--dust);pointer-events:none}
+#search{
+  background:rgba(24,22,15,0.04);border:0.5px solid var(--hairline-strong);border-radius:0;
+  font-family:'Space Mono',monospace;font-size:12px;color:var(--carbon);
+  padding:8px 12px 8px 32px;width:260px;outline:none;
+  transition:border-color 0.15s,background 0.15s;
+}
+#search::placeholder{color:var(--dust)}
+#search:focus{border-color:var(--carbon);background:rgba(255,255,255,0.4)}
+#search-dd{
+  position:absolute;top:calc(100% + 6px);right:0;width:340px;max-height:340px;overflow-y:auto;
+  background:rgba(246,244,238,0.98);backdrop-filter:blur(10px);
+  border:0.5px solid var(--hairline-strong);
+  box-shadow:0 24px 56px -22px rgba(24,22,15,0.28),0 2px 6px rgba(24,22,15,0.06);
+  border-radius:0;display:none;z-index:50;
+}
+#search-dd.on{display:block}
+.dd-row{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:0.5px solid var(--hairline);transition:background 0.12s}
+.dd-row:last-child{border-bottom:none}
+.dd-row:hover,.dd-row.cur{background:rgba(24,22,15,0.06)}
+.dd-row .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dd-row .code{font-family:'Space Mono',monospace;font-size:11px;color:var(--carbon);min-width:42px}
+.dd-row .name{font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--carbon);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dd-row .meta{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--dust)}
+.dd-empty{padding:14px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--dust);text-align:center}
+.dd-section{padding:6px 14px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.20em;text-transform:uppercase;color:var(--dust);background:rgba(24,22,15,0.025);border-bottom:0.5px solid var(--hairline)}
+
+#mml-filter{
+  background:rgba(24,22,15,0.04);border:0.5px solid var(--hairline-strong);border-radius:0;
+  font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--carbon);padding:8px 10px;outline:none;cursor:pointer;
+}
+#mml-filter:focus{border-color:var(--carbon)}
+
+/* ── sub-bar / breadcrumb ──────────────────────────────────────── */
+#subbar{
+  position:absolute;top:64px;left:0;right:0;height:54px;z-index:25;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;pointer-events:none;
+}
+#subbar > *{pointer-events:auto}
+.bc{
+  display:flex;align-items:center;gap:10px;
+  font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+}
+.bc .crumb{color:var(--dust);background:none;border:none;font:inherit;letter-spacing:inherit;text-transform:inherit;padding:0;transition:color 0.18s;cursor:pointer}
+.bc .crumb:hover{color:var(--carbon)}
+.bc .crumb.current{color:var(--carbon)}
+.bc .sep{color:var(--dust);opacity:0.45}
+.statusline{
+  font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.10em;text-transform:uppercase;
+  color:var(--dust);display:flex;gap:18px;align-items:center;
+}
+.statusline em{font-style:normal;color:var(--carbon)}
+.statusline .zoom{display:inline-flex;align-items:center;gap:6px;color:var(--carbon)}
+.statusline .zoom .pulse{width:5px;height:5px;border-radius:50%;background:var(--carbon)}
+
+/* ── canvas ────────────────────────────────────────────────────── */
+#canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none;z-index:1}
+#canvas.drag{cursor:grabbing}
+#canvas.over-node{cursor:pointer}
+
+/* ── legend ────────────────────────────────────────────────────── */
+#legend{
+  position:absolute;left:32px;bottom:28px;z-index:10;pointer-events:none;
+  display:flex;flex-direction:column;gap:10px;
+  background:rgba(246,244,238,0.6);backdrop-filter:blur(6px);
+  border:0.5px solid var(--hairline);
+  padding:14px 16px;border-radius:0;
+  min-width:200px;
+}
+#legend .lg-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--dust);display:flex;justify-content:space-between;align-items:center}
+#legend .lg-row{display:flex;align-items:center;gap:10px;font-family:'Space Mono',monospace;font-size:10px;color:var(--carbon);letter-spacing:0.04em}
+#legend .lg-dot{width:9px;height:9px;border-radius:50%;background:var(--carbon)}
+#legend .lg-label{flex:1;color:var(--dust)}
+#legend .lg-meta{color:var(--carbon);font-size:9px;letter-spacing:0.10em;text-transform:uppercase}
+
+/* ── zoom controls ─────────────────────────────────────────────── */
+#zoom-controls{
+  position:absolute;right:32px;bottom:200px;z-index:10;
+  display:flex;flex-direction:column;
+  background:rgba(246,244,238,0.85);backdrop-filter:blur(6px);
+  border:0.5px solid var(--hairline-strong);border-radius:0;
+  font-family:'DM Mono',monospace;
+  transition:right 0.55s cubic-bezier(0.22,1,0.36,1);
+}
+#zoom-controls button{
+  background:transparent;border:none;color:var(--carbon);
+  width:36px;height:36px;font-size:16px;line-height:1;
+  cursor:pointer;border-bottom:0.5px solid var(--hairline);
+  transition:background 0.15s;
+}
+#zoom-controls button:last-child{border-bottom:none}
+#zoom-controls button:hover{background:rgba(24,22,15,0.06)}
+#zoom-controls .zlbl{
+  height:24px;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--dust);display:flex;align-items:center;justify-content:center;
+  border-bottom:0.5px solid var(--hairline);
+}
+
+/* ── minimap ───────────────────────────────────────────────────── */
+#minimap{
+  position:absolute;right:32px;bottom:28px;z-index:10;
+  width:200px;height:148px;
+  background:rgba(246,244,238,0.70);backdrop-filter:blur(8px);
+  border:0.5px solid var(--hairline-strong);border-radius:0;
+  overflow:hidden;
+  transition:right 0.55s cubic-bezier(0.22,1,0.36,1);
+}
+
+/* When the passport drawer slides in, push the navigation tools left
+   by the panel width (520px capped at 46vw — matching #panel) plus the
+   existing 32px gutter, so they stay visible alongside the drawer. */
+#app:has(#panel.open) #zoom-controls,
+#app:has(#panel.open) #minimap{
+  right:calc(32px + min(520px, 46vw));
+}
+#minimap canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:pointer}
+
+/* ── palette switcher ──────────────────────────────────────────
+   Temporary demo control. Lives inside the .controls cluster
+   immediately to the left of the Explorer/Tree viewswitch, so the
+   two move together as the topbar reflows — no centred element
+   to collide with the right-hand controls when the viewport
+   narrows. Each button is a small strip carrying the four layer
+   colours as dots plus a text label, so the palette is
+   identifiable both visually and by name. The active palette is
+   bordered with the carbon ink colour; inactive palettes sit at
+   low contrast. */
+#palette-switcher{
+  display:flex;gap:4px;
+  background:rgba(246,244,238,0.85);backdrop-filter:blur(6px);
+  border:0.5px solid var(--hairline);
+  border-radius:0;padding:3px;
+}
+.pal-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  background:transparent;border:0.5px solid transparent;border-radius:0;
+  padding:5px 9px;cursor:pointer;
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;
+  text-transform:uppercase;color:var(--dust);
+  transition:background 0.15s,color 0.15s,border-color 0.15s,opacity 0.15s;
+  opacity:0.62;
+}
+.pal-btn:hover{color:var(--carbon);opacity:0.92}
+.pal-btn.active{
+  opacity:1;color:var(--carbon);
+  border-color:var(--hairline-strong);
+  background:rgba(255,255,255,0.55);
+}
+.pal-dots{display:inline-flex;gap:3px}
+.pal-dots span{
+  width:7px;height:7px;border-radius:50%;
+  box-shadow:0 0 0 0.5px rgba(15,35,64,0.18) inset;
+}
+.pal-label{font:inherit;color:inherit}
+
+#minimap .mm-tag{
+  position:absolute;top:6px;left:8px;
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--dust);pointer-events:none;
+}
+
+/* ── recents strip ─────────────────────────────────────────────── */
+#recents-strip{
+  position:absolute;
+  left:calc(32px + 200px + 16px);  /* clear legend */
+  right:calc(32px + 200px + 16px); /* clear minimap */
+  bottom:28px;
+  height:44px;z-index:11;
+  display:flex;align-items:center;gap:12px;
+  pointer-events:none;
+  transition:right 0.55s cubic-bezier(0.22,1,0.36,1);
+}
+#recents-strip > *{pointer-events:auto}
+/* When the drawer is open, push the strip's right edge left in lockstep
+   with the minimap, so chips never disappear under the drawer. */
+#app:has(#panel.open) #recents-strip{
+  right:calc(32px + min(520px, 46vw) + 200px + 16px);
+}
+.rec-label{
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--dust);flex-shrink:0;padding-right:2px;
+}
+#recents-scroller{
+  flex:1;min-width:0;
+  display:flex;align-items:center;gap:6px;
+  overflow-x:auto;overflow-y:hidden;
+  scroll-behavior:smooth;
+  scrollbar-width:thin;scrollbar-color:rgba(24,22,15,0.18) transparent;
+  height:36px;padding:0 4px;
+  /* Soft fade at the scroll edges so chips dissolve into the canvas
+     rather than getting clipped abruptly. */
+  -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+  mask-image:linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+}
+#recents-scroller::-webkit-scrollbar{height:5px}
+#recents-scroller::-webkit-scrollbar-thumb{background:rgba(24,22,15,0.18);border-radius:0}
+#recents-scroller::-webkit-scrollbar-track{background:transparent}
+.rec-chip{
+  flex-shrink:0;
+  display:inline-flex;align-items:center;gap:8px;
+  height:28px;padding:0 4px 0 10px;
+  background:rgba(246,244,238,0.85);backdrop-filter:blur(6px);
+  border:0.5px solid var(--hairline-strong);border-radius:0;
+  cursor:pointer;font:inherit;color:var(--carbon);
+  transition:background 0.12s,border-color 0.12s;
+}
+.rec-chip:hover{background:rgba(255,255,255,0.95);border-color:var(--carbon)}
+.rec-chip .rec-code{
+  font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:0.04em;color:var(--carbon);
+}
+.rec-chip .rec-name{
+  font-family:'Space Grotesk',sans-serif;font-size:12px;color:var(--dust);
+  max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.rec-x{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;margin-left:2px;
+  border-radius:50%;background:transparent;
+  color:var(--dust);font-size:13px;line-height:1;cursor:pointer;
+  transition:background 0.12s,color 0.12s;
+  flex-shrink:0;
+}
+.rec-x:hover{background:rgba(24,22,15,0.10);color:var(--carbon)}
+.rec-empty{
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--dust);opacity:0.55;
+}
+
+/* ── tooltip ───────────────────────────────────────────────────── */
+#tip{
+  position:absolute;pointer-events:none;z-index:40;display:none;
+  background:var(--carbon);color:var(--vellum-1);
+  font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.04em;
+  padding:6px 10px;border-radius:0;white-space:nowrap;
+  box-shadow:0 8px 24px rgba(24,22,15,0.18);
+}
+#tip .tc{color:rgba(235,238,242,0.55);margin-right:8px}
+#tip .tm{color:rgba(235,238,242,0.45);margin-left:8px;font-size:9.5px;letter-spacing:0.10em;text-transform:uppercase}
+
+/* ── passport panel ───────────────────────────────────────────── */
+#panel{
+  position:absolute;top:0;right:0;bottom:0;width:520px;max-width:46vw;
+  background:linear-gradient(180deg,var(--vellum-1) 0%,var(--vellum-2) 100%);
+  border-left:0.5px solid var(--hairline-strong);
+  box-shadow:-40px 0 60px -24px rgba(24,22,15,0.10);
+  transform:translateX(102%);transition:transform 0.55s cubic-bezier(0.22,1,0.36,1);
+  z-index:35;overflow-y:auto;
+}
+#panel.open{transform:translateX(0)}
+#panel .stripe{display:flex;height:36px;width:100%}
+#panel .stripe span{flex:1;height:100%}
+#panel .close{
+  position:absolute;top:16px;right:18px;z-index:2;
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(255,255,255,0.45);border:0.5px solid var(--hairline);
+  color:var(--carbon);font-size:16px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background 0.15s,border-color 0.15s;
+}
+#panel .close:hover{background:rgba(255,255,255,0.8);border-color:var(--carbon)}
+#panel .pad{padding:40px 44px 56px}
+.pp-eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--dust);margin-bottom:18px;display:flex;gap:12px;align-items:center}
+.pp-eyebrow .pp-dot{width:5px;height:5px;border-radius:50%;background:var(--dust)}
+.pp-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:42px;line-height:1.04;letter-spacing:0.005em;color:var(--carbon);margin-bottom:22px;text-wrap:balance}
+.pp-badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:28px}
+.pp-badge{font-family:'Space Mono',monospace;font-weight:500;font-size:11px;letter-spacing:0.04em;padding:5px 12px;border-radius:100px}
+.pp-rule{height:1px;background:var(--hairline);margin:24px 0;border:none}
+.pp-full-link{display:inline-block;margin-top:16px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--carbon);text-decoration:none;border-bottom:0.5px solid var(--hairline-strong);padding-bottom:2px;transition:border-color 0.15s,opacity 0.15s;opacity:0.6}
+.pp-full-link:hover{opacity:1;border-bottom-color:var(--carbon)}
+.pp-lbl{font-family:'DM Mono',monospace;font-weight:500;font-size:10px;letter-spacing:0.20em;text-transform:uppercase;color:var(--dust);margin-bottom:8px;display:flex;justify-content:space-between;align-items:baseline}
+.pp-lbl .pp-lbl-meta{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:none;color:var(--dust);opacity:0.75}
+.pp-body{font-family:'Space Grotesk',sans-serif;font-weight:300;font-size:17px;line-height:1.55;letter-spacing:-0.003em;color:#3c3a30;margin-bottom:24px;text-wrap:pretty}
+.pp-poles{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:6px}
+.pp-pole{padding:14px 14px 12px;background:rgba(255,255,255,0.32);border:0.5px solid var(--hairline);border-radius:0}
+.pp-pole .pl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.20em;text-transform:uppercase;color:var(--dust);margin-bottom:6px}
+.pp-pole .pv{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:400;line-height:1.5;color:var(--carbon)}
+.pp-2col{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
+.pp-2col .pv-mono{font-family:'Space Mono',monospace;font-size:12px;color:var(--carbon);letter-spacing:0.02em}
+.pp-nbrs{display:flex;flex-wrap:wrap;gap:6px}
+.pp-nbr{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.06em;padding:5px 10px;border-radius:0;border:0.5px solid var(--hairline-strong);background:rgba(255,255,255,0.4);color:var(--carbon);cursor:pointer;transition:all 0.15s}
+.pp-nbr .nb-name{color:var(--dust);margin-left:6px}
+.pp-nbr:hover{border-color:var(--carbon);background:var(--carbon);color:var(--vellum-1)}
+.pp-nbr:hover .nb-name{color:rgba(235,238,242,0.7)}
+.pp-meta{display:flex;justify-content:space-between;margin-top:32px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--dust)}
+
+/* ── tree view ────────────────────────────────────────────────── */
+#tree-view{
+  position:absolute;top:64px;left:0;right:0;bottom:0;
+  display:none;flex-direction:column;
+  background:linear-gradient(160deg,var(--vellum-1) 0%,var(--vellum-2) 100%);
+  z-index:20;
+}
+#tree-view.active{display:flex}
+#tree-breadcrumb{
+  height:54px;flex-shrink:0;
+  display:flex;align-items:center;
+  padding:0 32px;
+  border-bottom:0.5px solid var(--hairline);
+  font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+  gap:10px;
+}
+#tree-breadcrumb .crumb{color:var(--dust);background:none;border:none;font:inherit;letter-spacing:inherit;text-transform:inherit;padding:0;cursor:pointer;transition:color 0.18s}
+#tree-breadcrumb .crumb:hover{color:var(--carbon)}
+#tree-breadcrumb .crumb.current{color:var(--carbon)}
+#tree-breadcrumb .sep{color:var(--dust);opacity:0.45}
+#tree-cols{flex:1;display:flex;min-height:0;overflow:hidden}
+.tree-col{
+  display:flex;flex-direction:column;
+  border-right:0.5px solid var(--hairline-strong);
+  overflow-y:auto;
+  min-width:240px;
+  width:280px;flex-shrink:0;
+}
+.tree-col-wide{flex:1;border-right:none;min-width:340px;width:auto}
+.tree-col-header{
+  padding:14px 20px 10px;
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--dust);
+  border-bottom:0.5px solid var(--hairline);
+  position:sticky;top:0;
+  background:rgba(235,238,242,0.92);backdrop-filter:blur(6px);
+  z-index:2;
+  display:flex;justify-content:space-between;align-items:baseline;
+}
+.tree-col-header em{font-style:normal;color:var(--carbon)}
+.tree-layer-row,.tree-block-row,.tree-element-row{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 20px;
+  border-bottom:0.5px solid var(--hairline);
+  cursor:pointer;
+  transition:background 0.12s;
+  position:relative;
+}
+.tree-layer-row:hover,.tree-block-row:hover,.tree-element-row:hover{
+  background:rgba(24,22,15,0.04);
+}
+.tree-layer-row.active,.tree-block-row.active{
+  background:rgba(24,22,15,0.05);
+}
+.tree-layer-row.active::before,.tree-block-row.active::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--carbon);
+}
+.tree-row-left-accent{
+  width:3px;height:36px;border-radius:0;flex-shrink:0;
+}
+.tree-row-body{flex:1;min-width:0}
+.tree-row-name{
+  font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:14px;color:var(--carbon);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.tree-row-desc{
+  font-family:'DM Mono',monospace;font-size:11px;color:var(--dust);margin-top:3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.tree-row-count{
+  font-family:'Space Mono',monospace;font-size:11px;color:var(--dust);
+  margin-left:auto;white-space:nowrap;
+}
+.tree-empty-hint{
+  padding:24px 20px;
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--dust);
+  line-height:1.6;
+}
+#tree-filter-bar{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 20px;
+  border-bottom:0.5px solid var(--hairline);
+  background:rgba(235,238,242,0.6);
+  flex-wrap:wrap;
+}
+.tree-filter-group{display:flex;align-items:center;gap:6px}
+.tree-filter-label{
+  font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--dust);
+}
+.tree-filter-chip{
+  background:transparent;border:0.5px solid var(--hairline-strong);
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.10em;text-transform:uppercase;
+  padding:4px 9px;color:var(--dust);cursor:pointer;border-radius:0;
+  transition:background 0.12s,color 0.12s,border-color 0.12s;
+}
+.tree-filter-chip:hover{color:var(--carbon)}
+.tree-filter-chip.on{background:var(--carbon);color:var(--vellum-1);border-color:var(--carbon)}
+#tree-filter-status{
+  margin-left:auto;font-family:'Space Mono',monospace;font-size:10px;color:var(--dust);
+}
+.tree-element-row{padding:12px 20px}
+.tree-element-row.dimmed{opacity:0.32}
+.tree-element-row.flash{animation:treeFlash 0.8s ease-out 1}
+@keyframes treeFlash{
+  0%{background:rgba(24,22,15,0.16)}
+  100%{background:transparent}
+}
+.tree-el-code{
+  font-family:'Space Mono',monospace;font-size:11px;color:var(--dust);
+  min-width:46px;
+}
+.tree-el-name{
+  font-family:'Space Grotesk',sans-serif;font-size:14px;color:var(--carbon);flex:1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.tree-el-mml{display:flex;gap:6px;flex-shrink:0}
+.mml-badge{
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;
+  padding:3px 8px;border-radius:0;border:0.5px solid currentColor;
+  white-space:nowrap;
+}
+.mml-1{color:var(--core-dark);background:var(--core-tint)}
+.mml-2{color:var(--derived-dark);background:var(--derived-tint)}
+.mml-3{color:var(--quantum-dark);background:var(--quantum-tint)}
+.mml-4{color:var(--emotional-dark);background:var(--emotional-tint)}
+.mml-5{color:#7B7869;background:rgba(123,120,105,0.08)}
+.tree-el-arrow{color:var(--dust);font-family:'Space Mono',monospace;font-size:12px}
+.tree-el-meta-bar{
+  padding:10px 20px;
+  font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--dust);text-align:center;
+  border-top:0.5px solid var(--hairline);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   DARK-MODE EXPLORER OVERRIDES — ALL scoped to body.is-explorer
+   Tree View is completely untouched; it sees none of these rules.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Body background — dark space behind the shader */
+body.is-explorer { background: #0d1117; }
+
+/* Topbar hairline */
+body.is-explorer #topbar::after {
+  background: rgba(232, 228, 220, 0.10);
+}
+
+/* Explorer-specific surfaces: minimap, zoom controls, legend,
+   subbar, recents strip — swap vellum fills for dark glass */
+body.is-explorer #minimap,
+body.is-explorer #zoom-controls,
+body.is-explorer #legend,
+body.is-explorer #subbar,
+body.is-explorer #recents-strip {
+  background: rgba(13, 17, 23, 0.72);
+  border-color: rgba(232, 228, 220, 0.12);
+  color: rgba(232, 228, 220, 0.85);
+}
+
+/* Topbar itself — shared element, only dark when Explorer is active */
+body.is-explorer #topbar {
+  background: rgba(13, 17, 23, 0.60);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+body.is-explorer #topbar .lockup,
+body.is-explorer #topbar .viewswitch,
+body.is-explorer #topbar #search,
+body.is-explorer #topbar #mml-filter {
+  color: rgba(232, 228, 220, 0.85);
+}
+body.is-explorer #topbar #search,
+body.is-explorer #topbar #mml-filter {
+  background: rgba(232, 228, 220, 0.07);
+  border-color: rgba(232, 228, 220, 0.18);
+}
+body.is-explorer #topbar .viewswitch button[aria-pressed="true"] {
+  background: rgba(232, 228, 220, 0.90);
+  color: #0d1117;
+}
+
+/* Passport sidebar panel */
+body.is-explorer #panel {
+  background: rgba(13, 17, 23, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-color: rgba(232, 228, 220, 0.12);
+  color: rgba(232, 228, 220, 0.85);
+}
+
+/* Palette switcher — dark glass in Explorer, vellum in Tree */
+body.is-explorer #palette-switcher {
+  background: rgba(13, 17, 23, 0.60);
+  border-color: rgba(232, 228, 220, 0.12);
+}
+body.is-explorer .pal-btn { color: rgba(232, 228, 220, 0.50); opacity: 1; }
+body.is-explorer .pal-btn:hover { color: rgba(232, 228, 220, 0.85); opacity: 1; }
+body.is-explorer .pal-btn.active {
+  color: rgba(232, 228, 220, 0.92);
+  background: rgba(232, 228, 220, 0.10);
+  border-color: rgba(232, 228, 220, 0.25);
+  opacity: 1;
+}
+
+/* Override hardcoded vellum rgba fills in Explorer-specific elements */
+body.is-explorer .rec-chip {
+  background: rgba(13, 17, 23, 0.72);
+  border-color: rgba(232, 228, 220, 0.18);
+  color: rgba(232, 228, 220, 0.85);
+}
+body.is-explorer .rec-chip:hover {
+  background: rgba(232, 228, 220, 0.10);
+  border-color: rgba(232, 228, 220, 0.40);
+}
+body.is-explorer .rec-chip .rec-code { color: rgba(232, 228, 220, 0.85); }
+body.is-explorer .rec-chip .rec-name { color: rgba(232, 228, 220, 0.55); }
+body.is-explorer .rec-label { color: rgba(232, 228, 220, 0.45); }
+body.is-explorer .rec-x { color: rgba(232, 228, 220, 0.45); }
+body.is-explorer .rec-x:hover { background: rgba(232, 228, 220, 0.12); color: rgba(232, 228, 220, 0.85); }
+body.is-explorer #zoom-controls button { color: rgba(232, 228, 220, 0.85); }
+body.is-explorer #zoom-controls button:hover { background: rgba(232, 228, 220, 0.08); }
+body.is-explorer #zoom-controls .zlbl { color: rgba(232, 228, 220, 0.45); border-color: rgba(232, 228, 220, 0.12); }
+body.is-explorer #legend .lg-title { color: rgba(232, 228, 220, 0.55); }
+body.is-explorer #legend .lg-row { color: rgba(232, 228, 220, 0.85); }
+body.is-explorer #legend .lg-label { color: rgba(232, 228, 220, 0.55); }
+body.is-explorer #legend .lg-meta { color: rgba(232, 228, 220, 0.85); }
+body.is-explorer .bc .crumb { color: rgba(232, 228, 220, 0.55); }
+body.is-explorer .bc .crumb:hover { color: rgba(232, 228, 220, 0.90); }
+body.is-explorer .bc .crumb.current { color: rgba(232, 228, 220, 0.90); }
+body.is-explorer .bc .sep { color: rgba(232, 228, 220, 0.30); }
+body.is-explorer .statusline { color: rgba(232, 228, 220, 0.45); }
+body.is-explorer .statusline em { color: rgba(232, 228, 220, 0.85); }
+body.is-explorer .statusline .zoom { color: rgba(232, 228, 220, 0.85); }
+body.is-explorer .statusline .pulse { background: rgba(232, 228, 220, 0.85); }
+body.is-explorer #search-dd {
+  background: rgba(13, 17, 23, 0.95);
+  border-color: rgba(232, 228, 220, 0.18);
+}
+body.is-explorer .dd-row { border-color: rgba(232, 228, 220, 0.08); }
+body.is-explorer .dd-row:hover, body.is-explorer .dd-row.cur { background: rgba(232, 228, 220, 0.07); }
+body.is-explorer .dd-row .code { color: rgba(232, 228, 220, 0.85); }
+body.is-explorer .dd-row .name { color: rgba(232, 228, 220, 0.85); }
+body.is-explorer .dd-row .meta { color: rgba(232, 228, 220, 0.45); }
+body.is-explorer .dd-empty { color: rgba(232, 228, 220, 0.45); }
+body.is-explorer .dd-section { color: rgba(232, 228, 220, 0.35); background: rgba(232, 228, 220, 0.03); border-color: rgba(232, 228, 220, 0.08); }
+body.is-explorer #search { background: rgba(232, 228, 220, 0.07); border-color: rgba(232, 228, 220, 0.18); color: rgba(232, 228, 220, 0.85); }
+body.is-explorer #search::placeholder { color: rgba(232, 228, 220, 0.35); }
+body.is-explorer #search:focus { border-color: rgba(232, 228, 220, 0.60); background: rgba(232, 228, 220, 0.10); }
+body.is-explorer #mml-filter { background: rgba(232, 228, 220, 0.07); border-color: rgba(232, 228, 220, 0.18); color: rgba(232, 228, 220, 0.85); }
+
+/* Panel interior text elements */
+body.is-explorer .pp-eyebrow { color: rgba(232, 228, 220, 0.55); }
+body.is-explorer .pp-title { color: rgba(232, 228, 220, 0.95); }
+body.is-explorer .pp-body { color: rgba(232, 228, 220, 0.80); }
+body.is-explorer .pp-lbl { color: rgba(232, 228, 220, 0.55); }
+body.is-explorer .pp-rule { background: rgba(232, 228, 220, 0.12); }
+body.is-explorer .pp-pole { background: rgba(232, 228, 220, 0.05); border-color: rgba(232, 228, 220, 0.10); }
+body.is-explorer .pp-pole .pl { color: rgba(232, 228, 220, 0.45); }
+body.is-explorer .pp-pole .pv { color: rgba(232, 228, 220, 0.85); }
+body.is-explorer .pp-nbr { background: rgba(232, 228, 220, 0.06); border-color: rgba(232, 228, 220, 0.18); color: rgba(232, 228, 220, 0.85); }
+body.is-explorer .pp-nbr .nb-name { color: rgba(232, 228, 220, 0.50); }
+body.is-explorer .pp-nbr:hover { background: rgba(232, 228, 220, 0.88); color: #0d1117; }
+body.is-explorer .pp-nbr:hover .nb-name { color: rgba(13, 17, 23, 0.65); }
+body.is-explorer .pp-meta { color: rgba(232, 228, 220, 0.45); }
+body.is-explorer .pp-full-link { color: rgba(232, 228, 220, 0.70); border-color: rgba(232, 228, 220, 0.25); }
+body.is-explorer .pp-full-link:hover { opacity: 1; border-color: rgba(232, 228, 220, 0.70); color: rgba(232, 228, 220, 0.95); }
+body.is-explorer #panel .close { background: rgba(232, 228, 220, 0.10); border-color: rgba(232, 228, 220, 0.18); color: rgba(232, 228, 220, 0.85); }
+body.is-explorer #panel .close:hover { background: rgba(232, 228, 220, 0.20); border-color: rgba(232, 228, 220, 0.40); }
+body.is-explorer .lockup .wm { color: rgba(232, 228, 220, 0.85); }
+body.is-explorer .lockup .wm .sep { color: rgba(232, 228, 220, 0.40); }
+body.is-explorer .lockup .wm .lab { color: rgba(232, 228, 220, 0.40); }
+body.is-explorer .lockup .wm .mode { color: rgba(232, 228, 220, 0.85); border-color: rgba(232, 228, 220, 0.25); }
+body.is-explorer .viewswitch { border-color: rgba(232, 228, 220, 0.25); }
+body.is-explorer .viewswitch button { color: rgba(232, 228, 220, 0.50); border-color: rgba(232, 228, 220, 0.18); }
+body.is-explorer .viewswitch button:hover { color: rgba(232, 228, 220, 0.85); }
+body.is-explorer #minimap .mm-tag { color: rgba(232, 228, 220, 0.45); }
+
+/* #tip tooltip is already dark (var(--carbon) bg, light text) — no change needed */
+</style>
+</head>
+<body>
+
+<template id="__bundler_thumbnail" data-bg-color="#E7E6E0">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="vellum" x1="0" x2="1" y1="0" y2="1">
+        <stop offset="0%" stop-color="#EBEEF2"/>
+        <stop offset="100%" stop-color="#E3DED8"/>
+      </linearGradient>
+    </defs>
+    <rect width="1200" height="800" fill="url(#vellum)"/>
+    <!-- Four orrery systems on an asymmetric constellation —
+         Core top-left, Derived top-right, Quantum bottom-just-left,
+         Emotional far-bottom-right. Each system shows nested orbit
+         rings with planet dots on each ring. -->
+    <g fill="none" stroke-width="1">
+      <!-- Core (top, far-left) — 8 orbit rings -->
+      <g transform="translate(320,320)" stroke="#3C91D6">
+        <circle r="46" opacity="0.22"/>
+        <circle r="62" opacity="0.22"/>
+        <circle r="78" opacity="0.22"/>
+        <circle r="94" opacity="0.22"/>
+        <circle r="110" opacity="0.22"/>
+        <circle r="126" opacity="0.22"/>
+        <circle r="142" opacity="0.22"/>
+        <circle r="158" opacity="0.22"/>
+        <g fill="#3C91D6" stroke="#3C91D6">
+          <circle r="7" fill-opacity="0.3"/>
+          <circle r="3" fill-opacity="1"/>
+        </g>
+        <g fill="#3C91D6" stroke="none">
+          <circle cx="0" cy="-46" r="4"/>
+          <circle cx="59" cy="-19" r="4"/>
+          <circle cx="65" cy="42" r="4"/>
+          <circle cx="22" cy="91" r="4"/>
+          <circle cx="-58" cy="89" r="4"/>
+          <circle cx="-119" cy="38" r="4"/>
+          <circle cx="-127" cy="-62" r="4"/>
+          <circle cx="-54" cy="-148" r="4"/>
+        </g>
+      </g>
+      <!-- Derived (top-right-of-centre) — 12 orbit rings, biggest system -->
+      <g transform="translate(820,320)" stroke="#2EA397">
+        <circle r="46" opacity="0.22"/>
+        <circle r="62" opacity="0.22"/>
+        <circle r="78" opacity="0.22"/>
+        <circle r="94" opacity="0.22"/>
+        <circle r="110" opacity="0.22"/>
+        <circle r="126" opacity="0.22"/>
+        <circle r="142" opacity="0.22"/>
+        <circle r="158" opacity="0.22"/>
+        <circle r="174" opacity="0.22"/>
+        <circle r="190" opacity="0.22"/>
+        <circle r="206" opacity="0.22"/>
+        <circle r="222" opacity="0.22"/>
+        <g fill="#2EA397" stroke="#2EA397">
+          <circle r="7" fill-opacity="0.3"/>
+          <circle r="3" fill-opacity="1"/>
+        </g>
+        <g fill="#2EA397" stroke="none">
+          <circle cx="0" cy="-46" r="4"/>
+          <circle cx="32" cy="-53" r="4"/>
+          <circle cx="63" cy="-46" r="4"/>
+          <circle cx="89" cy="-30" r="4"/>
+          <circle cx="106" cy="29" r="4"/>
+          <circle cx="93" cy="86" r="4"/>
+          <circle cx="50" cy="133" r="4"/>
+          <circle cx="-22" cy="157" r="4"/>
+          <circle cx="-104" cy="139" r="4"/>
+          <circle cx="-170" cy="84" r="4"/>
+          <circle cx="-200" cy="-49" r="4"/>
+          <circle cx="-153" cy="-161" r="4"/>
+        </g>
+      </g>
+      <!-- Quantum (bottom-just-left-of-centre) — 5 orbit rings, smaller -->
+      <g transform="translate(540,650)" stroke="#CC5023">
+        <circle r="46" opacity="0.22"/>
+        <circle r="62" opacity="0.22"/>
+        <circle r="78" opacity="0.22"/>
+        <circle r="94" opacity="0.22"/>
+        <circle r="110" opacity="0.22"/>
+        <g fill="#CC5023" stroke="#CC5023">
+          <circle r="7" fill-opacity="0.3"/>
+          <circle r="3" fill-opacity="1"/>
+        </g>
+        <g fill="#CC5023" stroke="none">
+          <circle cx="0" cy="-46" r="4"/>
+          <circle cx="59" cy="-19" r="4"/>
+          <circle cx="46" cy="63" r="4"/>
+          <circle cx="-50" cy="80" r="4"/>
+          <circle cx="-105" cy="-32" r="4"/>
+        </g>
+      </g>
+      <!-- Emotional (far-bottom-right) — 5 orbit rings -->
+      <g transform="translate(940,640)" stroke="#9A49B8">
+        <circle r="46" opacity="0.22"/>
+        <circle r="62" opacity="0.22"/>
+        <circle r="78" opacity="0.22"/>
+        <circle r="94" opacity="0.22"/>
+        <circle r="110" opacity="0.22"/>
+        <g fill="#9A49B8" stroke="#9A49B8">
+          <circle r="7" fill-opacity="0.3"/>
+          <circle r="3" fill-opacity="1"/>
+        </g>
+        <g fill="#9A49B8" stroke="none">
+          <circle cx="0" cy="-46" r="4"/>
+          <circle cx="59" cy="-19" r="4"/>
+          <circle cx="46" cy="63" r="4"/>
+          <circle cx="-50" cy="80" r="4"/>
+          <circle cx="-105" cy="-32" r="4"/>
+        </g>
+      </g>
+    </g>
+    <text x="600" y="60" text-anchor="middle" font-family="DM Mono, monospace" font-size="22" letter-spacing="6" fill="#0f2340">HES / PASSPORT LIBRARY · ORRERY</text>
+  </svg>
+</template>
+
+<h2 class="sr-only">HES Passport Library — Orrery. A static star-chart of the Human Elements System. Each of the four layers sits as a sun in a 2×2 grid; its blocks orbit it as planets on a perfect ring, and each block's elements orbit it as moons on a smaller ring. All positions are calculated geometrically — no physics, no drift. Neighbor relationships are revealed only on hover.</h2>
+
+<div id="app">
+  <canvas id="shader-bg" aria-hidden="true"></canvas>
+  <header id="topbar">
+    <div class="lockup">
+      <div class="mark" aria-hidden="true"></div>
+      <div class="wm">
+        HES<span class="sep">/</span><span class="lab">LIBRARY</span>
+      </div>
+    </div>
+    <div class="controls">
+      <div id="palette-switcher" role="radiogroup" aria-label="Colour palette">
+        <button class="pal-btn" type="button" data-pal="0" role="radio" aria-checked="false" aria-label="Palette Spec">
+          <span class="pal-dots" aria-hidden="true">
+            <span style="background:#1565c0"></span><span style="background:#43a047"></span><span style="background:#ff8f00"></span><span style="background:#ab47bc"></span>
+          </span>
+          <span class="pal-label">Spec</span>
+        </button>
+        <button class="pal-btn" type="button" data-pal="1" role="radio" aria-checked="false" aria-label="Palette Bright">
+          <span class="pal-dots" aria-hidden="true">
+            <span style="background:#00b4e0"></span><span style="background:#00b88d"></span><span style="background:#fa7a2b"></span><span style="background:#9163e0"></span>
+          </span>
+          <span class="pal-label">Bright</span>
+        </button>
+        <button class="pal-btn" type="button" data-pal="2" role="radio" aria-checked="false" aria-label="Palette Earth">
+          <span class="pal-dots" aria-hidden="true">
+            <span style="background:#65778c"></span><span style="background:#a8806c"></span><span style="background:#ccb576"></span><span style="background:#7dada0"></span>
+          </span>
+          <span class="pal-label">Earth</span>
+        </button>
+        <button class="pal-btn active" type="button" data-pal="3" role="radio" aria-checked="true" aria-label="Palette Earth-2">
+          <span class="pal-dots" aria-hidden="true">
+            <span style="background:#627C99"></span><span style="background:#B27E6B"></span><span style="background:#D69D2B"></span><span style="background:#5BA38B"></span>
+          </span>
+          <span class="pal-label">Earth-2</span>
+        </button>
+      </div>
+      <div class="viewswitch" role="tablist" aria-label="View mode">
+        <button id="btn-explorer" aria-pressed="true">Explorer</button>
+        <button id="btn-tree"     aria-pressed="false">Tree</button>
+      </div>
+      <div class="searchwrap">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" aria-hidden="true">
+          <circle cx="7" cy="7" r="5"></circle><path d="m11 11 4 4"></path>
+        </svg>
+        <input id="search" type="text" placeholder="search elements, codes, blocks…" autocomplete="off"/>
+        <div id="search-dd" role="listbox" aria-label="Search results"></div>
+      </div>
+      <select id="mml-filter" aria-label="MML filter">
+        <option value="">All MML</option>
+        <option value="1">MML-1 · Established</option>
+        <option value="2">MML-2 · Validated</option>
+        <option value="3">MML-3 · Emerging</option>
+        <option value="4">MML-4 · Theoretical</option>
+        <option value="5">MML-5 · Speculative</option>
+      </select>
+    </div>
+  </header>
+
+  <div id="subbar">
+    <nav class="bc" id="bc" aria-label="Breadcrumb"><button class="crumb current">All elements</button></nav>
+    <div class="statusline" id="status">
+      <span><em>343</em> PASSPORTS · <em>4</em> LAYERS · <em>46</em> BLOCKS</span>
+      <span class="zoom" id="zoom-display"><span class="pulse"></span>ZOOM <em id="zk">1.00×</em></span>
+    </div>
+  </div>
+
+  <canvas id="canvas"></canvas>
+
+  <div id="legend" aria-hidden="true">
+    <div class="lg-title"><span>Layers</span><span>elements</span></div>
+    <div class="lg-row" id="lg-core"><div class="lg-dot" style="background:#65778c"></div><div class="lg-label">Core</div><div class="lg-meta">106</div></div>
+    <div class="lg-row" id="lg-derived"><div class="lg-dot" style="background:#a8806c"></div><div class="lg-label">Derived</div><div class="lg-meta">154</div></div>
+    <div class="lg-row" id="lg-quantum"><div class="lg-dot" style="background:#ccb576"></div><div class="lg-label">Quantum</div><div class="lg-meta">40</div></div>
+    <div class="lg-row" id="lg-emotional"><div class="lg-dot" style="background:#7dada0"></div><div class="lg-label">Emotional</div><div class="lg-meta">43</div></div>
+  </div>
+
+  <div id="zoom-controls" aria-label="Zoom controls">
+    <button id="z-in" title="Zoom in" aria-label="Zoom in">+</button>
+    <div class="zlbl" id="zk2">1.0×</div>
+    <button id="z-out" title="Zoom out" aria-label="Zoom out">−</button>
+    <button id="z-reset" title="Reset view" aria-label="Reset view" style="font-size:12px">⤢</button>
+  </div>
+
+  <div id="minimap">
+    <div class="mm-tag">All 343 · drag or click to navigate</div>
+    <canvas id="mm-canvas"></canvas>
+  </div>
+
+  <div id="tip"></div>
+
+  <div id="recents-strip" aria-label="Recently viewed passports">
+    <div class="rec-label">Recent</div>
+    <div id="recents-scroller" role="list"></div>
+  </div>
+
+  <aside id="panel" aria-hidden="true">
+    <div class="stripe" id="pp-stripe"></div>
+    <button class="close" id="pp-close" aria-label="Close passport">✕</button>
+    <div class="pad" id="pp-content"></div>
+  </aside>
+
+  <!-- ── TREE VIEW ── full-screen DOM panel overlaying the canvas ── -->
+  <section id="tree-view" aria-hidden="true">
+    <nav id="tree-breadcrumb" aria-label="Library breadcrumb">
+      <button class="crumb current" data-tb-go="home">Home</button>
+      <span class="sep">›</span>
+      <button class="crumb current">Library</button>
+    </nav>
+    <div id="tree-cols">
+      <div id="tree-layer-col" class="tree-col">
+        <div class="tree-col-header"><span>Layer · <em id="tree-layer-status">1 of 4 selected</em></span></div>
+        <div id="tree-layer-list"></div>
+      </div>
+      <div id="tree-block-col" class="tree-col">
+        <div class="tree-col-header"><span>Blocks in <em id="tree-block-layer-label">CORE</em> · <em id="tree-block-count">0</em></span></div>
+        <div id="tree-block-list"></div>
+      </div>
+      <div id="tree-element-col" class="tree-col tree-col-wide">
+        <div class="tree-col-header"><span>Elements in <em id="tree-el-context">—</em> · <em id="tree-el-count">0</em></span></div>
+        <div id="tree-filter-bar">
+          <div class="tree-filter-group">
+            <span class="tree-filter-label">MML</span>
+            <button class="tree-filter-chip" data-fmml="1">1</button>
+            <button class="tree-filter-chip" data-fmml="2">2</button>
+            <button class="tree-filter-chip" data-fmml="3">3</button>
+            <button class="tree-filter-chip" data-fmml="4">4</button>
+            <button class="tree-filter-chip" data-fmml="5">5</button>
+          </div>
+          <div class="tree-filter-group">
+            <span class="tree-filter-label">Trainability</span>
+            <button class="tree-filter-chip" data-ftr="High">Hi</button>
+            <button class="tree-filter-chip" data-ftr="Mid">Mid</button>
+            <button class="tree-filter-chip" data-ftr="Low">Lo</button>
+          </div>
+          <div class="tree-filter-group">
+            <span class="tree-filter-label">Modifiability</span>
+            <button class="tree-filter-chip" data-fmd="High">Hi</button>
+            <button class="tree-filter-chip" data-fmd="Mid">Mid</button>
+            <button class="tree-filter-chip" data-fmd="Low">Lo</button>
+          </div>
+          <span id="tree-filter-status"></span>
+        </div>
+        <div id="tree-element-list"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Orrery uses only d3-zoom (and the few modules zoom depends on). The
+     full d3-force bundle is no longer needed since positions are static. -->
+<script src="https://cdn.jsdelivr.net/npm/d3-selection@3/dist/d3-selection.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-dispatch@3/dist/d3-dispatch.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-color@3/dist/d3-color.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-interpolate@3/dist/d3-interpolate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-ease@3/dist/d3-ease.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-timer@3/dist/d3-timer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-transition@3/dist/d3-transition.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-drag@3/dist/d3-drag.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-zoom@3/dist/d3-zoom.min.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   HES NETWORK EXPLORER — CONTINUOUS FIELD
+   One shared world. No layer anchors, no block anchors, no halos.
+   Position is entirely emergent from neighbor link forces.
+   Layer identity is color only. Blocks emerge as soft sub-clusters
+   wherever the synthetic neighbor graph naturally clumps. Cross-layer
+   relationships become visible as color mixing between adjacent dots.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── DETERMINISTIC RNG ────────────────────────────────────────────────
+   Override Math.random with a seeded Mulberry32 BEFORE any other code
+   runs. The initial node scatter and d3-force's internal jiggle both
+   read from Math.random, so seeding here makes the entire equilibrium
+   reproducible. Users returning to a session find every element in the
+   same place. Change SEED to scramble. */
+(function(){
+  const SEED = 0x9E3779B9; /* golden ratio constant — arbitrary fixed seed */
+  let s = SEED >>> 0;
+  Math.random = function(){
+    s = (s + 0x6D2B79F5) >>> 0;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+})();
+
+/* ── DATA MODEL (unchanged from God View v1) ───────────────────────── */
+/* Layer definitions. stroke / tint / dark are the hardcoded Earth
+   palette values — the production look. Keep these in sync with the
+   CSS :root variables. */
+const LY=[
+  {id:'core',     label:'Core',     tag:'Hardware, stable', count:106, stroke:'#65778c', tint:'#e4e7eb', dark:'#384252',
+   desc:'The foundational layer. Stable, well-evidenced capacities that underlie all higher cognition — attention, memory, executive control, sensory and motor systems. These elements change slowly and are measurable across the lifespan.'},
+  {id:'derived',  label:'Derived',  tag:'Software',      count:154, stroke:'#a8806c', tint:'#ebe8e6', dark:'#5c463b',
+   desc:'Capacities that grow out of the core layer through experience and culture — cognitive styles, communication, decision-making, identity, belief. They are plastic, shaped by environment, and form the bulk of individual character.'},
+  {id:'quantum',  label:'Quantum',  tag:'Crash States, rupture',    count:40,  stroke:'#ccb576', tint:'#ebe6d8', dark:'#706341',
+   desc:'Discontinuous states that interrupt ordinary function: freeze, collapse, overwhelm, dissociation, panic, shame loops. They are rupture rather than gradient — short-lived but consequential, and often misread as the layers beneath them.'},
+  {id:'emotional',label:'Emotional',tag:'rare, shifting',       count:43,  stroke:'#7dada0', tint:'#d8ebe6', dark:'#456058',
+   desc:'The capacity to hold and manipulate emotional information across time — the workbench of conscious affect. Underpins reasoning about meaning, comprehension of others, and learning from felt experience.'},
+];
+const BL={
+  core:[{id:'B01',name:'Attention & Processing',count:8},{id:'B02',name:'Memory Systems',count:7},{id:'B03',name:'Executive Function',count:9},{id:'B04',name:'Sensory Processing',count:6},{id:'B05',name:'Emotional Core',count:8},{id:'B06',name:'Social Cognition',count:7},{id:'B07',name:'Motor & Coordination',count:5},{id:'B08',name:'Interoception',count:6},{id:'B09',name:'Temporal Processing',count:5},{id:'B10',name:'Reward & Motivation',count:7},{id:'B11',name:'Language Foundation',count:6},{id:'B12',name:'Pattern Recognition',count:8},{id:'B13',name:'Arousal & Energy',count:7},{id:'B14',name:'Biological Rhythms',count:7}],
+  derived:[{id:'BD01',name:'Cognitive Styles',count:12},{id:'BD02',name:'Learning & Adaptation',count:11},{id:'BD03',name:'Emotional Regulation',count:10},{id:'BD04',name:'Social Dynamics',count:13},{id:'BD05',name:'Communication',count:11},{id:'BD06',name:'Creativity & Imagination',count:9},{id:'BD07',name:'Decision Making',count:12},{id:'BD08',name:'Identity & Self',count:10},{id:'BD09',name:'Values & Meaning',count:11},{id:'BD10',name:'Resilience & Coping',count:10},{id:'BD11',name:'Motivation Styles',count:9},{id:'BD12',name:'Metacognition',count:11},{id:'BD13',name:'Interpersonal Patterns',count:12},{id:'BD14',name:'Belief Systems',count:13}],
+  quantum:[{id:'QB01',name:'Freeze States',count:5},{id:'QB02',name:'Collapse Modes',count:4},{id:'QB03',name:'Overwhelm Patterns',count:5},{id:'QB04',name:'Dissociation Types',count:4},{id:'QB05',name:'Rage & Dysregulation',count:4},{id:'QB06',name:'Shutdown States',count:4},{id:'QB07',name:'Spiral Patterns',count:4},{id:'QB08',name:'Panic Architecture',count:4},{id:'QB09',name:'Shame Loops',count:3},{id:'QB10',name:'Trauma Responses',count:3}],
+  emotional:[{id:'EB01',name:'Positive Affect',count:6},{id:'EB02',name:'Negative Affect',count:6},{id:'EB03',name:'Ambivalent States',count:5},{id:'EB04',name:'Social Emotions',count:6},{id:'EB05',name:'Self-Conscious Emotions',count:5},{id:'EB06',name:'Existential Affect',count:5},{id:'EB07',name:'Aesthetic Emotions',count:5},{id:'EB08',name:'Background Emotions',count:5}],
+};
+const DEFS=[
+  'The capacity to hold and manipulate information in mind over short periods — the workbench of conscious thought. Underpins reasoning, comprehension, and learning.',
+  'Latency between stimulus and motor response — the most consistently measurable elementary cognitive capacity across the lifespan.',
+  'Filtering of task-relevant input from competing distractors during goal-directed activity. Modulated by arousal and motivation.',
+  'Capacity to suppress prepotent responses when they conflict with current goals. A cornerstone of executive function.',
+  'The baseline rate at which well-learned mental operations are carried out under controlled conditions.',
+  'Sensitivity to physiological signals arising from the body interior; the somatic substrate of emotional experience.',
+  'The ability to shift attentional focus between different tasks, rules, or mental sets without performance decrement.',
+  'The capacity to maintain focused engagement on a single stimulus stream over extended duration despite fatigue.',
+];
+const POLES_LO=[
+  'Difficulty maintaining engagement under normal conditions; attention drifts within minutes.',
+  'High distractibility, frequent rule-switching errors, weak inhibition of irrelevant input.',
+  'Slow consolidation; retrieval requires repeated cues even for recent material.',
+];
+const POLES_HI=[
+  'Exceptional performance even under high cognitive load or competing stimuli.',
+  'Sustained vigilance through extended duty cycles; resistant to fatigue effects.',
+  'Strong manipulation of held information; flexible recombination under demand.',
+];
+const AUTHORS=['Baddeley','Posner','Diamond','Deisseroth','Davidson','Damasio','Tulving','Anderson','Treisman','Kahneman'];
+const MML_D=[1,1,1,2,2,2,2,3,3,3,4,4,4,5];
+const MML_LABEL=['','Established','Validated','Emerging','Theoretical','Speculative'];
+const NAME_VOCAB=['Stability','Switching','Capacity','Filtering','Control','Speed','Awareness','Flexibility','Threshold','Resonance','Coherence','Drift','Aperture','Latency'];
+
+const ELS=[];
+Object.entries(BL).forEach(([lid,blocks])=>{
+  const px=lid==='core'?'C':lid==='derived'?'D':lid==='quantum'?'Q':'E';
+  let counter=0;
+  blocks.forEach(bl=>{
+    for(let i=0;i<bl.count;i++){
+      counter++;
+      const n=String(counter).padStart(3,'0');
+      const base=bl.name.split(/\s|&/)[0];
+      const suffix=NAME_VOCAB[(i+bl.id.charCodeAt(1))%NAME_VOCAB.length];
+      ELS.push({
+        id:`${px}${n}_${bl.id}`,
+        code:`${px}${n}`,
+        name:`${base} ${suffix}`,
+        layer:lid, block:bl.id, blockName:bl.name,
+        mml:MML_D[(i+counter)%MML_D.length],
+        definition:DEFS[(i+counter)%DEFS.length],
+        poleLow:POLES_LO[(i+counter)%POLES_LO.length],
+        poleHigh:POLES_HI[(i+counter)%POLES_HI.length],
+        trainability:['High','Mid','Low'][(i+counter)%3],
+        modifiability:['High','Mid','High','Low'][(i+counter)%4],
+        author:AUTHORS[(i+counter)%AUTHORS.length],
+        neighbors:[],
+      });
+    }
+  });
+});
+ELS.forEach((el,i)=>{
+  const same=ELS.filter(e=>e.block===el.block&&e.id!==el.id);
+  const diff=ELS.filter(e=>e.layer===el.layer&&e.block!==el.block);
+  const cross=ELS.filter(e=>e.layer!==el.layer);
+  const p=[];
+  if(same.length)p.push(same[Math.abs(i*3)%same.length]);
+  if(same.length>1)p.push(same[Math.abs(i*7+2)%same.length]);
+  if(diff.length)p.push(diff[Math.abs(i*11)%diff.length]);
+  if(i%4===0&&cross.length)p.push(cross[Math.abs(i*13)%cross.length]);
+  el.neighbors=[...new Set(p.filter(x=>x&&x.id!==el.id))].slice(0,4).map(x=>x.code);
+});
+const ELS_BY_CODE = Object.fromEntries(ELS.map(e=>[e.code,e]));
+const LY_BY_ID = Object.fromEntries(LY.map(l=>[l.id,l]));
+const BL_BY_ID = {}; Object.values(BL).flat().forEach(b=>BL_BY_ID[b.id]=b);
+const BLOCK_LAYER = {}; Object.entries(BL).forEach(([lid,blocks])=>{ blocks.forEach(b=>{ BLOCK_LAYER[b.id]=lid; }); });
+
+/* ── BLOCK DESCRIPTIONS (placeholder — client provides real text) ─────
+   Six templates cycled deterministically so every block has a 2–3 sentence
+   description for the sidebar card. Replace this with authored content
+   when wiring up real passport JSON. */
+const BLOCK_DESC_TEMPLATES = [
+  (b, l) => `${b.name} groups the ${b.count} ${l.label} elements concerned with how the system handles signal, decision, and routing under typical conditions. Construct boundaries with adjacent blocks tend to fuzz at developmental transitions and clarify at maturity.`,
+  (b, l) => `${b.count} elements that share a common neuropsychological substrate and tend to co-vary across individuals. ${b.name} sits within the broader ${l.label} layer and is most informative when read against the blocks immediately adjacent to it.`,
+  (b, l) => `These ${b.count} constructs operate together in everyday function and respond to similar interventions. ${b.name} loads on a shared latent factor in factor-analytic work; element-level distinctions become useful for fine-grained clinical or research questions.`,
+  (b, l) => `An MML-mixed block: the ${b.count} elements within range from Established to Speculative. Reading at the block level rather than the element level is sometimes the right resolution, especially for population-scale questions.`,
+  (b, l) => `${b.count} elements concerned with ${b.name.toLowerCase()}. Construct boundaries are clearest at midlife and fuzziest at the developmental edges — early childhood and late-life decline — where adjacent blocks bleed into one another.`,
+  (b, l) => `Internal boundaries within ${b.name} are tighter than between this block and its neighbors in ${l.label}. The ${b.count} elements share measurement strategies and, where established, anatomical localization.`,
+];
+const BLOCK_DESCRIPTIONS = {};
+Object.values(BL).flat().forEach((b, i)=>{
+  const l = LY_BY_ID[BLOCK_LAYER[b.id]];
+  BLOCK_DESCRIPTIONS[b.id] = BLOCK_DESC_TEMPLATES[i % BLOCK_DESC_TEMPLATES.length](b, l);
+});
+
+/* ── ELEMENT RADIUS — same as v1, MML-keyed ─────────────────────────── */
+function elementRadius(e){
+  return 5.5 + (5 - e.mml) * 0.4;
+}
+
+/* ── BUILD SIMULATION NODES — hierarchical gravity ──────────────────
+   Three node populations share one world: 4 layer anchors, 46 block
+   anchors, and 343 element nodes. Layer nodes hold a fixed cross-pattern
+   initial position so the simulation has a head start; block nodes
+   scatter around their layer; element nodes scatter randomly in a small
+   disc. Equilibrium is shaped by the hierarchical link structure
+   (layer→block, block→element) plus the element-neighbor relationships. */
+const INIT_RADIUS = 320;
+const NODES = ELS.map((e, idx)=>{
+  const a = Math.random() * Math.PI * 2;
+  const r = Math.sqrt(Math.random()) * INIT_RADIUS;
+  return {
+    ...e,
+    kind: 'element',
+    r: elementRadius(e),
+    x: Math.cos(a) * r,
+    y: Math.sin(a) * r,
+    vx: 0, vy: 0,
+  };
+});
+const NODES_BY_CODE = Object.fromEntries(NODES.map(n=>[n.code,n]));
+
+/* ── ORRERY GEOMETRY ────────────────────────────────────────────────
+   Each layer is a sun. Each block has a circular TERRITORY around the
+   sun — an annular ring with the visible orbit ring drawn at the
+   planet's orbital radius. The planet sits ON that ring, and its
+   moons cluster around the planet on a small number of compact arcs.
+   At max zoom-out the user sees just suns + the block orbit rings; as
+   the user zooms in, the planets emerge on those rings, and finally
+   the moons spread around each planet.
+
+   Block radius is no longer uniform: each block planet's size scales
+   with its element count so larger blocks read as bigger planets.   */
+const _BLOCKS_FLAT = Object.values(BL).flat();
+const _BLOCK_COUNTS = _BLOCKS_FLAT.map(b => b.count);
+const minBlockCount = Math.min(..._BLOCK_COUNTS);
+const maxBlockCount = Math.max(..._BLOCK_COUNTS);
+/* blockRadius: smallest planet ≈ 5 (clearly larger than a moon = 3),
+   largest ≈ 13 (clearly smaller than a sun = 20). */
+function blockRadius(b){
+  if(maxBlockCount === minBlockCount) return 5;
+  return 5 + ((b.count - minBlockCount) / (maxBlockCount - minBlockCount)) * 8;
+}
+
+const GEO = {
+  sunR: 20,                /* layer node radius */
+  planetR: 5,              /* legacy fallback only — block sizes come from blockRadius(b) */
+  moonR: 3,                /* element node radius */
+  moonOrbitStep: 9,        /* px between consecutive moon arcs */
+  minMoonClearance: 5,     /* gap from planet surface to innermost moon arc */
+  sunClearance: 8,         /* gap from sun surface to innermost block territory */
+  interOrbitGap: 20,       /* gap between adjacent block territories */
+  systemGutter: 50,        /* min clearance between adjacent layer systems */
+  /* How many moons fit on a moon-arc of radius r (around a planet),
+     given GEO.moonR and a minimum inter-moon arc gap. */
+  moonsPerShell: (r) => {
+    const MIN_MOON_GAP = 5;
+    const cap = Math.floor((2 * Math.PI * r) / (GEO.moonR * 2 + MIN_MOON_GAP));
+    return Math.min(4, Math.max(1, cap));
+  },
+  /* Number of moon arcs needed to hold n moons around a planet whose
+     outer surface sits at planetR.  Greedy fill: each successive arc
+     takes as many moons as moonsPerShell(arcRadius) allows. */
+  moonArcCount: (n, planetR) => {
+    if(n <= 0) return 0;
+    let remaining = n, j = 0;
+    while(remaining > 0){
+      const r = GEO.moonArcR(j, planetR);
+      const cap = GEO.moonsPerShell(r);
+      remaining -= cap;
+      j++;
+    }
+    return j;
+  },
+  /* Outermost moon arc radius for a block with n elements (from planet centre). */
+  outerMoonR: (n, planetR=GEO.planetR) => {
+    const arcs = GEO.moonArcCount(n, planetR);
+    if(arcs <= 0) return planetR;
+    return GEO.moonArcR(arcs - 1, planetR);
+  },
+  /* Radius of the j-th moon arc (0-indexed) around a planet of radius planetR. */
+  moonArcR: (j, planetR=GEO.planetR) => planetR + GEO.minMoonClearance + j * GEO.moonOrbitStep,
+};
+
+const LAYER_NODES = LY.map(l => ({
+  id: 'layer__' + l.id,
+  kind: 'layer',
+  layer: l.id,
+  label: l.label,
+  tag: l.tag,
+  desc: l.desc,
+  count: l.count,
+  r: GEO.sunR,
+  x: 0, y: 0,             /* set by computeOrreryPositions() */
+  vx: 0, vy: 0,
+}));
+const LAYER_NODES_BY_ID = Object.fromEntries(LAYER_NODES.map(ln => [ln.layer, ln]));
+
+const BLOCK_NODES = Object.values(BL).flat().map(b => {
+  const lid = BLOCK_LAYER[b.id];
+  return {
+    id: 'block__' + b.id,
+    kind: 'block',
+    layer: lid,
+    blockId: b.id,
+    blockName: b.name,
+    count: b.count,
+    r: blockRadius(b),
+    x: 0, y: 0,           /* set by computeOrreryPositions() */
+    vx: 0, vy: 0,
+  };
+});
+const BLOCK_NODES_BY_ID = Object.fromEntries(BLOCK_NODES.map(bn => [bn.blockId, bn]));
+
+/* ── ELLIPSE ORBIT PARAMS ─────────────────────────────────────────────
+   Pseudo-3D / isometric look: each solar system's orbital plane is viewed
+   at a single angle. All block rings around a given sun share ONE
+   compression and ONE tilt — only the radius changes, exactly like the
+   concentric ellipses in a real solar system diagram viewed from an angle.
+   Likewise, all moon arcs around a given planet share ONE compression and
+   ONE tilt.
+
+   LAYER_ORBIT_PARAMS[l.id]  → { compression, tilt, incl }
+     Applied to EVERY block ring drawn around that layer's sun, and used
+     when placing each block planet on its orbit.
+
+   BLOCK_ORBIT_PARAMS[b.id]  → { compression, tilt, incl }
+     Applied to EVERY moon arc drawn around that block's planet, and used
+     when placing each element moon on its arc.
+
+   Generated with the already-seeded Mulberry32 Math.random() so the
+   layout is fully deterministic.                                         */
+const LAYER_ORBIT_PARAMS = {};
+const BLOCK_ORBIT_PARAMS = {};
+
+(function generateOrbitParams(){
+  /* One orbital-plane orientation per layer sun system.
+
+     compression: raised ~22% from the original range so ellipses are
+       noticeably less squished while still reading as tilted disks.
+       Old range 0.32–0.68 → new range 0.44–0.76.
+
+     tilt: a small seeded-random angle (±~17°) so each of the four sun
+       systems sits on a slightly different orbital plane. All nested
+       elements within a system inherit this exact same tilt, keeping
+       each system internally coherent while the four systems visibly
+       differ from one another.                                         */
+  /* Per-system tilt nudges applied on top of the seeded random value.
+     Negative = counter-clockwise; positive = clockwise.              */
+  const TILT_BIAS = { core: -0.18, derived: 0, quantum: 0, emotional: 0 };
+
+  LY.forEach(l => {
+    const tilt = (Math.random() - 0.5) * 0.60 + (TILT_BIAS[l.id] || 0);
+    LAYER_ORBIT_PARAMS[l.id] = {
+      compression: 0.44 + Math.random() * (0.76 - 0.44),
+      tilt,
+      incl:        0.05 + Math.random() * (0.70 - 0.05),
+    };
+  });
+
+  /* One orbital-plane orientation per block / planet moon system.
+     compression: similarly raised — old 0.38–0.72 → new 0.50–0.80.
+     tilt: copied from the parent layer so every planet and moon arc
+       within a given sun system shares the same orbital plane.        */
+  Object.values(BL).flat().forEach(b => {
+    const layerTilt = LAYER_ORBIT_PARAMS[BLOCK_LAYER[b.id]].tilt;
+    BLOCK_ORBIT_PARAMS[b.id] = {
+      compression: 0.50 + Math.random() * (0.80 - 0.50),
+      tilt:        layerTilt,
+      incl:        0.05 + Math.random() * (0.55 - 0.05),
+    };
+  });
+})();
+
+/* ── ELLIPSE POINT HELPER ─────────────────────────────────────────────
+   Returns {x, y} for a node placed at angle `theta` on an ellipse with
+   semi-major axis `a` and compression ratio `comp` (b = a * comp),
+   rotated by `tilt` radians, centred on parent (px, py).
+   The parent sits at the GEOMETRIC CENTRE — no focus offset.          */
+function ellipsePoint(px, py, a, comp, tilt, theta){
+  const b  = a * comp;
+  const xl = a * Math.cos(theta);
+  const yl = b * Math.sin(theta);
+  return {
+    x: px + xl * Math.cos(tilt) - yl * Math.sin(tilt),
+    y: py + xl * Math.sin(tilt) + yl * Math.cos(tilt),
+  };
+}
+
+/* ── ORRERY POSITION COMPUTATION ─────────────────────────────────────
+   Pure geometry, runs once. After this returns, every node has its
+   final x/y, r, orbitR, and parent coords. No simulation is ever
+   created.
+
+   Rutherford shell packing: blocks no longer sit each on its own
+   ring. Instead, blocks are assigned to concentric SHELLS, and
+   multiple blocks share one shell when their circles fit on it
+   without overlapping. This keeps the whole system more compact and
+   reads as an atom rather than a fanned-out spectrum.
+
+   Per block, the first element sits on the innermost moon orbit
+   (planet edge + minMoonClearance); each subsequent moon arc is
+   moonOrbitStep px further out. Both block-on-shell angles and
+   moon-on-arc angles are seeded-randomised so the layout looks
+   organic, then a short repulsion pass fixes any bunching.        */
+const MIN_BLOCK_GAP = 8;   /* min angular gap (px) between block circles on the same shell */
+
+function computeBlockOrbits(blocks){
+  /* Greedy shell assignment, largest blocks first so the inner shells
+     hold the biggest planets. Each shell can hold as many blocks as
+     fit at that radius without their circles touching, given the
+     largest block circle on the shell and a small angular gap.   */
+  const sized = blocks.map(b => ({
+    block: b,
+    radius: blockRadius(b),
+    outerMoonR: GEO.outerMoonR(b.count, blockRadius(b)),
+  }));
+  /* Sort by descending block radius for greedy fill. */
+  const remaining = sized.slice().sort((a,b) => b.radius - a.radius);
+
+  const shells = [];        /* each shell: { radius, members:[sized] } */
+  /* Start the first shell so the largest planet's INWARD-FACING moon
+     ring clears the sun by sunClearance. The planet centre therefore
+     sits at sunR + sunClearance + outerMoonR + planetR. Without this
+     correction, large planets close to the sun would have their inner
+     moons rendered inside the sun disc. */
+  let shellRadius = GEO.sunR + GEO.sunClearance +
+    (remaining[0] ? remaining[0].outerMoonR + remaining[0].radius : 5);
+
+  while(remaining.length > 0){
+    const members = [];
+    /* maxBlockR is the dominant block radius for capacity / spacing
+       math — we let smaller blocks "join" the shell only if there is
+       room, but we always size capacity off the dominant member.  */
+    const maxBlockR = remaining[0].radius;
+    /* Slot width is the full moon-system diameter (NOT just the planet
+       diameter) plus interOrbitGap, so adjacent planets on the same
+       shell have their moon systems clear of each other. */
+    const maxMoonRForShell = remaining[0].outerMoonR;
+    const capacity = Math.min(4, Math.max(1, Math.floor(
+      (2 * Math.PI * shellRadius) / (2 * maxMoonRForShell + GEO.interOrbitGap)
+    )));
+    for(let i=0; i<capacity && remaining.length>0; i++){
+      members.push(remaining.shift());
+    }
+    shells.push({ radius: shellRadius, members, maxBlockR });
+
+    if(remaining.length > 0){
+      /* Advance the cursor past this shell's moons AND past the next
+         shell's planet circle, leaving an inter-orbit gap. */
+      const maxMoonExtent = members.reduce((m, s) => Math.max(m, s.outerMoonR), 0);
+      const nextMaxR = remaining[0].radius;
+      shellRadius = shellRadius + maxBlockR + maxMoonExtent + GEO.interOrbitGap + nextMaxR;
+    }
+  }
+
+  /* Flatten into an orbits[] array keyed by blockId, plus measure the
+     full system extent for sun placement. */
+  const orbits = [];
+  let totalSystemR = GEO.sunR;
+  shells.forEach(shell => {
+    const memberMaxMoon = shell.members.reduce((m, s) => Math.max(m, s.outerMoonR), 0);
+    shell.members.forEach(s => {
+      orbits.push({
+        blockId:    s.block.id,
+        orbitR:     shell.radius,
+        planetR:    s.radius,
+        outerMoonR: s.outerMoonR,
+      });
+    });
+    const shellExtent = shell.radius + shell.maxBlockR + memberMaxMoon + 6;
+    if(shellExtent > totalSystemR) totalSystemR = shellExtent;
+  });
+
+  return { orbits, shells, totalSystemR };
+}
+
+/* Sun positions — compact 2×2 constellation for landscape desktops.
+   Core top-left, Derived top-right, Quantum bottom-centre-left,
+   Emotional bottom-right. All four read as one coherent group.
+
+   Ellipses-variant override: with tilt = 0 the visual footprint of
+   each system is an ellipse whose minor (vertical) axis is
+   compression × systemRadius ≈ 0.50 × systemRadius. Using the full
+   circular radius for clearance over-estimates the required vertical
+   gap by 2×. We correct by scaling each system radius by
+   ELLIPSE_FACTOR before computing minimum clearance distances, so the
+   packer allows systems to be much closer vertically while still
+   preventing actual ellipse overlap.                                  */
+function computeSunPositions(systemRadii){
+  const proposed = {
+    core:      { x: -210, y:  -60 },
+    derived:   { x:  240, y:  -80 },
+    quantum:   { x:  -25, y:   95 },
+    emotional: { x:  200, y:  190 },
+  };
+  const pairs = [
+    ['core','derived'], ['core','quantum'], ['core','emotional'],
+    ['derived','quantum'], ['derived','emotional'], ['quantum','emotional'],
+  ];
+  /* Compression range is 0.44–0.76 (avg ~0.60). ELLIPSE_FACTOR must
+     match that average so the packer grants the right clearance for
+     the actual ellipse footprint in all directions.                   */
+  const ELLIPSE_FACTOR = 0.60;
+  let scale = 1;
+  pairs.forEach(([a, b]) => {
+    const dx = proposed[a].x - proposed[b].x;
+    const dy = proposed[a].y - proposed[b].y;
+    const dist = Math.hypot(dx, dy);
+    const need = (systemRadii[a] + systemRadii[b]) * ELLIPSE_FACTOR + GEO.systemGutter;
+    if(need / dist > scale) scale = need / dist;
+  });
+  const out = {};
+  Object.keys(proposed).forEach(k => {
+    out[k] = { x: proposed[k].x * scale, y: proposed[k].y * scale };
+  });
+  return out;
+}
+
+/* Repulsion pass for nodes sharing a single circular orbit. After
+   random jitter, two nodes on the same ring may end up too close;
+   we run a small number of iterations of pairwise angular nudges to
+   restore at least `minArcGap` radians of separation between any
+   two nodes. minArcGap is keyed off the largest node radius and the
+   ring radius so the result is geometry-consistent.
+
+   `items` is an array of objects with .angle and .nodeR (in world
+   units). orbitR is the ring radius. mutates items[].angle.       */
+function repulseOnRing(items, orbitR, iterations=3){
+  if(items.length < 2 || orbitR <= 0) return;
+  for(let it=0; it<iterations; it++){
+    for(let i=0; i<items.length; i++){
+      for(let j=i+1; j<items.length; j++){
+        const a = items[i], b = items[j];
+        let d = b.angle - a.angle;
+        /* wrap to [-π, π] */
+        while(d >  Math.PI) d -= Math.PI*2;
+        while(d < -Math.PI) d += Math.PI*2;
+        const sign = d >= 0 ? 1 : -1;
+        const sep  = Math.abs(d);
+        const rMax = Math.max(a.nodeR, b.nodeR);
+        /* arc-gap requirement: minimum chord must clear 2*rMax + small pad */
+        const minArcGap = (2 * rMax + 2) / orbitR;
+        if(sep < minArcGap){
+          const fix = (minArcGap - sep) / 2;
+          a.angle -= sign * fix;
+          b.angle += sign * fix;
+        }
+      }
+    }
+  }
+}
+
+function computeOrreryPositions(){
+  /* 1. Compute per-layer block orbital packing and total system radii. */
+  const layerOrbits = {};
+  const layerShells = {};
+  const systemRadii = {};
+  LY.forEach(l => {
+    const blocks = BL[l.id];                  /* canonical order */
+    const { orbits, shells, totalSystemR } = computeBlockOrbits(blocks);
+    layerOrbits[l.id]  = orbits;
+    layerShells[l.id]  = shells;
+    systemRadii[l.id]  = totalSystemR;
+  });
+  /* 2. Place layer suns based on measured system extents. */
+  const sunPos = computeSunPositions(systemRadii);
+  LAYER_NODES.forEach(ln => {
+    const p = sunPos[ln.layer];
+    ln.x = p.x;
+    ln.y = p.y;
+    ln.r = GEO.sunR;
+    ln.systemR = systemRadii[ln.layer];
+  });
+  /* 3. Place block planets on their assigned shell with jitter +
+     repulsion. Each shell gets a random angular offset so adjacent
+     layers don't all start their inner planet at "12 o'clock". */
+  LY.forEach(l => {
+    const sun    = LAYER_NODES_BY_ID[l.id];
+    const shells = layerShells[l.id];
+    shells.forEach(shell => {
+      const shellAngleOffset = (Math.random() * Math.PI * 2);
+      const n = shell.members.length;
+      const maxJitterScale = 0.6;
+      /* Build a placement record per member; mutate the BLOCK_NODES
+         after repulsion is finished. */
+      const placed = shell.members.map((s, i) => {
+        const base = (i / n) * Math.PI * 2 + shellAngleOffset;
+        const jitter = (Math.random() - 0.5) * maxJitterScale * (2 * Math.PI / n);
+        return {
+          block: s.block,
+          radius: s.radius,
+          outerMoonR: s.outerMoonR,
+          angle: base + jitter,
+          nodeR: s.radius,
+        };
+      });
+      repulseOnRing(placed, shell.radius, 3);
+      placed.forEach(p => {
+        const bn  = BLOCK_NODES_BY_ID[p.block.id];
+        const op  = LAYER_ORBIT_PARAMS[l.id];   /* shared plane for all blocks in this system */
+        const ep  = ellipsePoint(sun.x, sun.y, shell.radius, op.compression, op.tilt, p.angle);
+        bn.x          = ep.x;
+        bn.y          = ep.y;
+        bn.r          = p.radius;
+        bn.orbitR     = shell.radius;        /* planet sits ON this ring */
+        bn.outerMoonR = p.outerMoonR;
+        bn.parentX    = sun.x;
+        bn.parentY    = sun.y;
+        bn.angle      = p.angle;
+      });
+    });
+  });
+  /* 4. Place element moons — packed on concentric arcs around the planet.
+     The number of moons per arc is computed dynamically from the arc
+     radius (via GEO.moonsPerShell) — moons are NOT capped at a fixed
+     count, so larger arcs hold more moons. Each arc is angle-jittered
+     and repulsed; a final post-layout pass bumps any still-overlapping
+     moon to the next arc out. */
+  LY.forEach(l => {
+    BL[l.id].forEach(b => {
+      const planet   = BLOCK_NODES_BY_ID[b.id];
+      const elements = NODES.filter(n => n.block === b.id);
+      const count    = elements.length;
+      if(count === 0) return;
+
+      /* Bucket elements into arcs greedily by capacity at each arc radius. */
+      const arcs = [];   /* each: { radius, members:[el] } */
+      let remaining = elements.slice();
+      let j = 0;
+      while(remaining.length > 0){
+        const r = GEO.moonArcR(j, planet.r);
+        const cap = GEO.moonsPerShell(r);
+        const take = remaining.splice(0, cap);
+        arcs.push({ radius: r, members: take, arcIdx: j });
+        j++;
+      }
+
+      arcs.forEach(arc => {
+        const n = arc.members.length;
+        const arcAngleOffset = Math.random() * Math.PI * 2;
+        const placed = arc.members.map((el, i) => {
+          const base = (i / n) * Math.PI * 2 + arcAngleOffset;
+          const jitter = (Math.random() - 0.5) * 0.4 * (2 * Math.PI / n);
+          return { el, angle: base + jitter, nodeR: GEO.moonR };
+        });
+        repulseOnRing(placed, arc.radius, 3);
+        placed.forEach(p => {
+          const mp  = BLOCK_ORBIT_PARAMS[b.id];  /* shared plane for all moon arcs in this system */
+          const ep  = ellipsePoint(planet.x, planet.y, arc.radius, mp.compression, mp.tilt, p.angle);
+          p.el.x        = ep.x;
+          p.el.y        = ep.y;
+          p.el.r        = GEO.moonR;
+          p.el.orbitR   = arc.radius;
+          p.el.arcIdx   = arc.arcIdx;
+          p.el.parentX  = planet.x;
+          p.el.parentY  = planet.y;
+          p.el.angle    = p.angle;
+        });
+      });
+
+      /* Post-layout overlap fix: scan moons around this planet and, if
+         any two are closer than 2·moonR + 3 px, push the OUTER one to
+         the next arc. O(n²) with n ≤ ~13, negligible. */
+      const moons = elements.slice();
+      const overlapDist = GEO.moonR * 2 + 3;
+      for(let pass=0; pass<3; pass++){
+        let moved = false;
+        for(let i=0; i<moons.length; i++){
+          for(let k=i+1; k<moons.length; k++){
+            const a = moons[i], c = moons[k];
+            const dx = c.x - a.x, dy = c.y - a.y;
+            const d = Math.hypot(dx, dy);
+            if(d < overlapDist){
+              /* outer = the one with greater orbitR (or, if tied, c) */
+              const outer = (c.orbitR >= a.orbitR) ? c : a;
+              outer.arcIdx = (outer.arcIdx || 0) + 1;
+              const newR = GEO.moonArcR(outer.arcIdx, planet.r);
+              outer.orbitR = newR;
+              const _mp = BLOCK_ORBIT_PARAMS[b.id];  /* same shared plane */
+              const _ep = ellipsePoint(planet.x, planet.y, newR, _mp.compression, _mp.tilt, outer.angle);
+              outer.x = _ep.x;
+              outer.y = _ep.y;
+              moved = true;
+            }
+          }
+        }
+        if(!moved) break;
+      }
+
+      /* Update planet.outerMoonR in case overlap-pass pushed a moon
+         further out than the originally allocated arcs. */
+      let maxArcR = planet.outerMoonR || 0;
+      moons.forEach(m => { if(m.orbitR > maxArcR) maxArcR = m.orbitR; });
+      planet.outerMoonR = maxArcR;
+    });
+  });
+}
+computeOrreryPositions();
+
+/* The full simulation population (still used for bounds and minimap). */
+const ALL_NODES = [...LAYER_NODES, ...BLOCK_NODES, ...NODES];
+
+/* ── EDGES — element-to-element relationships (existing 3 categories) ── */
+const EDGES_INTRA  = [];
+const EDGES_XBLOCK = [];
+const EDGES_XLAYER = [];
+const ALL_EDGES    = [];
+const seenEdge = new Set();
+NODES.forEach(n=>{
+  (n.neighbors||[]).forEach(nc=>{
+    const t = NODES_BY_CODE[nc];
+    if(!t) return;
+    const key = n.code < t.code ? n.code+'|'+t.code : t.code+'|'+n.code;
+    if(seenEdge.has(key)) return;
+    seenEdge.add(key);
+    const e = { source:n, target:t };
+    if(n.block === t.block)       EDGES_INTRA.push(e);
+    else if(n.layer === t.layer)  EDGES_XBLOCK.push(e);
+    else                          EDGES_XLAYER.push(e);
+    ALL_EDGES.push(e);
+  });
+});
+
+/* Structural hierarchy is encoded geometrically (computeOrreryPositions
+   sets every node's x/y from GEO constants). ALL_EDGES are kept for
+   on-hover neighbor highlighting only — they're never used by any
+   simulation, since there is no simulation. */
+
+/* ── DYNAMIC WORLD BOUNDS — measured from current node positions ────── */
+let WORLD = { minX:-INIT_RADIUS, maxX:INIT_RADIUS, minY:-INIT_RADIUS, maxY:INIT_RADIUS };
+function recomputeBounds(){
+  let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
+  for(let i=0;i<ALL_NODES.length;i++){
+    const n = ALL_NODES[i];
+    if(n.x < minX) minX = n.x;
+    if(n.x > maxX) maxX = n.x;
+    if(n.y < minY) minY = n.y;
+    if(n.y > maxY) maxY = n.y;
+  }
+  const pad = 80;
+  WORLD = { minX: minX-pad, maxX: maxX+pad, minY: minY-pad, maxY: maxY+pad };
+}
+
+/* ── DEFAULTS — hardcoded production constants ──────────────────────── */
+const TW = {
+  /* Hardcoded Earth palette — matches LY[].stroke. */
+  palette: ["#65778c", "#a8806c", "#ccb576", "#7dada0"],
+  linkStrength: 0.32,
+  linkDistance: 62,
+  repelStrength: 50,
+  labelDensity: 1.0,
+  edgeDensity: 1.0,
+  mmlFade: 0.34,
+  tetherStyle: 'solid',
+  showCrossLayer: true,
+  showCrossBlock: true,
+  showLegend: true,
+  showMinimap: true,
+};
+
+/* ── COLOR HELPERS ───────────────────────────────────────────────────── */
+function ha(hex,a){
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+function layerColor(lid){ return LY_BY_ID[lid].stroke; }
+function mmlVis(m){ const floor = TW.mmlFade; const t=(5-m)/4; return 1 - t*(1-floor); }
+
+/* ── CANVAS SETUP ────────────────────────────────────────────────────── */
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d', { alpha: true });
+const mmCanvas = document.getElementById('mm-canvas');
+const mmCtx = mmCanvas.getContext('2d', { alpha: true });
+
+let W=0, H=0, DPR=1;
+function resize(){
+  W = window.innerWidth; H = window.innerHeight;
+  DPR = window.devicePixelRatio || 1;
+  canvas.width = W * DPR; canvas.height = H * DPR;
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  const mmW = 200, mmH = 148;
+  mmCanvas.width = mmW * DPR; mmCanvas.height = mmH * DPR;
+  mmCtx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener('resize', ()=>{ resize(); fitToWorld(false); });
+
+/* ── ZOOM / TRANSFORM ────────────────────────────────────────────────── */
+let transform = d3.zoomIdentity;
+let hoveredNode = null;
+let selectedNode = null;
+let selectedLayerId = null;  /* set only when the layer card is open */
+let selectedBlockId = null;  /* set only when the block card is open */
+let mouseX = -999, mouseY = -999;
+
+const zoom = d3.zoom()
+  .scaleExtent([0.6, 12])
+  .filter(ev => {
+    if(ev.type === 'mousedown' || ev.type === 'touchstart'){
+      const tgt = ev.target;
+      return tgt === canvas;
+    }
+    return !ev.button;
+  })
+  .on('start', () => { canvas.classList.add('drag'); })
+  .on('zoom',  (ev) => { transform = ev.transform; updateZoomUI(); })
+  .on('end',   () => { canvas.classList.remove('drag'); });
+
+d3.select(canvas).call(zoom).on('dblclick.zoom', null);
+
+function fitToWorld(animate=true){
+  const ww = WORLD.maxX - WORLD.minX, wh = WORLD.maxY - WORLD.minY;
+  const pad = 60;
+  const sx = (W - pad*2) / ww, sy = (H - 200) / wh;
+  const k = Math.min(sx, sy) * 0.92;
+  const cx = (WORLD.minX + WORLD.maxX)/2, cy = (WORLD.minY + WORLD.maxY)/2;
+  const t = d3.zoomIdentity.translate(W/2 - cx*k, (H+60)/2 - cy*k).scale(k);
+  const sel = d3.select(canvas);
+  if(animate) sel.transition().duration(700).ease(d3.easeCubicInOut).call(zoom.transform, t);
+  else sel.call(zoom.transform, t);
+}
+function fitK(){
+  const ww = WORLD.maxX - WORLD.minX, wh = WORLD.maxY - WORLD.minY;
+  const sx = (W - 120) / ww, sy = (H - 200) / wh;
+  return Math.min(sx, sy) * 0.92;
+}
+
+function worldToScreen(x,y){ return [transform.applyX(x), transform.applyY(y)]; }
+function screenToWorld(x,y){ return transform.invert([x,y]); }
+
+/* ── FORCE SIMULATION ──────────────────────────────────────────────────
+   Hierarchy in physics: layer nodes hold positions in a wide cross,
+   block nodes orbit their layer via strong short links, element nodes
+   orbit their block via medium links, and the neighbor relationships
+   layer on top as supplementary intra-block cohesion. ManyBody and
+   collide are kind-aware so layer/block nodes carve appropriate room
+   without exploding the field. */
+/* ── NO SIMULATION ────────────────────────────────────────────────────
+   In the orrery variant, positions are computed once by
+   computeOrreryPositions() above and never change. There is no
+   D3-force simulation, no per-tick math, no neighbor springs, no
+   repulsion. `refreshForces` remains as a no-op so applyAll() — which
+   is kept identical to the canonical file — still resolves cleanly. */
+function refreshForces(){ /* no-op in orrery mode */ }
+
+/* ── ZOOM TIER LOGIC — retuned for the solar-system layout ──────────
+   Structure is already legible at god view, so thresholds shift in:
+     T0  k<0.7   full system, layer labels + structural tethers
+     T1  k<1.4   block labels appear, block-element tethers fading in
+     T2  k<2.8   element codes appear
+     T3  k≥2.8   element names + all tethers visible */
+function tier(k){
+  if(k < 0.7) return 0;
+  if(k < 1.4) return 1;
+  if(k < 2.8) return 2;
+  return 3;
+}
+function ramp(k, a, b){ if(k<=a) return 0; if(k>=b) return 1; const t=(k-a)/(b-a); return t*t*(3-2*t); }
+
+/* ── RENDER LOOP ─────────────────────────────────────────────────────── */
+let lastFrame = performance.now();
+let fps = 60, fpsAcc = 0, fpsCount = 0;
+
+function render(now){
+  const dt = now - lastFrame; lastFrame = now;
+  if(dt > 0){ fpsAcc += 1000/dt; fpsCount++; if(fpsCount>=30){ fps = fpsAcc/fpsCount; fpsAcc=0; fpsCount=0; } }
+
+  /* Positions are static — bounds are computed once at init, never here. */
+
+  const k = transform.k;
+  const t = tier(k);
+
+  ctx.clearRect(0,0,W,H);
+
+  ctx.save();
+  ctx.translate(transform.x, transform.y);
+  ctx.scale(k, k);
+
+  const tl = transform.invert([0,0]);
+  const br = transform.invert([W,H]);
+  const view = { minX:tl[0]-20, minY:tl[1]-20, maxX:br[0]+20, maxY:br[1]+20 };
+
+  /* Orbit rings first (faint structural scaffolding), then on-hover
+     neighbor edges, then nodes. */
+  drawOrbitRings(t, k, view);
+  drawEdges(t, k, view);
+  drawNodes(t, k, view);
+
+  ctx.restore();
+
+  drawLabels(t, k);
+
+  if(TW.showMinimap) drawMinimap();
+
+  requestAnimationFrame(render);
+}
+requestAnimationFrame(render);
+
+/* ── EDGES ─────────────────────────────────────────────────────────────
+   Two edge populations: structural tethers (layer↔block, block↔element)
+   visualise the hierarchy, and the three neighbor-relationship edges
+   (intra-block / cross-block / cross-layer) show element-to-element
+   relationships. Selection/hover highlight on top. */
+function drawEdges(t, k, view){
+  /* In orrery mode the structural hierarchy is carried entirely by the
+     orbit rings drawn in drawOrbitRings(). The default state of the
+     canvas has NO neighbor lines at all — they appear only for the
+     hovered or selected element node, so users can summon a node's
+     connections on demand without the field becoming a thicket. */
+  const focus = selectedNode || hoveredNode;
+  if(!focus || focus.kind !== 'element') return;
+  if(t < 1) return; /* no edges at god view even on hover */
+
+  const lcol = layerColor(focus.layer);
+  ctx.lineWidth = 1.2 / k;
+  ctx.setLineDash([3/k, 4/k]);
+  for(let i=0; i<ALL_EDGES.length; i++){
+    const e = ALL_EDGES[i];
+    const s = e.source, tg = e.target;
+    if(s !== focus && tg !== focus) continue;
+    if((s.x < view.minX && tg.x < view.minX) || (s.x > view.maxX && tg.x > view.maxX) ||
+       (s.y < view.minY && tg.y < view.minY) || (s.y > view.maxY && tg.y > view.maxY)) continue;
+    ctx.strokeStyle = ha(lcol, 0.55);
+    ctx.beginPath();
+    ctx.moveTo(s.x, s.y);
+    ctx.lineTo(tg.x, tg.y);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+}
+
+/* ── ORBIT RINGS ─────────────────────────────────────────────────────
+   The structural scaffolding of the orrery. Block rings (the path on
+   which each layer's planets sit) are always visible because they
+   define what a layer IS. Element rings (the path on which each
+   block's moons sit) fade in at mid zoom — at god view they would
+   just be 46 tiny circles drowning out the star pattern. */
+function drawOrbitRings(t, k, view){
+  ctx.setLineDash([]);
+
+  /* ── Block orbit rings — the ring on which each block planet sits,
+     centred on its sun. Drawn at the planet's actual orbit radius
+     (NOT the outer edge of the annular territory), so the planet
+     reads as sitting ON the ring rather than floating inside an
+     annulus. Dashed and faint so the rings recede into the
+     scaffolding. Dash lengths are divided by k so the pattern stays
+     visually consistent across zoom levels. */
+  ctx.lineWidth = 0.5 / k;
+  /* Ellipses variant: all block rings around a given sun share ONE
+     compression and ONE tilt — the "viewing angle" of that solar system's
+     orbital plane. Only the radius differs, producing the concentric-
+     ellipses-on-a-tilted-disk look shown in classic solar system diagrams.
+     Blocks that share the same shell orbitR are deduplicated so only one
+     ring is drawn per shell radius, just as in the original. */
+  LY.forEach(l => {
+    const sun  = LAYER_NODES_BY_ID[l.id];
+    const lcol = layerColor(l.id);
+    const op   = LAYER_ORBIT_PARAMS[l.id];
+    const comp = op ? op.compression : 0.50;
+    const tilt = op ? op.tilt        : 0;
+    const incl = op ? op.incl        : 0.35;
+    const baseOpacity = 0.42;
+    const ringOpacity = baseOpacity * (0.45 + 0.55 * (1 - incl));
+    const seenR = new Set();
+    BL[l.id].forEach(b => {
+      const bn  = BLOCK_NODES_BY_ID[b.id];
+      const key = Math.round(bn.orbitR * 10);
+      if(seenR.has(key)) return;
+      seenR.add(key);
+      ctx.setLineDash([4 / k, 6 / k]);
+      ctx.strokeStyle = ha(lcol, 0.30);
+      ctx.beginPath();
+      ctx.ellipse(sun.x, sun.y, bn.orbitR, bn.orbitR * comp, tilt, 0, Math.PI * 2);
+      ctx.stroke();
+    });
+  });
+  ctx.setLineDash([]);
+
+  /* ── Moon arcs — one ring per concentric arc, centred on its planet
+     (NOT one per moon). They appear once the user zooms in enough that
+     the moon system has real screen presence. Dashed + slightly
+     softer than the block rings. */
+  const moonRingAlpha = ramp(k, 1.0, 2.0) * 0.32;
+  if(moonRingAlpha > 0.005){
+    ctx.lineWidth = 0.4 / k;
+    LY.forEach(l => {
+      const lcol = layerColor(l.id);
+      BL[l.id].forEach(b => {
+        const planet = BLOCK_NODES_BY_ID[b.id];
+        const arcs   = GEO.moonArcCount(b.count, planet.r);
+        if(arcs <= 0) return;
+        const maxR = planet.outerMoonR || GEO.moonArcR(arcs - 1, planet.r);
+        if(planet.x + maxR < view.minX || planet.x - maxR > view.maxX ||
+           planet.y + maxR < view.minY || planet.y - maxR > view.maxY) return;
+        /* All moon arcs around this planet share one orbital-plane
+           orientation — concentric ellipses on the same tilted disk. */
+        const mp    = BLOCK_ORBIT_PARAMS[b.id];
+        const mComp = mp ? mp.compression : 0.55;
+        const mTilt = mp ? mp.tilt        : 0;
+        const mIncl = mp ? mp.incl        : 0.30;
+        const mAlpha = moonRingAlpha * (0.45 + 0.55 * (1 - mIncl));
+        ctx.setLineDash([3 / k, 5 / k]);
+        for(let j=0; j<arcs; j++){
+          const r = GEO.moonArcR(j, planet.r);
+          ctx.strokeStyle = ha(lcol, mAlpha * 0.40);
+          ctx.lineWidth   = 0.4 / k;
+          ctx.beginPath();
+          ctx.ellipse(planet.x, planet.y, r, r * mComp, mTilt, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      });
+    });
+    ctx.setLineDash([]);
+  }
+}
+
+function drawEdgeList(list, view, colorFn, dash){
+  if(dash) ctx.setLineDash(dash); else ctx.setLineDash([]);
+  for(let i=0; i<list.length; i++){
+    const e = list[i];
+    const s = e.source, t = e.target;
+    if((s.x < view.minX && t.x < view.minX) || (s.x > view.maxX && t.x > view.maxX) ||
+       (s.y < view.minY && t.y < view.minY) || (s.y > view.maxY && t.y > view.maxY)) continue;
+    ctx.strokeStyle = colorFn(e);
+    ctx.beginPath();
+    ctx.moveTo(s.x, s.y); ctx.lineTo(t.x, t.y);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+}
+
+/* ── NODES ─────────────────────────────────────────────────────────────
+   Three populations drawn in z-order: elements (bottom), blocks (mid),
+   layers (top). Progressive disclosure by zoom:
+     • Layer suns are always fully visible.
+     • Planets fade in between k=0.40 and k=0.90 — god view shows just
+       suns + orbit rings.
+     • Moons fade in between k=1.80 and k=2.60 — they only appear once
+       the user has zoomed into a planet's local neighbourhood.       */
+function drawNodes(t, k, view){
+  const mfilt = mmlFilter;
+  const sterm = searchTerm;
+
+  /* gentle size boost at god view so element dots remain readable. */
+  const sizeBoost = k < 0.95 ? 1.45 : (k < 1.6 ? 1.2 : 1.0);
+
+  /* Progressive disclosure:
+       At max zoom-out (k≈0.1–0.3), the canvas shows just suns + block
+         territory rings (planetAlpha=0). Each block IS its outer ring.
+       From k≈0.3 to ~0.6 the planet dot emerges in the middle of its
+         ring — "exposing the planet". This range covers the typical
+         fit zoom on most window sizes, so users see planets by default.
+       From k≈1.2 to ~2.0, moons spread around each planet. */
+  const planetAlpha = ramp(k, 0.30, 0.60);
+  const moonAlpha   = ramp(k, 1.20, 2.00);
+
+  /* ── 0. ELEMENT CENTRE DOTS (god-view) ──────────────────────────────
+     Tiny filled circles that mark every element position at low-to-mid
+     zoom (0.6x→~1.3x). Alpha is exactly (1 - moonAlpha), so the dots
+     cross-fade out as the full moon circles fade in — the two
+     representations never stack. Radius is 2 screen-px (2/k in world
+     space) so the dots stay a consistent size across the zoom range. */
+  const dotAlpha = 1 - moonAlpha;
+  if(dotAlpha > 0.01){
+    for(let i=0; i<NODES.length; i++){
+      const n = NODES[i];
+      if(n.x < view.minX || n.x > view.maxX || n.y < view.minY || n.y > view.maxY) continue;
+      const matchMML  = !mfilt || String(n.mml) === mfilt;
+      const matchSrch = !sterm || matchesNode(n, sterm);
+      const dim = (!matchMML || !matchSrch);
+      const lcol = LY_BY_ID[n.layer].stroke;
+      const m = mmlVis(n.mml);
+      ctx.fillStyle = ha(lcol, (dim ? 0.20 : 0.55 + m * 0.45) * dotAlpha);
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, 2 / k, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  /* ── 1. ELEMENT NODES (bottom) ── only when moonAlpha is non-trivial */
+  if(moonAlpha > 0.01){
+    for(let i=0; i<NODES.length; i++){
+      const n = NODES[i];
+      if(n.x < view.minX || n.x > view.maxX || n.y < view.minY || n.y > view.maxY) continue;
+
+      const matchMML  = !mfilt || String(n.mml) === mfilt;
+      const matchSrch = !sterm || matchesNode(n, sterm);
+      const dim = (!matchMML || !matchSrch);
+
+      const l    = LY_BY_ID[n.layer];
+      const lcol = l.stroke;
+      const m    = mmlVis(n.mml);
+      /* Orrery: all moons are uniform size — MML is encoded via opacity. */
+      const baseR     = GEO.moonR * sizeBoost;
+      const baseAlpha = (dim ? 0.15 : (0.50 + m*0.50)) * moonAlpha;
+      const fillAlpha = (dim ? 0.10 : 0.32 + m*0.20)  * moonAlpha;
+
+      /* screen-composite glow pass — radial gradient, no shadowBlur */
+      if(moonAlpha > 0.3){
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        const _mgR = Math.min(9 / k, 18);
+        const _mg  = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, _mgR);
+        _mg.addColorStop(0,   ha(lcol, (dim ? 0.10 : 0.45) * moonAlpha));
+        _mg.addColorStop(1.0, ha(lcol, 0));
+        ctx.fillStyle = _mg;
+        ctx.beginPath(); ctx.arc(n.x, n.y, _mgR, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
+      ctx.fillStyle = ha(lcol, fillAlpha);
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, baseR, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.strokeStyle = ha(lcol, baseAlpha);
+      ctx.lineWidth = (k < 1.6 ? 1.1 : 1.25) / k;
+      ctx.stroke();
+    }
+  }
+
+  /* ── 2. BLOCK NODES (mid) ── only when planetAlpha is non-trivial */
+  if(planetAlpha > 0.01){
+    for(let i=0; i<BLOCK_NODES.length; i++){
+      const bn = BLOCK_NODES[i];
+      if(bn.x < view.minX || bn.x > view.maxX || bn.y < view.minY || bn.y > view.maxY) continue;
+      const lcol  = layerColor(bn.layer);
+      const isHov = (hoveredNode === bn);
+      const isSel = (selectedBlockId === bn.blockId);
+
+      /* screen-composite glow pass — radial gradient, no shadowBlur */
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      const _pgR = Math.min(16 / k, 32);
+      const _pg  = ctx.createRadialGradient(bn.x, bn.y, 0, bn.x, bn.y, _pgR);
+      _pg.addColorStop(0,   ha(lcol, 0.70 * planetAlpha));
+      _pg.addColorStop(0.3, ha(lcol, 0.45 * planetAlpha));
+      _pg.addColorStop(1.0, ha(lcol, 0));
+      ctx.fillStyle = _pg;
+      ctx.beginPath(); ctx.arc(bn.x, bn.y, _pgR, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+
+      /* crisp planet — source-over */
+      ctx.fillStyle = ha(lcol, (isSel ? 0.35 : 0.22) * planetAlpha);
+      ctx.beginPath();
+      ctx.arc(bn.x, bn.y, bn.r, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.strokeStyle = ha(lcol, (isHov || isSel ? 1.0 : 0.75) * planetAlpha);
+      ctx.lineWidth = (isHov || isSel ? 2 : 1.5) / k;
+      ctx.stroke();
+
+      /* selected: outer ring at a comfortable gap so the planet reads
+         as picked even when its name label is offscreen. */
+      if(isSel){
+        ctx.strokeStyle = ha(lcol, 0.85 * planetAlpha);
+        ctx.lineWidth = 1.5 / k;
+        ctx.beginPath();
+        ctx.arc(bn.x, bn.y, bn.r + 5/k, 0, Math.PI*2);
+        ctx.stroke();
+      }
+    }
+  }
+
+  /* ── 3. LAYER NODES (top) ── always fully visible */
+  for(let i=0; i<LAYER_NODES.length; i++){
+    const ln = LAYER_NODES[i];
+    if(ln.x < view.minX || ln.x > view.maxX || ln.y < view.minY || ln.y > view.maxY) continue;
+    const lcol  = layerColor(ln.layer);
+    const isHov = (hoveredNode === ln);
+
+    /* Radial gradient halo — center opaque, edge transparent. Extends
+       to the outermost block orbit so the glow fills the whole system
+       at god view. createRadialGradient uses world coordinates, so it
+       scales automatically with the canvas transform — no ctx.filter
+       gymnastics, no save/restore needed. */
+    const haloR = ln.systemR || (ln.r * 8);
+    const grad = ctx.createRadialGradient(ln.x, ln.y, 0, ln.x, ln.y, haloR);
+    grad.addColorStop(0,    ha(lcol, 0.45));
+    grad.addColorStop(0.06, ha(lcol, 0.28));
+    grad.addColorStop(0.20, ha(lcol, 0.10));
+    grad.addColorStop(1.0,  ha(lcol, 0.00));
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(ln.x, ln.y, haloR, 0, Math.PI * 2);
+    ctx.fill();
+
+    /* Outer disc — hover only or when the layer's own card is open.
+       Default state is just halo + inner dot, so the layer reads as a
+       star rather than a target. selectedLayerId is set ONLY by
+       openLayerCard, so opening a child passport or block card no
+       longer "highlights" this sun. */
+    const isSelected = (selectedLayerId === ln.layer);
+    if(isHov || isSelected){
+      ctx.fillStyle = ha(lcol, 0.15);
+      ctx.beginPath();
+      ctx.arc(ln.x, ln.y, ln.r, 0, Math.PI*2);
+      ctx.fill();
+      ctx.strokeStyle = ha(lcol, 1.0);
+      ctx.lineWidth = (isHov ? 2.5 : 2) / k;
+      ctx.stroke();
+    }
+
+    /* inner dot — always, with screen-composite glow via radial gradient */
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    const _lgR = Math.min(32 / k, 60);
+    const _lg  = ctx.createRadialGradient(ln.x, ln.y, 0, ln.x, ln.y, _lgR);
+    _lg.addColorStop(0,    ha(lcol, 0.85));
+    _lg.addColorStop(0.15, ha(lcol, 0.55));
+    _lg.addColorStop(1.0,  ha(lcol, 0));
+    ctx.fillStyle = _lg;
+    ctx.beginPath(); ctx.arc(ln.x, ln.y, _lgR, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    /* crisp white core — source-over, no shadow */
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    ctx.beginPath(); ctx.arc(ln.x, ln.y, 3, 0, Math.PI * 2); ctx.fill();
+  }
+
+  /* ── HOVER / SELECT rings on top of everything ──
+     Respect progressive disclosure — don't ring an invisible moon. */
+  [hoveredNode, selectedNode].forEach(n=>{
+    if(!n) return;
+    if(n.x < view.minX || n.x > view.maxX || n.y < view.minY || n.y > view.maxY) return;
+    if(n.kind === 'element' && moonAlpha   < 0.05) return;
+    if(n.kind === 'block'   && planetAlpha < 0.05) return;
+    const lcol = layerColor(n.layer);
+    ctx.strokeStyle = ha(lcol, n === selectedNode ? 1 : 0.85);
+    ctx.lineWidth = (n === selectedNode ? 2.6 : 2) / k;
+    const baseR = n.kind === 'element' ? GEO.moonR * sizeBoost : n.r;
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, baseR + 4/k, 0, Math.PI*2);
+    ctx.stroke();
+  });
+}
+
+/* ── LABELS — anchored to live (smoothed) centroids ──────────────────
+   labelHitRects tracks every layer/block label rectangle that was
+   successfully placed this frame, so the click handler can hit-test
+   them and open the layer/block info card on the right. */
+const placedRects = [];
+const labelHitRects = []; /* { rect:{x,y,w,h}, kind:'layer'|'block', id } */
+function rectsOverlap(a,b){ return !(a.x+a.w<b.x || b.x+b.w<a.x || a.y+a.h<b.y || b.y+b.h<a.y); }
+function tryPlace(x,y,w,h, padX=4, padY=2){
+  const r = {x:x-w/2-padX, y:y-h/2-padY, w:w+padX*2, h:h+padY*2};
+  for(let i=0;i<placedRects.length;i++) if(rectsOverlap(r, placedRects[i])) return false;
+  placedRects.push(r); return true;
+}
+function pickLabel(sx, sy){
+  /* iterate newest first so labels drawn on top win */
+  for(let i=labelHitRects.length-1; i>=0; i--){
+    const r = labelHitRects[i].rect;
+    if(sx >= r.x && sx <= r.x + r.w && sy >= r.y && sy <= r.y + r.h) return labelHitRects[i];
+  }
+  return null;
+}
+function measureText(text, font){ ctx.font = font; return ctx.measureText(text).width; }
+
+function drawLabels(t, k){
+  placedRects.length = 0;
+  labelHitRects.length = 0;
+  const density = TW.labelDensity;
+
+  /* tier 1: LAYER labels — anchored to the layer NODE's screen position.
+     The node is always visible, so the label never floats unanchored. */
+  /* Layer labels are always visible at strong opacity. They only fade
+     when zoomed very close (k > 3.5) so element labels can claim space. */
+  /* Orrery: layer labels stay strongly visible across most of the zoom
+     range. They only soften at very close zoom, since the orrery's
+     spread-out star pattern reads better when sun labels persist. */
+  const layerOp = Math.max(0.20, 1 - ramp(k, 3.0, 5.0) * 0.80);
+  const layerSize = k < 0.95 ? 22 : (k < 1.6 ? 32 : (k < 3.0 ? 28 : 22));
+  if(layerOp > 0.04){
+    LY.forEach(l=>{
+      const ln = LAYER_NODES_BY_ID[l.id];
+      if(!ln) return;
+      /* anchor in screen space so the offset from the node ring stays
+         constant regardless of zoom. sx/sy is the center of the label
+         group (name row), positioned above the node. */
+      const [nx, ny] = worldToScreen(ln.x, ln.y);
+      const _tagSizeEst = layerSize < 26 ? 9 : 10;
+      const _cSizeEst   = layerSize < 26 ? 10 : 11;
+      const _halfGroupH = layerSize*0.82 + _cSizeEst/2 + 16;
+      const nodeRadiusPx = ln.r * k;
+      const sx = nx;
+      const sy = ny - (nodeRadiusPx + _halfGroupH + 4);
+      if(sx < -200 || sx > W+200 || sy < -100 || sy > H+100) return;
+
+      ctx.textBaseline='middle';
+      const tagText = l.tag.split(',')[0].toUpperCase();
+      const tagSize = layerSize < 26 ? 9 : 10;
+      const cSize = layerSize < 26 ? 10 : 11;
+      const countText = `${l.count} elements`;
+
+      /* measure all three rows */
+      ctx.font = `500 ${tagSize}px 'DM Mono', monospace`;
+      const tagW = measureText(tagText, ctx.font);
+      ctx.font = `700 ${layerSize}px 'Space Grotesk', sans-serif`;
+      const nameW = measureText(l.label, ctx.font);
+      ctx.font = `400 ${cSize}px 'Space Mono', monospace`;
+      const countW = measureText(countText, ctx.font);
+      const maxW = Math.max(tagW, nameW, countW);
+
+      /* group bounds — single backdrop for the whole label group.
+         Vertical spacing between rows is now noticeably looser. */
+      const tagY   = sy - layerSize*0.82;
+      const nameY  = sy;
+      const countY = sy + layerSize*0.82;
+      const groupTop = tagY   - tagSize/2 - 8;
+      const groupBot = countY + cSize/2   + 8;
+      const groupH = groupBot - groupTop;
+      const bgW = maxW + 28;
+      const groupCy = (groupTop + groupBot) / 2;
+
+      /* atomic placement: backdrop + texts are one group */
+      if(!tryPlace(sx, groupCy, bgW, groupH, 4, 4)) return;
+
+      /* register this rect for label hit-testing (click → openLayerCard) */
+      labelHitRects.push({
+        rect: { x: sx - bgW/2 - 4, y: groupTop - 4, w: bgW + 8, h: groupH + 8 },
+        kind: 'layer',
+        id: l.id,
+      });
+
+      /* frosted vellum backdrop. Canvas 2D can't render real
+         backdrop-filter blur, so a slightly opaque fill plus a soft
+         drop shadow approximates the frosted-glass feel. */
+      ctx.save();
+      const _lyDark = currentView === 'explorer';
+      ctx.shadowColor = _lyDark ? 'rgba(0,0,0,0.00)' : 'rgba(24,22,15,0.06)';
+      ctx.shadowBlur  = _lyDark ? 0 : 14;
+      ctx.shadowOffsetY = _lyDark ? 0 : 1;
+      ctx.fillStyle = _lyDark ? ha('#0d1117', 0.82 * layerOp) : ha('#F6F4EE', 0.61 * layerOp);
+      roundRect(ctx, sx - bgW/2, groupTop, bgW, groupH, 0);
+      ctx.fill();
+      ctx.restore();
+      ctx.strokeStyle = _lyDark ? ha('#E8E4DC', 0.15 * layerOp) : ha('#0f2340', 0.08 * layerOp);
+      ctx.lineWidth = 0.5;
+      roundRect(ctx, sx - bgW/2, groupTop, bgW, groupH, 0);
+      ctx.stroke();
+
+      /* texts on top of backdrop */
+      const labelLeft  = sx - bgW/2 + 8;
+      const labelRight = sx + bgW/2 - 8;
+
+      /* descriptor: right-aligned, flush with the label's top-right corner */
+      ctx.textAlign = 'right';
+      ctx.font = `500 ${tagSize}px 'DM Mono', monospace`;
+      ctx.fillStyle = _lyDark ? ha('#E8E4DC', layerOp * 0.55) : ha('#7B7869', layerOp * 0.9);
+      ctx.fillText(tagText, labelRight, tagY);
+
+      /* title: left-aligned */
+      ctx.textAlign = 'left';
+      ctx.font = `700 ${layerSize}px 'Space Grotesk', sans-serif`;
+      ctx.fillStyle = _lyDark ? ha('#E8E4DC', layerOp * 0.95) : ha('#0f2340', layerOp);
+      ctx.fillText(l.label, labelLeft, nameY);
+
+      /* count: left-aligned */
+      ctx.font = `400 ${cSize}px 'Space Mono', monospace`;
+      ctx.fillStyle = _lyDark ? ha('#E8E4DC', layerOp * 0.55) : ha('#7B7869', layerOp*0.85);
+      ctx.fillText(countText, labelLeft, countY);
+    });
+  }
+
+  /* tier 2: BLOCK labels — anchored to the block NODE's screen position.
+     Fade in slightly earlier than v1 (k > 1.1 instead of 1.3). */
+  /* Block labels appear early — solar-system structure is legible from
+     k≈0.6 onward, so block names are useful much sooner than before. */
+  /* Orrery: block labels appear earlier — planet structure is legible
+     from further out because every block sits on a clear orbital ring. */
+  /* Block (planet) labels appear at moderate zoom. Planets themselves
+     are always visible, so the labels can start fading in around k≈0.2x
+     and be fully visible by k≈0.5x (the natural fit zoom). */
+  /* Three-tier block label disclosure:
+       0.6x → 1.6x  code pill only — colored badge, no backdrop, no name.
+       1.6x → 2.0x  frosted backdrop and block name fade in together.
+     Min zoom is capped at 0.6x so blockCodeOp is already ~0.4 at the
+     zoom floor and fully opaque well before 1.6x. */
+  const blockCodeOp    = ramp(k, 0.50, 0.75) * Math.min(1, 0.4 + density*0.7);
+  const blockBackdropOp = ramp(k, 1.6, 2.0);
+  const blockNameOp    = blockBackdropOp * blockCodeOp;
+  if(blockCodeOp > 0.04){
+    const blockSize = k < 2.0 ? 11 : (k < 3.0 ? 12 : 12);
+    const showName = (blockNameOp > 0.05);
+    /* render order: closer to origin first (so center labels claim space) */
+    const blocks = Object.values(BL).flat().slice().sort((a,b)=>{
+      const ba = BLOCK_NODES_BY_ID[a.id], bb = BLOCK_NODES_BY_ID[b.id];
+      if(!ba || !bb) return 0;
+      return (ba.x*ba.x + ba.y*ba.y) - (bb.x*bb.x + bb.y*bb.y);
+    });
+    blocks.forEach(b=>{
+      const bn = BLOCK_NODES_BY_ID[b.id];
+      if(!bn) return;
+      /* place label group just above the block node ring (screen space) */
+      const [nx, ny] = worldToScreen(bn.x, bn.y);
+      const nodeRadiusPx = bn.r * k;
+      const sx = nx;
+      /* sy is the code-pill area center; the name (if shown) sits below */
+      const sy = ny - (nodeRadiusPx + Math.max(2, Math.min(22, 8 * k)));
+      if(sx < -100 || sx > W+100 || sy < -60 || sy > H+60) return;
+
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      const layerOfBlock = BLOCK_LAYER[b.id];
+      const lcol = layerColor(layerOfBlock);
+      const labelY = sy - 18;
+
+      /* measure code */
+      ctx.font = `500 9.5px 'DM Mono', monospace`;
+      const codeW = measureText(b.id, ctx.font);
+
+      /* measure name (possibly two-line) — only when we'll draw it */
+      let nameW = 0, twoLine = false;
+      let l1='', l2='', l1W=0, l2W=0;
+      if(showName){
+        ctx.font = `500 ${blockSize}px 'Space Grotesk', sans-serif`;
+        nameW = measureText(b.name, ctx.font);
+        twoLine = nameW > 220;
+        if(twoLine){
+          const words = b.name.split(' ');
+          const mid = Math.ceil(words.length/2);
+          l1 = words.slice(0,mid).join(' '); l2 = words.slice(mid).join(' ');
+          l1W = measureText(l1, ctx.font); l2W = measureText(l2, ctx.font);
+        }
+      }
+
+      /* atomic group bounds: code pill always sized; name only when shown */
+      const widthForName = showName ? (twoLine ? Math.max(l1W, l2W) : nameW) : 0;
+      const groupW = Math.max(codeW + 14, widthForName) + 14;
+      const groupTop = labelY - 18;
+      const groupBot = showName
+        ? (twoLine ? labelY + blockSize*1.85 + 4 : labelY + blockSize + 6)
+        : labelY + 2;  /* code-only: keep group height tight */
+      const groupH = groupBot - groupTop;
+      const groupCy = (groupTop + groupBot) / 2;
+
+      if(!tryPlace(sx, groupCy, groupW, groupH, 4, 3)) return;
+
+      /* register block label rect for click → openBlockCard */
+      labelHitRects.push({
+        rect: { x: sx - groupW/2 - 4, y: groupTop - 3, w: groupW + 8, h: groupH + 6 },
+        kind: 'block',
+        id: b.id,
+      });
+
+      /* frosted backdrop — only visible once blockBackdropOp > 0.
+         Below 1.6x the group is just the code pill with no backdrop. */
+      if(blockBackdropOp > 0.02){
+        ctx.save();
+        const _blDark = currentView === 'explorer';
+        ctx.shadowColor = _blDark ? 'rgba(0,0,0,0.00)' : 'rgba(24,22,15,0.04)';
+        ctx.shadowBlur  = _blDark ? 0 : 9;
+        ctx.shadowOffsetY = _blDark ? 0 : 1;
+        ctx.fillStyle = _blDark ? ha('#0d1117', 0.82 * blockBackdropOp * blockCodeOp) : ha('#F6F4EE', 0.52 * blockBackdropOp * blockCodeOp);
+        roundRect(ctx, sx - groupW/2, groupTop, groupW, groupH, 0);
+        ctx.fill();
+        ctx.restore();
+        ctx.strokeStyle = _blDark ? ha('#E8E4DC', 0.15 * blockBackdropOp * blockCodeOp) : ha('#0f2340', 0.06 * blockBackdropOp * blockCodeOp);
+        ctx.lineWidth = 0.5;
+        roundRect(ctx, sx - groupW/2, groupTop, groupW, groupH, 0);
+        ctx.stroke();
+      }
+
+      /* colored code pill on top of backdrop */
+      ctx.font = `500 9.5px 'DM Mono', monospace`;
+      const _cpDark = currentView === 'explorer';
+      ctx.fillStyle = ha(lcol, (_cpDark ? 0.25 : 0.20) * blockCodeOp);
+      roundRect(ctx, sx - codeW/2 - 5, labelY - 9 - 6, codeW + 10, 12, 6);
+      ctx.fill();
+      ctx.fillStyle = _cpDark ? ha(lcol, blockCodeOp * 0.90) : ha(LY_BY_ID[layerOfBlock].dark, blockCodeOp);
+      ctx.fillText(b.id, sx, labelY - 9);
+
+      /* name (only when faded in) */
+      if(showName){
+        ctx.font = `500 ${blockSize}px 'Space Grotesk', sans-serif`;
+        ctx.fillStyle = currentView === 'explorer' ? ha('#E8E4DC', blockNameOp * 0.95) : ha('#0f2340', blockNameOp);
+        if(twoLine){
+          ctx.fillText(l1, sx, labelY + blockSize*0.2);
+          ctx.fillText(l2, sx, labelY + blockSize*1.3);
+        } else {
+          ctx.fillText(b.name, sx, labelY + blockSize*0.6);
+        }
+      }
+    });
+  }
+
+  /* tier 3: ELEMENT codes at k≥2.4, names at k≥4.0 */
+  /* Orrery: element codes ramp in slightly earlier (k 1.6→2.4) since
+     moons sit on clean ring positions and don't visually overlap. */
+  /* Element labels fade in alongside the moons themselves. */
+  const _moonAlpha = ramp(k, 1.40, 2.20);
+  const codeOp = ramp(k, 1.8, 2.6) * _moonAlpha * Math.min(1, 0.4 + density*0.7);
+  if(codeOp > 0.04){
+    const candidates = NODES.slice().sort((a,b)=>{
+      if(a.mml !== b.mml) return a.mml - b.mml;
+      return 0;
+    });
+    const codeSize = 10;
+    candidates.forEach(n=>{
+      const [sx, sy] = worldToScreen(n.x, n.y);
+      if(sx < -40 || sx > W+40 || sy < -30 || sy > H+30) return;
+      const matchMML = !mmlFilter || String(n.mml) === mmlFilter;
+      const matchSrch = !searchTerm || matchesNode(n, searchTerm);
+      const dim = (!matchMML || !matchSrch);
+      const op = (dim ? 0.25 : 1);
+
+      if(codeOp > 0.04){
+        ctx.font = `700 ${codeSize}px 'Space Mono', monospace`;
+        const w = measureText(n.code, ctx.font);
+        const ny = sy + n.r*transform.k + 9;
+        if(tryPlace(sx, ny, w+6, codeSize+4, 3, 2)){
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillStyle = currentView === 'explorer' ? ha('#E8E4DC', codeOp * op * 0.80) : ha('#0f2340', codeOp * op);
+          ctx.fillText(n.code, sx, ny);
+        }
+      }
+      /* Element names are intentionally not drawn on the canvas —
+         titles appear exclusively in the passport panel.            */
+    });
+  }
+}
+
+function roundRect(c, x, y, w, h, r){
+  c.beginPath();
+  c.moveTo(x+r, y);
+  c.lineTo(x+w-r, y); c.quadraticCurveTo(x+w, y, x+w, y+r);
+  c.lineTo(x+w, y+h-r); c.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  c.lineTo(x+r, y+h); c.quadraticCurveTo(x, y+h, x, y+h-r);
+  c.lineTo(x, y+r); c.quadraticCurveTo(x, y, x+r, y);
+}
+
+/* ── MINIMAP — no halos, just node dots + viewport rect ─────────────── */
+let mmDragging = false;
+function mmRect(){
+  const mmW = 200, mmH = 148;
+  const ww = WORLD.maxX - WORLD.minX, wh = WORLD.maxY - WORLD.minY;
+  const sx = mmW / ww, sy = mmH / wh;
+  const s = Math.min(sx, sy) * 0.94;
+  const offX = (mmW - ww*s)/2 - WORLD.minX*s;
+  const offY = (mmH - wh*s)/2 - WORLD.minY*s;
+  return { mmW, mmH, s, offX, offY };
+}
+function drawMinimap(){
+  const { mmW, mmH, s, offX, offY } = mmRect();
+  mmCtx.clearRect(0,0,mmW,mmH);
+  mmCtx.fillStyle = 'rgba(255,255,255,0.18)';
+  mmCtx.fillRect(0,0,mmW,mmH);
+
+  /* z-order: elements (bottom), then blocks, then layers on top. */
+  mmCtx.globalAlpha = 0.78;
+  for(let i=0;i<NODES.length;i++){
+    const n = NODES[i];
+    mmCtx.fillStyle = layerColor(n.layer);
+    mmCtx.fillRect(n.x*s + offX - 0.8, n.y*s + offY - 0.8, 1.6, 1.6);
+  }
+  /* blocks: medium dots (~2.4px) so they read as "planets" in the minimap */
+  mmCtx.globalAlpha = 0.95;
+  for(let i=0;i<BLOCK_NODES.length;i++){
+    const bn = BLOCK_NODES[i];
+    mmCtx.fillStyle = layerColor(bn.layer);
+    mmCtx.beginPath();
+    mmCtx.arc(bn.x*s + offX, bn.y*s + offY, 1.6, 0, Math.PI*2);
+    mmCtx.fill();
+  }
+  /* layers: larger dots with a small dark ring */
+  mmCtx.globalAlpha = 1;
+  for(let i=0;i<LAYER_NODES.length;i++){
+    const ln = LAYER_NODES[i];
+    const cx = ln.x*s + offX, cy = ln.y*s + offY;
+    mmCtx.fillStyle = layerColor(ln.layer);
+    mmCtx.beginPath();
+    mmCtx.arc(cx, cy, 3, 0, Math.PI*2);
+    mmCtx.fill();
+    mmCtx.strokeStyle = 'rgba(24,22,15,0.55)';
+    mmCtx.lineWidth = 0.6;
+    mmCtx.stroke();
+  }
+
+  const tl = transform.invert([0,0]);
+  const br = transform.invert([W,H]);
+  const rx = tl[0]*s + offX, ry = tl[1]*s + offY;
+  const rw = (br[0]-tl[0])*s, rh = (br[1]-tl[1])*s;
+  mmCtx.strokeStyle = '#0f2340';
+  mmCtx.lineWidth = 1.25;
+  mmCtx.strokeRect(rx, ry, rw, rh);
+  mmCtx.fillStyle = 'rgba(24,22,15,0.06)';
+  mmCtx.fillRect(rx, ry, rw, rh);
+}
+function mmClick(ev){
+  const mm = mmCanvas.getBoundingClientRect();
+  const mx = ev.clientX - mm.left, my = ev.clientY - mm.top;
+  const { s, offX, offY } = mmRect();
+  const wx = (mx - offX) / s;
+  const wy = (my - offY) / s;
+  flyTo(wx, wy, transform.k, 480);
+}
+mmCanvas.addEventListener('mousedown', (ev)=>{ mmDragging = true; mmClick(ev); });
+mmCanvas.addEventListener('mousemove', (ev)=>{ if(mmDragging) mmClick(ev); });
+window.addEventListener('mouseup', ()=>{ mmDragging = false; });
+mmCanvas.addEventListener('touchstart', ev=>{ ev.preventDefault(); mmClick(ev.touches[0]); }, {passive:false});
+mmCanvas.addEventListener('touchmove',  ev=>{ ev.preventDefault(); mmClick(ev.touches[0]); }, {passive:false});
+
+/* ── HIT TESTING ──────────────────────────────────────────────────────
+   Hit-tests across all three node kinds. Layer nodes win over block
+   nodes which win over element nodes for any given click point (since
+   they're drawn on top, the user expects clicks to land on the visible
+   element). Sorted iteration handles the tie-breaking. */
+function pickNode(sx, sy){
+  const [wx, wy] = screenToWorld(sx, sy);
+  const k = transform.k;
+  const minScreenHit = 7;
+  /* Respect progressive disclosure: don't pick what the user can't see.
+     Block-territory rings are pickable via their label (handled by
+     pickLabel); the planet DOT only becomes a node-picker target once
+     it has visually emerged. */
+  const planetAlpha = ramp(k, 0.30, 0.60);
+  const moonAlpha   = ramp(k, 1.20, 2.00);
+  /* iterate elements first (least priority), then blocks, then layers,
+     so layer hits naturally override blocks override elements when
+     overlapping. */
+  let best = null, bestD2 = Infinity;
+  const pools = [NODES, BLOCK_NODES, LAYER_NODES];
+  for(let p=0; p<pools.length; p++){
+    const pool = pools[p];
+    if(pool === NODES        && moonAlpha   < 0.1) continue;
+    if(pool === BLOCK_NODES  && planetAlpha < 0.1) continue;
+    for(let i=0; i<pool.length; i++){
+      const n = pool[i];
+      const dx = n.x - wx, dy = n.y - wy;
+      const d2 = dx*dx + dy*dy;
+      const rWorld = Math.max(n.r + 2, minScreenHit / k);
+      if(d2 <= rWorld*rWorld){ best = n; bestD2 = d2; }
+    }
+  }
+  return best;
+}
+
+canvas.addEventListener('mousemove', ev=>{
+  const rect = canvas.getBoundingClientRect();
+  mouseX = ev.clientX - rect.left;
+  mouseY = ev.clientY - rect.top;
+  /* labels take cursor priority — they sit on top of dots visually */
+  const lbl = pickLabel(mouseX, mouseY);
+  if(lbl){
+    if(hoveredNode){ hoveredNode = null; hideTip(); }
+    canvas.classList.add('over-node');
+    return;
+  }
+  const n = pickNode(mouseX, mouseY);
+  if(n !== hoveredNode){
+    hoveredNode = n;
+    canvas.classList.toggle('over-node', !!n);
+    if(n) showTip(ev, n); else hideTip();
+  } else if(n){
+    showTip(ev, n);
+  }
+});
+canvas.addEventListener('mouseleave', ()=>{ hoveredNode = null; hideTip(); canvas.classList.remove('over-node'); });
+
+/* ── CLICK HANDLING ──────────────────────────────────────────────────
+   Window-level pointer events with explicit drag tracking. d3-zoom v7
+   captures the pointer on its own mousedown, which made canvas-scoped
+   `mouseup` listeners unreliable for click detection. Doing this at
+   window scope sidesteps that entirely: we record pointerdown if it
+   started on the canvas, watch for movement, and on pointerup decide
+   whether it was a click or a drag. */
+let _downX=0, _downY=0, _downT=0, _downValid=false, _movedSinceDown=false;
+window.addEventListener('pointerdown', ev=>{
+  if(ev.target !== canvas){ _downValid = false; return; }
+  _downX = ev.clientX; _downY = ev.clientY; _downT = performance.now();
+  _downValid = true; _movedSinceDown = false;
+}, true);
+window.addEventListener('pointermove', ev=>{
+  if(!_downValid) return;
+  const dx = ev.clientX - _downX, dy = ev.clientY - _downY;
+  if(dx*dx + dy*dy > 25) _movedSinceDown = true;
+}, true);
+window.addEventListener('pointerup', ev=>{
+  if(!_downValid) return;
+  _downValid = false;
+  if(_movedSinceDown) return;
+  const dt = performance.now() - _downT;
+  if(dt > 400) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const sx = ev.clientX - rect.left;
+  const sy = ev.clientY - rect.top;
+  if(sx < 0 || sx > W || sy < 0 || sy > H) return;
+
+  /* labels first — they're drawn on top of dots */
+  const lbl = pickLabel(sx, sy);
+  if(lbl){
+    if(lbl.kind === 'layer') openLayerCard(LY_BY_ID[lbl.id]);
+    else if(lbl.kind === 'block') openBlockCard(BL_BY_ID[lbl.id]);
+    return;
+  }
+
+  /* then nodes — dispatch by kind */
+  const n = pickNode(sx, sy);
+  if(n){
+    if(n.kind === 'layer'){
+      openLayerCard(LY_BY_ID[n.layer]);
+    } else if(n.kind === 'block'){
+      openBlockCard(BL_BY_ID[n.blockId]);
+    } else {
+      /* element */
+      if(transform.k >= 2.5) openPassport(n);
+      else flyToNode(n, ()=> openPassport(n));
+    }
+  } else {
+    if(transform.k >= 2.5) closePassport();
+  }
+}, true);
+
+/* ── TOOLTIP ─────────────────────────────────────────────────────────── */
+const tip = document.getElementById('tip');
+function showTip(ev, n){
+  const l = LY_BY_ID[n.layer];
+  let html;
+  if(n.kind === 'layer'){
+    html = `<span class="tc">LAYER</span>${l.label}<span class="tm">${l.count} elements · ${BL[l.id].length} blocks</span>`;
+  } else if(n.kind === 'block'){
+    html = `<span class="tc">${n.blockId}</span>${n.blockName}<span class="tm">${l.label} · ${n.count} elements</span>`;
+  } else {
+    /* Orrery: since neighbor links are hidden by default, surface them
+       in the tooltip so users know connections exist. Compute from
+       ALL_EDGES so the set matches what hover-edge rendering uses. */
+    const nbrs = ALL_EDGES
+      .filter(e => e.source === n || e.target === n)
+      .map(e => e.source === n ? e.target.code : e.source.code)
+      .slice(0, 5)
+      .join(' · ');
+    html = `<span class="tc">${n.code}</span>${n.name}<span class="tm">${l.label} · ${n.block} · MML-${n.mml}</span>` +
+           (nbrs ? `<span class="tm" style="margin-left:0;display:block;margin-top:3px;opacity:0.65">↔ ${nbrs}</span>` : '');
+  }
+  tip.innerHTML = html;
+  tip.style.display = 'block';
+  let x = ev.clientX + 14, y = ev.clientY - 32;
+  if(x + tip.offsetWidth > W - 16) x = ev.clientX - tip.offsetWidth - 14;
+  if(y < 8) y = ev.clientY + 18;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+function hideTip(){ tip.style.display = 'none'; }
+
+/* ── FLY-TO / ZOOM TRANSITIONS ───────────────────────────────────────── */
+function flyTo(wx, wy, k, dur=620){
+  const tgt = d3.zoomIdentity.translate(W/2 - wx*k, (H+60)/2 - wy*k).scale(k);
+  d3.select(canvas).transition().duration(dur).ease(d3.easeCubicInOut).call(zoom.transform, tgt);
+}
+function flyToNode(n, cb){
+  /* Orrery: moons live on small inner orbits inside a much larger
+     system, so flying to one needs a closer zoom than the field view. */
+  const targetK = 4.5;
+  flyTo(n.x, n.y, targetK, 720);
+  if(cb) setTimeout(cb, 720);
+}
+
+/* ── SEARCH ──────────────────────────────────────────────────────────── */
+let searchTerm = '';
+let mmlFilter = '';
+let ddIndex = -1;
+let ddResults = [];
+
+function matchesNode(n, term){
+  const t = term.toLowerCase();
+  return n.name.toLowerCase().includes(t)
+      || n.code.toLowerCase().includes(t)
+      || n.block.toLowerCase().includes(t)
+      || n.blockName.toLowerCase().includes(t);
+}
+
+function searchAll(term){
+  const t = term.toLowerCase();
+  if(!t) return [];
+  const results = [];
+  LY.forEach(l=>{
+    if(l.label.toLowerCase().includes(t) || l.id.includes(t)){
+      results.push({kind:'layer', layer:l});
+    }
+  });
+  Object.values(BL).flat().forEach(b=>{
+    if(b.name.toLowerCase().includes(t) || b.id.toLowerCase().includes(t)){
+      results.push({kind:'block', block:b});
+    }
+  });
+  NODES.forEach(n=>{
+    if(matchesNode(n, t)) results.push({kind:'element', node:n});
+  });
+  return results.slice(0, 40);
+}
+
+const searchEl = document.getElementById('search');
+const ddEl = document.getElementById('search-dd');
+searchEl.addEventListener('input', ()=>{
+  searchTerm = searchEl.value.trim();
+  ddIndex = -1;
+  renderDropdown();
+});
+searchEl.addEventListener('focus', ()=>{
+  if(searchTerm) renderDropdown();
+});
+document.addEventListener('click', ev=>{
+  if(!ev.target.closest('.searchwrap')) ddEl.classList.remove('on');
+});
+searchEl.addEventListener('keydown', ev=>{
+  if(ev.key === 'ArrowDown'){ ev.preventDefault(); ddIndex = Math.min(ddResults.length-1, ddIndex+1); renderDropdown(true); }
+  else if(ev.key === 'ArrowUp'){ ev.preventDefault(); ddIndex = Math.max(0, ddIndex-1); renderDropdown(true); }
+  else if(ev.key === 'Enter'){ ev.preventDefault(); if(ddResults[ddIndex]) chooseResult(ddResults[ddIndex]); else if(ddResults[0]) chooseResult(ddResults[0]); }
+  else if(ev.key === 'Escape'){ ddEl.classList.remove('on'); searchEl.blur(); }
+});
+
+function renderDropdown(keepOpen){
+  ddResults = searchAll(searchTerm);
+  if(!searchTerm || ddResults.length === 0){
+    if(searchTerm){
+      ddEl.innerHTML = `<div class="dd-empty">No matches for "${escapeHtml(searchTerm)}"</div>`;
+      ddEl.classList.add('on');
+    } else {
+      ddEl.classList.remove('on');
+    }
+    return;
+  }
+  let html = '';
+  let lastKind = '';
+  const kindLabel = { layer:'Layers', block:'Blocks', element:'Elements' };
+  ddResults.forEach((r,i)=>{
+    if(r.kind !== lastKind){
+      html += `<div class="dd-section">${kindLabel[r.kind]}</div>`;
+      lastKind = r.kind;
+    }
+    if(r.kind === 'layer'){
+      html += `<div class="dd-row${i===ddIndex?' cur':''}" data-i="${i}"><div class="dot" style="background:${r.layer.stroke}"></div><div class="code">${r.layer.id.toUpperCase().slice(0,4)}</div><div class="name">${r.layer.label}</div><div class="meta">${r.layer.count} els</div></div>`;
+    } else if(r.kind === 'block'){
+      const layer = Object.entries(BL).find(([lid, arr])=>arr.includes(r.block))[0];
+      html += `<div class="dd-row${i===ddIndex?' cur':''}" data-i="${i}"><div class="dot" style="background:${LY_BY_ID[layer].stroke}"></div><div class="code">${r.block.id}</div><div class="name">${r.block.name}</div><div class="meta">${r.block.count} els</div></div>`;
+    } else {
+      html += `<div class="dd-row${i===ddIndex?' cur':''}" data-i="${i}"><div class="dot" style="background:${LY_BY_ID[r.node.layer].stroke}"></div><div class="code">${r.node.code}</div><div class="name">${r.node.name}</div><div class="meta">MML-${r.node.mml}</div></div>`;
+    }
+  });
+  ddEl.innerHTML = html;
+  ddEl.classList.add('on');
+  ddEl.querySelectorAll('.dd-row').forEach(row=>{
+    row.addEventListener('click', ()=>{
+      const i = +row.dataset.i;
+      chooseResult(ddResults[i]);
+    });
+  });
+  if(keepOpen){
+    const cur = ddEl.querySelector('.dd-row.cur');
+    if(cur) cur.scrollIntoView({ block:'nearest' });
+  }
+}
+
+function chooseResult(r){
+  ddEl.classList.remove('on');
+  if(!r) return;
+  /* Tree view: pick result and update tree state instead of flying. */
+  if(typeof currentView !== 'undefined' && currentView === 'tree'){
+    if(r.kind === 'layer'){
+      selectTreeLayer(r.layer.id);
+    } else if(r.kind === 'block'){
+      const lid = BLOCK_LAYER[r.block.id];
+      selectTreeLayer(lid);
+      selectTreeBlock(r.block.id);
+    } else {
+      const n = r.node;
+      const lid = n.layer;
+      selectTreeLayer(lid);
+      selectTreeBlock(n.block);
+      highlightTreeElement(n.code);
+    }
+    searchTerm = ''; searchEl.value = '';
+    return;
+  }
+  /* Explorer: fly to the actual node positions. */
+  if(r.kind === 'layer'){
+    const ln = LAYER_NODES_BY_ID[r.layer.id];
+    searchTerm = ''; searchEl.value = '';
+    if(ln) flyTo(ln.x, ln.y, 0.9, 760);
+  } else if(r.kind === 'block'){
+    const bn = BLOCK_NODES_BY_ID[r.block.id];
+    searchTerm = ''; searchEl.value = '';
+    if(bn) flyTo(bn.x, bn.y, 2.2, 760);
+  } else {
+    const n = r.node;
+    searchTerm = ''; searchEl.value = '';
+    flyToNode(n, ()=> openPassport(n));
+  }
+}
+
+function escapeHtml(s){ return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+document.getElementById('mml-filter').addEventListener('change', e=>{
+  mmlFilter = e.target.value;
+});
+
+/* ── BREADCRUMB / STATUS — k-NEAREST viewport context ────────────────
+   With no fixed anchors, "what cluster am I looking at?" is answered by
+   the modal layer and modal block among the K nodes nearest screen
+   center. This reflects what's actually under the cursor rather than
+   the distance to a phantom anchor. */
+const bcEl = document.getElementById('bc');
+const statusEl = document.getElementById('status');
+const zkEl = document.getElementById('zk');
+const zk2El = document.getElementById('zk2');
+
+function viewportCenterContext(){
+  const k = transform.k;
+  const cw = transform.invert([W/2, H/2]);
+  const K_NEAREST = Math.min(12, NODES.length);
+  /* Find K nearest by partial sort (cheap for 343 nodes). */
+  const arr = new Array(NODES.length);
+  for(let i=0;i<NODES.length;i++){
+    const n = NODES[i];
+    const dx = n.x - cw[0], dy = n.y - cw[1];
+    arr[i] = { n, d2: dx*dx + dy*dy };
+  }
+  arr.sort((a,b)=>a.d2 - b.d2);
+  const near = arr.slice(0, K_NEAREST);
+
+  const layerCount = {};
+  const blockCount = {};
+  near.forEach(({n})=>{
+    layerCount[n.layer] = (layerCount[n.layer]||0)+1;
+    blockCount[n.block] = (blockCount[n.block]||0)+1;
+  });
+  let bestL = null, bestLN = -1;
+  for(const lid in layerCount){
+    if(layerCount[lid] > bestLN){ bestLN = layerCount[lid]; bestL = lid; }
+  }
+  let bestB = null, bestBN = -1;
+  for(const bid in blockCount){
+    if(blockCount[bid] > bestBN){ bestBN = blockCount[bid]; bestB = bid; }
+  }
+  return {
+    k, cw,
+    layer: bestL ? LY_BY_ID[bestL] : LY[0],
+    block: bestB ? BL_BY_ID[bestB] : Object.values(BL)[0][0],
+    layerDominance: bestLN / K_NEAREST,
+    blockDominance: bestBN / K_NEAREST,
+  };
+}
+
+let lastBcSig = '';
+function updateBreadcrumb(){
+  const c = viewportCenterContext();
+  const k = c.k;
+  let sig = `${k.toFixed(2)}`;
+  let html;
+  if(k < 0.95){
+    html = `<button class="crumb current">All elements</button>`;
+    sig += '|all';
+  } else if(k < 1.6){
+    html = `<button class="crumb" data-go="all">All elements</button><span class="sep">›</span><button class="crumb current">${c.layer.label}</button>`;
+    sig += '|'+c.layer.id;
+  } else if(k < 3.0){
+    html = `<button class="crumb" data-go="all">All elements</button><span class="sep">›</span><button class="crumb" data-go="layer:${c.layer.id}">${c.layer.label}</button><span class="sep">›</span><button class="crumb current">${c.block.id} ${c.block.name}</button>`;
+    sig += '|'+c.layer.id+'|'+c.block.id;
+  } else {
+    const sel = selectedNode || (hoveredNode && transform.k>3.0 ? hoveredNode : null);
+    const blockOfSelected = sel ? BL_BY_ID[sel.block] : c.block;
+    const layerOfSelected = sel ? LY_BY_ID[sel.layer] : c.layer;
+    html = `<button class="crumb" data-go="all">All elements</button><span class="sep">›</span><button class="crumb" data-go="layer:${layerOfSelected.id}">${layerOfSelected.label}</button><span class="sep">›</span><button class="crumb" data-go="block:${blockOfSelected.id}">${blockOfSelected.id} ${blockOfSelected.name}</button>` +
+      (sel ? `<span class="sep">›</span><button class="crumb current">${sel.code} ${sel.name}</button>` : `<span class="sep">›</span><button class="crumb current">${blockOfSelected.id}</button>`);
+    sig += '|'+layerOfSelected.id+'|'+blockOfSelected.id+'|'+(sel?sel.code:'-');
+  }
+  if(sig !== lastBcSig){
+    bcEl.innerHTML = html;
+    bcEl.querySelectorAll('.crumb[data-go]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const v = b.dataset.go;
+        if(v === 'all') flyTo(0, 0, fitK(), 720);
+        else if(v.startsWith('layer:')){
+          const id = v.split(':')[1];
+          const ln = LAYER_NODES_BY_ID[id];
+          if(ln) flyTo(ln.x, ln.y, 0.9, 720);
+        } else if(v.startsWith('block:')){
+          const id = v.split(':')[1];
+          const bn = BLOCK_NODES_BY_ID[id];
+          if(bn) flyTo(bn.x, bn.y, 2.2, 720);
+        }
+      });
+    });
+    lastBcSig = sig;
+  }
+}
+
+function updateZoomUI(){
+  const k = transform.k;
+  zkEl.textContent = k.toFixed(2) + '×';
+  zk2El.textContent = k.toFixed(1) + '×';
+  updateBreadcrumb();
+  updateStatusForTier();
+}
+
+function updateStatusForTier(){
+  const t = tier(transform.k);
+  const sl = document.getElementById('status').querySelector('span:first-child');
+  if(!sl) return;
+  if(t === 0){
+    sl.innerHTML = `<em>343</em> PASSPORTS · <em>4</em> LAYERS · <em>46</em> BLOCKS`;
+  } else {
+    const c = viewportCenterContext();
+    if(t === 1){
+      sl.innerHTML = `<em>${c.layer.label.toUpperCase()}</em> · ${c.layer.count} ELEMENTS · ${BL[c.layer.id].length} BLOCKS`;
+    } else if(t === 2){
+      sl.innerHTML = `<em>${c.layer.label.toUpperCase()}</em> · ${c.block.id} ${c.block.name.toUpperCase()} · ${c.block.count} ELEMENTS`;
+    } else {
+      sl.innerHTML = `<em>${c.layer.label.toUpperCase()}</em> · ${c.block.id} · ${c.block.count} ELEMENTS`;
+    }
+  }
+}
+
+/* ── INFO CARDS / PASSPORT PANEL ────────────────────────────────────
+   The same right-side panel hosts three kinds of content:
+     · openLayerCard(layer)   — clicked a layer label
+     · openBlockCard(block)   — clicked a block label
+     · openPassport(node)     — clicked an element node
+   All three share the colored stripe, close button, and slide-in
+   transition. Neighbor / block / element buttons inside the cards are
+   wired through a single delegation pass at the bottom of the function. */
+
+function _bindCardNav(){
+  document.getElementById('pp-content').querySelectorAll('.pp-nbr').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(btn.dataset.code){
+        const n = NODES_BY_CODE[btn.dataset.code];
+        if(n){
+          /* Always fly to the selected neighbor so it's centered and
+             framed, regardless of current zoom. Without this, clicking
+             a neighbor that's off-screen leaves the user disoriented. */
+          flyToNode(n, ()=> openPassport(n));
+        }
+      } else if(btn.dataset.block){
+        const b = BL_BY_ID[btn.dataset.block];
+        if(b){
+          const bn = BLOCK_NODES_BY_ID[b.id];
+          if(bn) flyTo(bn.x, bn.y, 2.2, 620);
+          openBlockCard(b);
+        }
+      } else if(btn.dataset.layer){
+        const l = LY_BY_ID[btn.dataset.layer];
+        if(l){
+          const ln = LAYER_NODES_BY_ID[l.id];
+          if(ln) flyTo(ln.x, ln.y, 0.9, 620);
+          openLayerCard(l);
+        }
+      }
+    });
+  });
+}
+
+function _showPanel(stripeLayer){
+  const stripe = document.getElementById('pp-stripe');
+  const l = stripeLayer;
+  stripe.innerHTML =
+    `<span style="background:${l.stroke}"></span>` +
+    `<span style="background:${l.stroke};opacity:0.70"></span>` +
+    `<span style="background:${l.stroke};opacity:0.45"></span>` +
+    `<span style="background:${l.stroke};opacity:0.20"></span>`;
+  const panel = document.getElementById('panel');
+  panel.classList.add('open'); panel.setAttribute('aria-hidden','false');
+}
+
+function openLayerCard(l){
+  _lastOpenCall = ()=>openLayerCard(l);
+  selectedNode = null;
+  selectedLayerId = l.id;
+  selectedBlockId = null;
+  _showPanel(l);
+  const blocks = BL[l.id];
+  const html =
+    `<div class="pp-eyebrow">
+       <span>${l.id.toUpperCase()} LAYER</span><span class="pp-dot"></span>
+       <span>${l.count} elements · ${blocks.length} blocks</span>
+     </div>
+     <h1 class="pp-title">${l.label}</h1>
+     <div class="pp-badges">
+       <span class="pp-badge" style="background:${l.tint};color:${l.dark}">${l.tag}</span>
+     </div>
+
+     <div class="pp-lbl"><span>Layer description</span></div>
+     <p class="pp-body">${l.desc}</p>
+
+     <hr class="pp-rule"/>
+
+     <div class="pp-lbl">Blocks <span class="pp-lbl-meta">${blocks.length}</span></div>
+     <div class="pp-nbrs">
+       ${blocks.map(b=>`<button class="pp-nbr" data-block="${b.id}">${b.id}<span class="nb-name">${b.name}</span></button>`).join('')}
+     </div>
+
+     <div class="pp-meta">
+       <span>HES · ${l.label} layer</span>
+       <span>v1.0 placeholder</span>
+     </div>`;
+  document.getElementById('pp-content').innerHTML = html;
+  _bindCardNav();
+}
+
+function openBlockCard(b){
+  _lastOpenCall = ()=>openBlockCard(b);
+  selectedNode = null;
+  selectedLayerId = null;
+  selectedBlockId = b.id;
+  const lid = BLOCK_LAYER[b.id];
+  const l = LY_BY_ID[lid];
+  _showPanel(l);
+  const elementsInBlock = NODES.filter(n => n.block === b.id);
+  const layerPill = `background:${l.tint};color:${l.dark}`;
+  const html =
+    `<div class="pp-eyebrow">
+       <span>${b.id}</span><span class="pp-dot"></span>
+       <span>${b.count} elements</span>
+     </div>
+     <h1 class="pp-title">${b.name}</h1>
+     <div class="pp-badges">
+       <button class="pp-badge" style="${layerPill};border:none;cursor:pointer;font:inherit" data-go-layer="${l.id}">${l.label} layer</button>
+     </div>
+
+     <div class="pp-lbl"><span>Block description</span></div>
+     <p class="pp-body">${BLOCK_DESCRIPTIONS[b.id]}</p>
+
+     <hr class="pp-rule"/>
+
+     <div class="pp-lbl">Elements <span class="pp-lbl-meta">${b.count}</span></div>
+     <div class="pp-nbrs">
+       ${elementsInBlock.map(n=>`<button class="pp-nbr" data-code="${n.code}">${n.code}<span class="nb-name">${n.name}</span></button>`).join('')}
+     </div>
+
+     <div class="pp-meta">
+       <span>${l.label} · ${b.id}</span>
+       <span>v1.0 placeholder</span>
+     </div>`;
+  document.getElementById('pp-content').innerHTML = html;
+  _bindCardNav();
+  /* the layer badge is a separate "go to layer" button */
+  const lbtn = document.getElementById('pp-content').querySelector('[data-go-layer]');
+  if(lbtn) lbtn.addEventListener('click', ()=>{
+    const l = LY_BY_ID[lbtn.dataset.goLayer];
+    const ln = LAYER_NODES_BY_ID[l.id];
+    if(ln) flyTo(ln.x, ln.y, 0.9, 620);
+    openLayerCard(l);
+  });
+}
+
+function openPassport(d){
+  _lastOpenCall = ()=>openPassport(d);
+  selectedNode = d;
+  selectedLayerId = null;
+  selectedBlockId = null;
+  pushRecent(d.code);
+  const l = LY_BY_ID[d.layer];
+  _showPanel(l);
+  const mmlHex = l.tint;
+  const mmlTxt = l.dark;
+  const layerPill = `background:${l.tint};color:${l.dark}`;
+  const block = BL_BY_ID[d.block];
+  const html =
+    `<div class="pp-eyebrow">
+       <span>${d.code}</span><span class="pp-dot"></span>
+       <span><button class="pp-nbr" style="padding:2px 8px;font-size:10px" data-block="${d.block}">${d.block} · ${block.name}</button></span>
+     </div>
+     <h1 class="pp-title">${d.name}</h1>
+     <div class="pp-badges">
+       <button class="pp-badge" style="${layerPill};border:none;cursor:pointer;font:inherit" data-go-layer="${l.id}">${l.label} layer</button>
+       <span class="pp-badge" style="background:${mmlHex};color:${mmlTxt}">MML-${d.mml} · ${MML_LABEL[d.mml]}</span>
+     </div>
+
+     <div class="pp-lbl"><span>Definition</span><span class="pp-lbl-meta">est. ${d.author}</span></div>
+     <p class="pp-body">${d.definition}</p>
+
+     <div class="pp-lbl">Poles</div>
+     <div class="pp-poles">
+       <div class="pp-pole"><div class="pl">Low pole</div><div class="pv">${d.poleLow}</div></div>
+       <div class="pp-pole"><div class="pl">High pole</div><div class="pv">${d.poleHigh}</div></div>
+     </div>
+
+     <hr class="pp-rule"/>
+
+     <div class="pp-2col">
+       <div><div class="pp-lbl">Trainability</div><div class="pv-mono">${d.trainability}</div></div>
+       <div><div class="pp-lbl">Modifiability</div><div class="pv-mono">${d.modifiability}</div></div>
+     </div>
+
+     <div class="pp-lbl">Nearest neighbors</div>
+     <div class="pp-nbrs">
+       ${(d.neighbors||[]).map(nc=>{
+          const f = ELS_BY_CODE[nc];
+          return `<button class="pp-nbr" data-code="${nc}">${nc}<span class="nb-name">${f?f.name:''}</span></button>`;
+       }).join('')}
+     </div>
+
+     <a class="pp-full-link" href="/HES/wireframe/library/C003.html" target="_blank" rel="noopener">Open full passport ↗</a>
+
+     <div class="pp-meta">
+       <span>Author · ${d.author}</span>
+       <span>Updated 2024</span>
+     </div>`;
+  document.getElementById('pp-content').innerHTML = html;
+  _bindCardNav();
+  /* layer badge is a separate "go to layer" button */
+  const lbtn = document.getElementById('pp-content').querySelector('[data-go-layer]');
+  if(lbtn) lbtn.addEventListener('click', ()=>{
+    const l = LY_BY_ID[lbtn.dataset.goLayer];
+    const ln = LAYER_NODES_BY_ID[l.id];
+    if(ln) flyTo(ln.x, ln.y, 0.9, 620);
+    openLayerCard(l);
+  });
+}
+function closePassport(){
+  const p = document.getElementById('panel');
+  p.classList.remove('open'); p.setAttribute('aria-hidden','true');
+  selectedNode = null;
+  selectedLayerId = null;
+  selectedBlockId = null;
+  _lastOpenCall = null;
+}
+document.getElementById('pp-close').addEventListener('click', closePassport);
+
+/* ── ZOOM BUTTONS ────────────────────────────────────────────────────── */
+function zoomBy(factor){
+  const cx = W/2, cy = H/2;
+  const k0 = transform.k, k1 = Math.max(0.3, Math.min(9, k0*factor));
+  const wp = transform.invert([cx, cy]);
+  const t = d3.zoomIdentity.translate(cx - wp[0]*k1, cy - wp[1]*k1).scale(k1);
+  d3.select(canvas).transition().duration(360).ease(d3.easeCubicInOut).call(zoom.transform, t);
+}
+document.getElementById('z-in').addEventListener('click', ()=> zoomBy(1.6));
+document.getElementById('z-out').addEventListener('click', ()=> zoomBy(1/1.6));
+document.getElementById('z-reset').addEventListener('click', ()=> { fitToWorld(true); selectedNode = null; });
+
+window.addEventListener('keydown', ev=>{
+  if(ev.target === searchEl) return;
+  if(ev.key === '+' || ev.key === '=') zoomBy(1.4);
+  else if(ev.key === '-' || ev.key === '_') zoomBy(1/1.4);
+  else if(ev.key === '0') fitToWorld(true);
+  else if(ev.key === 'Escape') closePassport();
+});
+
+/* ── VIEWSWITCH (decorative; only Graph implemented) ─────────────────── */
+document.querySelectorAll('.viewswitch button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.viewswitch button').forEach(x=>x.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+  });
+});
+
+/* ── PALETTES ────────────────────────────────────────────────────────
+   Three named colour palettes. Each entry pairs a primary (used for
+   node fill/stroke and strong UI accents) with a tint (used for
+   backgrounds, badge fills, faded states). The "dark" colour used as
+   readable text on a tint background is derived from the primary at
+   render time — see _darkenHex().                                       */
+const PALETTES = [
+  { name:'Spec',   colors:[
+    {primary:'#1565c0', tint:'#e4e7eb'},
+    {primary:'#43a047', tint:'#ebe8e6'},
+    {primary:'#ff8f00', tint:'#ebe2d8'},
+    {primary:'#ab47bc', tint:'#e8d8eb'}
+  ]},
+  { name:'Bright', colors:[
+    {primary:'#00b4e0', tint:'#d8e4eb'},
+    {primary:'#00b88d', tint:'#d8ebe6'},
+    {primary:'#fa7a2b', tint:'#ebddd8'},
+    {primary:'#9163e0', tint:'#e7d8eb'}
+  ]},
+  { name:'Earth',  colors:[
+    {primary:'#65778c', tint:'#e4e7eb'},
+    {primary:'#a8806c', tint:'#ebe8e6'},
+    {primary:'#ccb576', tint:'#ebe6d8'},
+    {primary:'#7dada0', tint:'#d8ebe6'}
+  ]},
+  { name:'Earth-2', colors:[
+    {primary:'#627C99', tint:'#e2e7ed'},
+    {primary:'#B27E6B', tint:'#ece7e3'},
+    {primary:'#D69D2B', tint:'#ede8d2'},
+    {primary:'#5BA38B', tint:'#d4ebe5'}
+  ]}
+];
+let currentPalette = 3; /* default: Earth-2 */
+
+/* Darken a primary hex to produce a readable text colour on the tint
+   background. Factor ~0.55 matches the relative depth of the original
+   stroke→dark mapping closely enough for body-text contrast. */
+function _darkenHex(hex, f=0.55){
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  const dr=Math.round(r*f), dg=Math.round(g*f), db=Math.round(b*f);
+  return '#' + [dr,dg,db].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+
+/* Remember the last opened passport / layer / block card so that a
+   palette switch can re-render its inline-styled colour accents
+   (stripe, badges) without the user having to close + reopen it. */
+let _lastOpenCall = null;
+
+/* ── LEGEND / MINIMAP VISIBILITY + PALETTE APPLICATION ───────────────
+   applyPalette() is called both at boot and on every palette button
+   click. It mutates LY[*].stroke/tint/dark in place — the render loop
+   reads from those fields each frame, so the canvas picks up the new
+   colours on the next animation tick without any simulation restart,
+   layout recompute, or zoom reset. */
+function applyLegendVis(){ document.getElementById('legend').style.display = TW.showLegend? 'flex':'none'; }
+function applyMinimapVis(){ document.getElementById('minimap').style.display = TW.showMinimap? 'block':'none'; }
+function applyPalette(idx){
+  if(typeof idx === 'number') currentPalette = idx;
+  const pal = PALETTES[currentPalette];
+  const keys = ['core','derived','quantum','emotional'];
+  const root = document.documentElement;
+  pal.colors.forEach((c, i)=>{
+    const dark = _darkenHex(c.primary, 0.55);
+    LY[i].stroke = c.primary;
+    LY[i].tint   = c.tint;
+    LY[i].dark   = dark;
+    root.style.setProperty(`--${keys[i]}`,       c.primary);
+    root.style.setProperty(`--${keys[i]}-tint`,  c.tint);
+    root.style.setProperty(`--${keys[i]}-dark`,  dark);
+    const dot = document.querySelector(`#lg-${keys[i]} .lg-dot`);
+    if(dot) dot.style.background = c.primary;
+  });
+  /* Keep TW.palette in sync — it's referenced in a couple of other
+     places (legacy compatibility). */
+  TW.palette = pal.colors.map(c => c.primary);
+
+  /* Update the switcher button states. */
+  document.querySelectorAll('#palette-switcher .pal-btn').forEach((b,i)=>{
+    const on = (i === currentPalette);
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-checked', on ? 'true' : 'false');
+  });
+
+  /* Tree view rows carry inline-style layer accents — refresh them if
+     the tree DOM has been built. Calling them when hidden is harmless.*/
+  if(typeof renderTreeLayerCol === 'function' && document.getElementById('tree-layer-list')){
+    renderTreeLayerCol();
+    renderTreeBlockCol();
+    renderTreeElementCol();
+  }
+
+  /* Re-render currently open passport / layer / block card so its
+     stripe + badge colours pick up the new palette. */
+  if(_lastOpenCall){ try{ _lastOpenCall(); } catch(_){} }
+}
+function applyAll(){ applyPalette(); applyLegendVis(); applyMinimapVis(); refreshForces(); }
+
+/* Wire up palette switcher buttons. Each click swaps the four layer
+   colours; the render loop redraws the canvas on the next frame with
+   no simulation restart, no zoom reset, no layout recompute. */
+document.querySelectorAll('#palette-switcher .pal-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const idx = parseInt(btn.dataset.pal, 10);
+    if(!Number.isNaN(idx)) applyPalette(idx);
+  });
+});
+
+/* tweaks panel removed in Passport Library build — TW constants are now
+   hardcoded above. Keeping `refreshForces` for internal use only. */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TREE VIEW
+   A separate full-screen DOM panel that overlays the canvas. Three
+   columns drill from layer → block → element. Filter chips operate on
+   MML, Trainability and Modifiability. Search results select the
+   matching column rows rather than flying through the canvas. */
+
+let tree_selectedLayer = 'core';
+let tree_selectedBlock = null;
+const tree_filterMML = new Set();
+const tree_filterTr  = new Set();
+const tree_filterMd  = new Set();
+
+function _tShortDesc(b){
+  /* take first ~38 chars of the block description as a subtitle */
+  const d = BLOCK_DESCRIPTIONS[b.id] || '';
+  const first = d.split('.')[0];
+  return first.length > 40 ? first.slice(0,40) + '…' : first;
+}
+
+function renderTreeLayerCol(){
+  const list = document.getElementById('tree-layer-list');
+  list.innerHTML = LY.map(l => {
+    const active = l.id === tree_selectedLayer ? ' active' : '';
+    return `<div class="tree-layer-row${active}" data-layer="${l.id}">
+      <div class="tree-row-left-accent" style="background:${l.stroke}"></div>
+      <div class="tree-row-body">
+        <div class="tree-row-name">${l.label}</div>
+        <div class="tree-row-desc">${l.tag}</div>
+      </div>
+      <div class="tree-row-count">${l.count} →</div>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.tree-layer-row').forEach(row => {
+    row.addEventListener('click', ()=> selectTreeLayer(row.dataset.layer));
+  });
+  /* status: "X of 4 selected" — always shows the active layer name */
+  const idx = LY.findIndex(l => l.id === tree_selectedLayer);
+  document.getElementById('tree-layer-status').textContent =
+    `${idx+1} of 4 · ${LY[idx].label.toUpperCase()}`;
+}
+
+function renderTreeBlockCol(){
+  const list = document.getElementById('tree-block-list');
+  if(!tree_selectedLayer){ list.innerHTML = ''; return; }
+  const blocks = BL[tree_selectedLayer];
+  list.innerHTML = blocks.map(b => {
+    const active = b.id === tree_selectedBlock ? ' active' : '';
+    return `<div class="tree-block-row${active}" data-block="${b.id}">
+      <div class="tree-row-body">
+        <div class="tree-row-name">${b.name}</div>
+        <div class="tree-row-desc">${_tShortDesc(b)}</div>
+      </div>
+      <div class="tree-row-count">${b.count} →</div>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.tree-block-row').forEach(row => {
+    row.addEventListener('click', ()=> selectTreeBlock(row.dataset.block));
+  });
+  document.getElementById('tree-block-layer-label').textContent =
+    LY_BY_ID[tree_selectedLayer].label.toUpperCase();
+  document.getElementById('tree-block-count').textContent = blocks.length;
+}
+
+function _treeElementMatchesFilters(n){
+  let match = true;
+  if(tree_filterMML.size && !tree_filterMML.has(String(n.mml))) match = false;
+  if(tree_filterTr.size  && !tree_filterTr.has(n.trainability)) match = false;
+  if(tree_filterMd.size  && !tree_filterMd.has(n.modifiability)) match = false;
+  /* shared MML filter from topbar */
+  if(mmlFilter && String(n.mml) !== mmlFilter) match = false;
+  return match;
+}
+
+function renderTreeElementCol(){
+  const list = document.getElementById('tree-element-list');
+  const ctxEl = document.getElementById('tree-el-context');
+  const countEl = document.getElementById('tree-el-count');
+  if(!tree_selectedBlock){
+    list.innerHTML = `<div class="tree-empty-hint">Select a block on the left to see its elements.</div>`;
+    ctxEl.textContent = '—';
+    countEl.textContent = '0';
+    return;
+  }
+  const b = BL_BY_ID[tree_selectedBlock];
+  const l = LY_BY_ID[BLOCK_LAYER[b.id]];
+  const elementsInBlock = NODES.filter(n => n.block === b.id);
+  ctxEl.textContent = `${l.label.toUpperCase()} · ${b.name.toUpperCase()}`;
+  countEl.textContent = elementsInBlock.length;
+  const anyFilter = tree_filterMML.size || tree_filterTr.size || tree_filterMd.size || mmlFilter;
+  let filteredCount = 0;
+  list.innerHTML = elementsInBlock.map(n => {
+    const match = _treeElementMatchesFilters(n);
+    if(match) filteredCount++;
+    const dimmed = (anyFilter && !match) ? ' dimmed' : '';
+    return `<div class="tree-element-row${dimmed}" data-code="${n.code}" title="${(n.definition||'').replace(/"/g,'&quot;')}">
+      <div class="tree-el-code">${n.code}</div>
+      <div class="tree-el-name">${n.name}</div>
+      <div class="tree-el-mml"><span class="mml-badge mml-${n.mml}">MML-${n.mml}</span></div>
+      <div class="tree-el-arrow">→</div>
+    </div>`;
+  }).join('') + `<div class="tree-el-meta-bar">· ${elementsInBlock.length} elements in this block ·</div>`;
+  list.querySelectorAll('.tree-element-row').forEach(row => {
+    row.addEventListener('click', ()=>{
+      /* In a real build this navigates to /library/[code]. In the
+         prototype we open the passport panel for inspection. */
+      const n = NODES_BY_CODE[row.dataset.code];
+      if(n) openPassport(n);
+    });
+  });
+  /* filter status */
+  const fs = document.getElementById('tree-filter-status');
+  if(anyFilter){
+    fs.textContent = `${filteredCount} of ${elementsInBlock.length} match`;
+  } else {
+    fs.textContent = '';
+  }
+}
+
+function selectTreeLayer(lid){
+  tree_selectedLayer = lid;
+  tree_selectedBlock = null;
+  renderTreeLayerCol();
+  renderTreeBlockCol();
+  renderTreeElementCol();
+  updateTreeBreadcrumb();
+}
+function selectTreeBlock(bid){
+  tree_selectedBlock = bid;
+  renderTreeBlockCol();
+  renderTreeElementCol();
+  updateTreeBreadcrumb();
+}
+
+function highlightTreeElement(code){
+  /* Scroll the element row into view and flash it briefly. */
+  const list = document.getElementById('tree-element-list');
+  const row = list.querySelector(`[data-code="${code}"]`);
+  if(!row) return;
+  row.scrollIntoView({ block:'center', behavior:'smooth' });
+  row.classList.remove('flash'); void row.offsetWidth; /* restart anim */
+  row.classList.add('flash');
+}
+
+function updateTreeBreadcrumb(){
+  const bc = document.getElementById('tree-breadcrumb');
+  const layer = LY_BY_ID[tree_selectedLayer];
+  const block = tree_selectedBlock ? BL_BY_ID[tree_selectedBlock] : null;
+  let html = `<button class="crumb" data-tb-go="home">Home</button><span class="sep">›</span>`;
+  html += `<button class="crumb${block?'':' current'}" data-tb-go="library">Library</button>`;
+  if(layer){
+    html += `<span class="sep">›</span><button class="crumb${block?'':' current'}" data-tb-go="layer:${layer.id}">${layer.label}</button>`;
+  }
+  if(block){
+    html += `<span class="sep">›</span><button class="crumb current">${block.name}</button>`;
+  }
+  bc.innerHTML = html;
+  bc.querySelectorAll('[data-tb-go]').forEach(btn => {
+    btn.addEventListener('click', ()=>{
+      const v = btn.dataset.tbGo;
+      if(v === 'home' || v === 'library'){
+        /* stay in tree view, just clear block selection */
+        tree_selectedBlock = null;
+        renderTreeBlockCol();
+        renderTreeElementCol();
+        updateTreeBreadcrumb();
+      } else if(v.startsWith('layer:')){
+        const lid = v.split(':')[1];
+        selectTreeLayer(lid);
+      }
+    });
+  });
+}
+
+/* filter chip click handlers (delegated, set up once) */
+function setupTreeFilterChips(){
+  document.querySelectorAll('#tree-filter-bar .tree-filter-chip').forEach(chip => {
+    chip.addEventListener('click', ()=>{
+      let set, val;
+      if(chip.dataset.fmml){ set = tree_filterMML; val = chip.dataset.fmml; }
+      else if(chip.dataset.ftr){ set = tree_filterTr; val = chip.dataset.ftr; }
+      else if(chip.dataset.fmd){ set = tree_filterMd; val = chip.dataset.fmd; }
+      if(!set) return;
+      if(set.has(val)){ set.delete(val); chip.classList.remove('on'); }
+      else { set.add(val); chip.classList.add('on'); }
+      renderTreeElementCol();
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   VIEW SWITCHING
+   Toggles the tree-view overlay, hides explorer chrome when in tree mode,
+   pushes ?view= via replaceState so reloads land on the same view. */
+
+let currentView = 'explorer';
+function activateView(view){
+  const isExplorer = (view === 'explorer');
+  currentView = isExplorer ? 'explorer' : 'tree';
+  document.body.classList.toggle('is-explorer', isExplorer);
+
+  document.getElementById('tree-view').classList.toggle('active', !isExplorer);
+  document.getElementById('tree-view').setAttribute('aria-hidden', isExplorer ? 'true' : 'false');
+  document.getElementById('canvas').style.display = isExplorer ? 'block' : 'none';
+  document.getElementById('minimap').style.display = (isExplorer && TW.showMinimap) ? 'block' : 'none';
+  document.getElementById('legend').style.display  = (isExplorer && TW.showLegend) ? 'flex' : 'none';
+  document.getElementById('zoom-controls').style.display = isExplorer ? 'flex' : 'none';
+  document.getElementById('subbar').style.display = isExplorer ? 'flex' : 'none';
+
+  document.getElementById('btn-explorer').setAttribute('aria-pressed', isExplorer ? 'true' : 'false');
+  document.getElementById('btn-tree').setAttribute('aria-pressed', isExplorer ? 'false' : 'true');
+
+  history.replaceState(null, '', '?view=' + currentView);
+
+  if(!isExplorer){
+    renderTreeLayerCol();
+    renderTreeBlockCol();
+    renderTreeElementCol();
+    updateTreeBreadcrumb();
+  }
+}
+document.getElementById('btn-explorer').addEventListener('click', ()=> activateView('explorer'));
+document.getElementById('btn-tree').addEventListener('click', ()=> activateView('tree'));
+setupTreeFilterChips();
+
+/* When the topbar MML filter changes while in tree view, refresh rows. */
+const _mmlFilterEl = document.getElementById('mml-filter');
+_mmlFilterEl.addEventListener('change', ()=>{
+  if(currentView === 'tree') renderTreeElementCol();
+});
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RECENTLY VIEWED STRIP
+   Persistent list of the last 12 passports the user opened. Each chip
+   is dismissible and click-to-reopen. Persisted via localStorage so the
+   list survives reload. In Explorer view, opening from a chip flies the
+   canvas to the node first; in Tree view it just opens the passport. */
+const RECENTS_LIMIT = 12;
+const RECENTS_STORAGE_KEY = 'hes-library-recents-v1';
+let recents = [];
+
+function loadRecents(){
+  try{
+    const raw = localStorage.getItem(RECENTS_STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(Array.isArray(parsed)){
+        /* drop any codes that no longer exist (stale data from a prior
+           dataset) */
+        recents = parsed.filter(c => ELS_BY_CODE[c]).slice(0, RECENTS_LIMIT);
+      }
+    }
+  } catch(_){ recents = []; }
+}
+function saveRecents(){
+  try{ localStorage.setItem(RECENTS_STORAGE_KEY, JSON.stringify(recents)); } catch(_){}
+}
+function pushRecent(code){
+  if(!ELS_BY_CODE[code]) return;
+  /* Move-to-front semantics: existing entry is removed, the code goes
+     to the head, and the oldest tail is dropped when over the limit. */
+  recents = [code, ...recents.filter(c => c !== code)].slice(0, RECENTS_LIMIT);
+  saveRecents();
+  renderRecents();
+}
+function dismissRecent(code){
+  recents = recents.filter(c => c !== code);
+  saveRecents();
+  renderRecents();
+}
+function renderRecents(){
+  const scroller = document.getElementById('recents-scroller');
+  if(!scroller) return;
+  if(recents.length === 0){
+    scroller.innerHTML = '<div class="rec-empty">no recent passports</div>';
+    return;
+  }
+  scroller.innerHTML = recents.map(code => {
+    const e = ELS_BY_CODE[code];
+    if(!e) return '';
+    const safeName = e.name.replace(/"/g, '&quot;');
+    return `<div class="rec-chip" role="listitem" data-code="${code}" tabindex="0" aria-label="Open passport for ${e.code} ${safeName}">
+      <span class="rec-code">${e.code}</span>
+      <span class="rec-name">${safeName}</span>
+      <span class="rec-x" data-x="${code}" role="button" aria-label="Remove ${e.code} from recents">×</span>
+    </div>`;
+  }).join('');
+  scroller.querySelectorAll('.rec-chip').forEach(chip => {
+    chip.addEventListener('click', ev => {
+      const dismiss = ev.target.closest('.rec-x');
+      if(dismiss){
+        ev.stopPropagation();
+        dismissRecent(dismiss.dataset.x);
+        return;
+      }
+      const n = NODES_BY_CODE[chip.dataset.code];
+      if(!n) return;
+      if(currentView === 'tree'){
+        openPassport(n);
+      } else {
+        flyToNode(n, ()=> openPassport(n));
+      }
+    });
+    /* keyboard activation */
+    chip.addEventListener('keydown', ev => {
+      if(ev.key === 'Enter' || ev.key === ' '){
+        ev.preventDefault();
+        chip.click();
+      } else if(ev.key === 'Delete' || ev.key === 'Backspace'){
+        ev.preventDefault();
+        dismissRecent(chip.dataset.code);
+      }
+    });
+  });
+}
+
+loadRecents();
+renderRecents();
+
+/* ── INIT ──────────────────────────────────────────────────────────────
+   Positions are already final (computeOrreryPositions ran at construction
+   time). No simulation to tick, no alpha to anneal — just measure the
+   world bounds and fit the viewport once. */
+resize();
+applyAll();
+recomputeBounds();
+fitToWorld(false);
+updateZoomUI();
+
+/* Read ?view= from URL and activate the appropriate view on load. */
+const _urlView = new URLSearchParams(location.search).get('view') || 'explorer';
+activateView(_urlView);
+/* Ensure is-explorer is set on initial load (Explorer is the default view).
+   activateView above handles the toggle, but this guarantees correctness
+   before any user interaction. */
+if(_urlView === 'explorer') document.body.classList.add('is-explorer');
+</script>
+
+<!-- ── Nebula Drift shader background (from hes-shaders-batch-05-deepspace) ── -->
+<script>
+(function(){
+const V4_VERT = `#version 300 es
+in vec2 aPos;
+void main() { gl_Position = vec4(aPos, 0.0, 1.0); }
+`;
+
+const DS_HEADER = `#version 300 es
+precision highp float;
+uniform vec2  uResolution;
+uniform vec2  uMouse;
+uniform vec2  uMouseSmooth;
+uniform float uTime;
+uniform float uClickTime;
+uniform vec2  uClickPos;
+uniform float uClickIdx;
+out vec4 outColor;
+
+const float TAU = 6.2831853;
+const float PI  = 3.14159265;
+
+const vec3 NIGHT     = vec3(0.028, 0.038, 0.060);
+const vec3 NIGHT_2   = vec3(0.070, 0.090, 0.124);
+const vec3 CORE      = vec3(0.396, 0.467, 0.549);
+const vec3 DERIVED   = vec3(0.659, 0.502, 0.424);
+const vec3 QUANTUM   = vec3(0.800, 0.710, 0.463);
+const vec3 EMOTIONAL = vec3(0.490, 0.678, 0.628);
+const vec3 STAR_W    = vec3(0.94, 0.96, 1.00);
+
+float hash11(float p) {
+  p = fract(p * 0.1031);
+  p *= p + 33.33;
+  p *= p + p;
+  return fract(p);
+}
+vec2 hash22(vec2 p) {
+  vec3 p3 = fract(vec3(p.xyx) * vec3(0.1031, 0.103, 0.0973));
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.xx + p3.yz) * p3.zy);
+}
+float hash21(vec2 p) {
+  vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.x + p3.y) * p3.z);
+}
+float vnoise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  float a = hash21(i);
+  float b = hash21(i + vec2(1.0, 0.0));
+  float c = hash21(i + vec2(0.0, 1.0));
+  float d = hash21(i + vec2(1.0, 1.0));
+  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+float fbm(vec2 p) {
+  float v = 0.0;
+  float a = 0.5;
+  mat2 r = mat2(0.8, 0.6, -0.6, 0.8);
+  for (int i = 0; i < 5; i++) {
+    v += a * vnoise(p);
+    p = r * p * 2.02 + 17.0;
+    a *= 0.5;
+  }
+  return v;
+}
+float fbm4(vec2 p) {
+  float v = 0.0;
+  float a = 0.5;
+  for (int i = 0; i < 4; i++) {
+    v += a * vnoise(p);
+    p *= 2.03; p += 9.7;
+    a *= 0.5;
+  }
+  return v;
+}
+
+vec2 rot(vec2 v, float a) {
+  float c = cos(a), s = sin(a);
+  return vec2(c * v.x - s * v.y, s * v.x + c * v.y);
+}
+
+vec3 boostSat(vec3 c, float k) {
+  float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
+  return max(vec3(0.0), mix(vec3(l), c, k));
+}
+
+vec3 starTint(float h) {
+  if (h < 0.08) return mix(STAR_W, EMOTIONAL, 0.55);
+  if (h < 0.17) return mix(STAR_W, QUANTUM,   0.50);
+  if (h < 0.24) return mix(STAR_W, DERIVED,   0.55);
+  if (h < 0.32) return mix(STAR_W, CORE,      0.40);
+  return STAR_W;
+}
+
+vec3 starLayer(vec2 p, float scale, float density, float coreSize, float haloSize, float twinkSpeed, float gain) {
+  vec2 pp = p * scale;
+  vec2 base = floor(pp);
+  vec3 c = vec3(0.0);
+  for (int dy = -1; dy <= 1; dy++) {
+    for (int dx = -1; dx <= 1; dx++) {
+      vec2 cell = base + vec2(float(dx), float(dy));
+      float h = hash21(cell + 7.31);
+      if (h < 1.0 - density) continue;
+      vec2 jit = hash22(cell + 13.7) * 0.7 + 0.15;
+      vec2 ctr = cell + jit;
+      float d = length(pp - ctr);
+      float h2 = hash11(h + 1.7);
+      float tw = max(0.0, 0.35 + 0.65 * sin(uTime * (twinkSpeed * (0.5 + h2 * 2.0)) + h2 * 6.28));
+      float core = smoothstep(coreSize, 0.0, d);
+      float halo = smoothstep(haloSize, 0.0, d) * 0.22;
+      c += starTint(h) * (core + halo) * tw * gain;
+    }
+  }
+  return c;
+}
+
+vec3 brightStars(vec2 p) {
+  float scale = 6.5;
+  vec2 pp = p * scale;
+  vec2 base = floor(pp);
+  vec3 c = vec3(0.0);
+  for (int dy = -1; dy <= 1; dy++) {
+    for (int dx = -1; dx <= 1; dx++) {
+      vec2 cell = base + vec2(float(dx), float(dy));
+      float h = hash21(cell + 41.0);
+      if (h <= 0.992) continue;
+      vec2 jit = hash22(cell + 19.0) * 0.7 + 0.15;
+      vec2 dv  = pp - (cell + jit);
+      float d  = length(dv);
+      float tw = max(0.0, 0.55 + 0.45 * sin(uTime * (0.35 + h * 0.9) + h * 6.28));
+      float core = smoothstep(0.04, 0.0, d);
+      float halo = smoothstep(0.40, 0.0, d) * 0.20;
+      float sx = max(0.0, 1.0 - abs(dv.x) * 70.0) * smoothstep(0.55, 0.0, abs(dv.y));
+      float sy = max(0.0, 1.0 - abs(dv.y) * 70.0) * smoothstep(0.55, 0.0, abs(dv.x));
+      c += starTint(h) * (core * 1.4 + halo + (sx + sy) * 0.20) * tw;
+    }
+  }
+  return c;
+}
+
+vec3 stars(vec2 p) {
+  vec3 c = vec3(0.0);
+  c += starLayer(p,         85.0, 0.06,  0.06, 0.22, 0.9,  0.55);
+  c += starLayer(p + 11.0,  38.0, 0.025, 0.07, 0.28, 0.55, 1.05);
+  c += starLayer(p + 31.0,  14.0, 0.010, 0.06, 0.40, 0.35, 1.30);
+  c += brightStars(p);
+  return c;
+}
+`;
+
+const DS_NEBULA = DS_HEADER + `
+void main() {
+  vec2 res = uResolution;
+  vec2 uv  = gl_FragCoord.xy / res;
+  float ar = res.x / res.y;
+  vec2 p   = vec2(uv.x * ar, uv.y);
+  vec2 m   = uMouseSmooth;
+
+  vec3 col = NIGHT;
+  vec2 par = (m - 0.5);
+
+  // distant cool layer
+  vec2 q1 = p * 1.3 + par * 0.05 + vec2(uTime * 0.012, uTime * 0.004);
+  float c1 = fbm(q1);
+  float c1b = fbm(q1 * 2.1 + 5.0);
+  vec3 cloud1 = mix(NIGHT_2, EMOTIONAL * 0.55, smoothstep(0.4, 0.9, c1) * (0.4 + 0.6 * c1b));
+  col = mix(col, cloud1, smoothstep(0.30, 0.85, c1) * 0.85);
+
+  // mid amber cloud
+  vec2 q2 = p * 2.2 + par * 0.10 + vec2(-uTime * 0.018, uTime * 0.007);
+  float c2 = fbm(q2 + fbm(q2 * 0.7) * 1.4);
+  vec3 cloud2 = mix(col, DERIVED * 0.7, smoothstep(0.52, 0.92, c2));
+  col = mix(col, cloud2, smoothstep(0.55, 0.92, c2) * 0.65);
+
+  // hot gold wisp
+  vec2 q3 = p * 3.0 + par * 0.18 + vec2(uTime * -0.024, uTime * 0.012);
+  float c3 = fbm(q3 + fbm(q3 * 0.5) * 1.1);
+  float wisp = smoothstep(0.66, 0.86, c3) * (1.0 - smoothstep(0.86, 0.98, c3));
+  col += QUANTUM * 0.50 * wisp;
+
+  // dust micro-detail
+  float dust = fbm(p * 6.0 + vec2(uTime * 0.03, 0.0));
+  col += CORE * 0.05 * smoothstep(0.5, 0.9, dust);
+
+  // stars with mild parallax
+  col += stars(p + par * 0.025);
+
+  // click shockwave (cool teal ring)
+  vec2 c = vec2(uClickPos.x * ar, uClickPos.y);
+  float dC = length(p - c);
+  float rT = uClickTime * 0.42;
+  float ring = exp(-pow((dC - rT) * 11.0, 2.0)) * exp(-uClickTime * 0.55);
+  col += EMOTIONAL * ring * 0.50;
+  col += QUANTUM * exp(-dC * 5.5) * exp(-uClickTime * 1.7) * 0.15;
+
+  col = boostSat(col, 1.25);
+
+  vec2 vd = uv - 0.5;
+  col *= 1.0 - 0.45 * dot(vd, vd);
+  outColor = vec4(col, 1.0);
+}
+`;
+
+function compile(gl, type, src) {
+  const sh = gl.createShader(type);
+  gl.shaderSource(sh, src);
+  gl.compileShader(sh);
+  if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+    console.error('Atmosphere shader compile:\n', gl.getShaderInfoLog(sh));
+    return null;
+  }
+  return sh;
+}
+
+function buildProg(gl, fragSrc) {
+  const vs = compile(gl, gl.VERTEX_SHADER, V4_VERT);
+  const fs = compile(gl, gl.FRAGMENT_SHADER, fragSrc);
+  if (!vs || !fs) return null;
+  const prog = gl.createProgram();
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+    console.error('Atmosphere link:', gl.getProgramInfoLog(prog));
+    return null;
+  }
+  return prog;
+}
+
+const canvas = document.getElementById('shader-bg');
+const gl = canvas.getContext('webgl2', { antialias: false, premultipliedAlpha: false });
+if (!gl) { console.warn('WebGL2 unavailable — static background fallback'); return; }
+
+// geometry
+const buf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+const vao = gl.createVertexArray();
+gl.bindVertexArray(vao);
+gl.enableVertexAttribArray(0);
+gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+const prog = buildProg(gl, DS_NEBULA);
+if (!prog) return;
+
+const startTime   = performance.now() / 1000;
+let mouse         = [0.5, 0.5];
+let mouseEased    = [0.5, 0.5];
+const easeK       = 0.04;
+let clickPos      = [0.5, 0.5];
+let clickTime     = startTime - 9999;
+let clickIdx      = 0;
+
+function resize() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 1); // 1× — gas cloud needs no pixel-perfect sharpness
+  canvas.width  = Math.floor(canvas.clientWidth  * dpr);
+  canvas.height = Math.floor(canvas.clientHeight * dpr);
+  gl.viewport(0, 0, canvas.width, canvas.height);
+}
+resize();
+window.addEventListener('resize', resize);
+
+window.addEventListener('mousemove', e => {
+  const r = canvas.getBoundingClientRect();
+  mouse = [(e.clientX - r.left) / r.width, 1.0 - (e.clientY - r.top) / r.height];
+});
+window.addEventListener('touchmove', e => {
+  if (e.touches[0]) {
+    const r = canvas.getBoundingClientRect();
+    mouse = [(e.touches[0].clientX - r.left) / r.width, 1.0 - (e.touches[0].clientY - r.top) / r.height];
+  }
+}, { passive: true });
+window.addEventListener('click', e => {
+  const r = canvas.getBoundingClientRect();
+  clickPos  = [(e.clientX - r.left) / r.width, 1.0 - (e.clientY - r.top) / r.height];
+  clickTime = performance.now() / 1000;
+  clickIdx++;
+});
+
+let _shaderFrame = 0;
+(function loop() {
+  requestAnimationFrame(loop);
+  /* Mouse easing runs every RAF so parallax stays smooth at 60fps. */
+  mouseEased[0] += (mouse[0] - mouseEased[0]) * easeK;
+  mouseEased[1] += (mouse[1] - mouseEased[1]) * easeK;
+  /* Skip odd frames — renders nebula at ~30fps. Gas cloud drift is
+     imperceptible at 30fps and this halves the shader's GPU budget. */
+  if (++_shaderFrame % 2 !== 0) return;
+
+  gl.useProgram(prog);
+  const now = performance.now() / 1000;
+  gl.uniform2f(gl.getUniformLocation(prog,'uResolution'), canvas.width, canvas.height);
+  gl.uniform2f(gl.getUniformLocation(prog,'uMouse'),      mouse[0],       mouse[1]);
+  gl.uniform2f(gl.getUniformLocation(prog,'uMouseEased'),  mouseEased[0],  mouseEased[1]);
+  gl.uniform2f(gl.getUniformLocation(prog,'uMouseSmooth'), mouseEased[0],  mouseEased[1]);
+  gl.uniform1f(gl.getUniformLocation(prog,'uTime'),       now - startTime);
+  gl.uniform1f(gl.getUniformLocation(prog,'uClickTime'),  now - clickTime);
+  gl.uniform2f(gl.getUniformLocation(prog,'uClickPos'),   clickPos[0],    clickPos[1]);
+  gl.uniform1f(gl.getUniformLocation(prog,'uClickIdx'),   clickIdx);
+  gl.bindVertexArray(vao);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+})();
+})();
+</script>
+</body>
+</html>
